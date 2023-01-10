@@ -61,6 +61,22 @@ def test_llh_to_ecef():
     assert isclose(x, -1302839.38, rel_tol=1.0e-3)
     assert isclose(y, 4177542.21, rel_tol=1.0e-3)
     assert isclose(z, 4632996.83, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_ecef_to_llh():
+    """
+    This method tests the llh_to_ecef method for correct results
+    """
+    lat = 46.826
+    lon = 107.321
+    alt = 6096.0
+    tran = Transformations(WGS84())
+    x, y, z = tran.llh_to_ecef(lat, lon, alt)
+    new_lat, new_lon, new_alt = tran.ecef_to_llh(x, y, z)
+    assert isclose(new_lat, lat, rel_tol=1.0e-3)
+    assert isclose(new_lon, lon, rel_tol=1.0e-3)
+    assert isclose(new_alt, alt, rel_tol=1.0e-3)
 # ================================================================================
 # ================================================================================
 # eof

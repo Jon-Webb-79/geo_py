@@ -42,7 +42,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePath</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">pi</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
 <span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">Datum</span>
@@ -108,6 +108,21 @@
 <span class="sd">        .. math::</span>
 
 <span class="sd">           N\\left(\\phi\\right) = \\frac{a}{\\sqrt[]{1-e^2sin^2\\:\\phi}}</span>
+
+<span class="sd">        Code example</span>
+
+<span class="sd">        .. code-block::</span>
+
+<span class="sd">            from geo_py.datum import WGS84</span>
+<span class="sd">            from geo_py.transform import Transformations</span>
+
+<span class="sd">            tran = Transformations(WGS84())</span>
+<span class="sd">            lat = 46.826</span>
+<span class="sd">            lon = 107.321</span>
+<span class="sd">            alt = 6096.0</span>
+<span class="sd">            x, y, z = tran.ecef_to_llh(lat, lon, alt)</span>
+<span class="sd">            print(x, y, z)</span>
+<span class="sd">            &gt;&gt;&gt; -1302839.38, 4177542.21, 4632996.83</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">lon</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
         <span class="n">lat</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
@@ -117,7 +132,92 @@
         <span class="n">ye</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
         <span class="n">ze</span> <span class="o">=</span> <span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span> <span class="o">+</span> \
                 <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">xe</span><span class="p">,</span> <span class="n">ye</span><span class="p">,</span> <span class="n">ze</span></div></div>
+        <span class="k">return</span> <span class="n">xe</span><span class="p">,</span> <span class="n">ye</span><span class="p">,</span> <span class="n">ze</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="Transformations.ecef_to_llh"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.Transformations.ecef_to_llh">[docs]</a>    <span class="k">def</span> <span class="nf">ecef_to_llh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param x: The x-coordinate in ECEF coordinate frame</span>
+<span class="sd">        :param y: The y-coordinate in ECEF coordinate frame</span>
+<span class="sd">        :param z: The z-coordinate in ECEF coordinate frame</span>
+<span class="sd">        :return lat, lon, alt: The latitude, longitude, and altitude in the</span>
+<span class="sd">                               LLH coordinate frame. Latitude and longitude</span>
+<span class="sd">                               are in units of decimal degrees, altitude</span>
+<span class="sd">                               in units of meters</span>
+
+<span class="sd">        This method will transform a data from an ECEF (Earth Centered Earth</span>
+<span class="sd">        Fixed) coordinate frame to a LLH (Latitude, Longitude, Height)</span>
+<span class="sd">        coordinate frame.  The LLH frame is a polar coordinate frame with its</span>
+<span class="sd">        origin at the center of the Earth.  The ECEF frame is a Cartesian</span>
+<span class="sd">        coordinate system with its origin at the center of the Earth.</span>
+
+<span class="sd">        This method takes the semi-major and semi-minor variables</span>
+<span class="sd">        (:math:`a`, :math:`b`) from the Datum dataclass and use them with the</span>
+<span class="sd">        ECEF inputs :math:`X`, :math:`Y`, :math:`Z` to calculate</span>
+<span class="sd">        latitude, longitude, and height :math:`\\phi`, :math:`\\lambda`,</span>
+<span class="sd">        :math:`h` in accordance with the following equations.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">           \\begin{eqnarray}</span>
+<span class="sd">           e^2 = \\frac{a^2-b^2}{a^2} \\\\</span>
+<span class="sd">           e^{\\prime 2} = \\frac{a^2-b^2}{b^2} \\\\</span>
+<span class="sd">           p = \\sqrt[]{X^2+Y^2} \\\\</span>
+<span class="sd">           F = 54b^2\\:Z^2 \\\\</span>
+<span class="sd">           G = p^2 + \\left(1 - e^2\\right)Z^2 - e^2 \\left(a^2-b^2\\right) \\\\</span>
+<span class="sd">           c = \\frac{e^4Fp^2}{G^3} \\\\</span>
+<span class="sd">           s = \\sqrt[3]{1 + c + \\sqrt[]{c^2 + 2c}} \\\\</span>
+<span class="sd">           k = s + 1 + \\frac{1}{s} \\\\</span>
+<span class="sd">           P = \\frac{F}{3k^2G^2} \\\\</span>
+<span class="sd">           Q = \\sqrt[]{1+2e^4P} \\\\</span>
+<span class="sd">           r_o = \\frac{-Pe^2p}{1+Q} \\\\</span>
+<span class="sd">           r_o2 = \\frac{1}{2}a\\left(1+\\frac{1}{Q}\\right) \\\\</span>
+<span class="sd">           r_o3 = -\\frac{P\\left(1-e^2\\right)Z^2}{Q\\left(1+Q\\right)} - \\frac{1}{2}Pp^2 \\\\</span>
+<span class="sd">           r_o = r_o + \\sqrt[]{r_o2 + r_o3} \\\\</span>
+<span class="sd">           U = \\sqrt[]{\\left(p-e^2r_o\\right)^2+Z^2} \\\\</span>
+<span class="sd">           V = \\sqrt[]{\\left(p-e^2r_o\\right)^2+\\left(1-e^2\\right)Z^2} \\\\</span>
+<span class="sd">           z_o = \\frac{b^2Z}{aV} \\\\</span>
+<span class="sd">           h = U\\left(1-\\frac{b^2}{aV}\\right) \\\\</span>
+<span class="sd">           \\phi = arctan\\left[\\frac{Z+e^{\\prime2}z_o}{p}\\right] \\\\</span>
+<span class="sd">           \\lambda = arctan2\\left[Y, X\\right]</span>
+<span class="sd">          \\end{eqnarray}</span>
+
+<span class="sd">        Code example</span>
+
+<span class="sd">        .. code-block::</span>
+
+<span class="sd">            from geo_py.datum import WGS84</span>
+<span class="sd">            from geo_py.transform import Transformations</span>
+
+<span class="sd">            tran = Transformations(WGS84())</span>
+<span class="sd">            x = -1302839.38</span>
+<span class="sd">            y = 4177542.21</span>
+<span class="sd">            z = 4632996.83</span>
+<span class="sd">            lat, lon, alt = tran.ecef_to_llh(x, y, z)</span>
+<span class="sd">            print(lat, lon, alt)</span>
+<span class="sd">            &gt;&gt;&gt; 46.826, 107.321, 6097.1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># calculations:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">ep_sq</span>  <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">ee</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="mi">54</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">*</span><span class="n">ee</span><span class="o">*</span><span class="mi">2</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="o">*</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">g</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">c</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">c</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">f</span><span class="o">/</span><span class="p">(</span><span class="mf">3.</span><span class="o">*</span><span class="p">(</span><span class="n">g</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">r_0</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">*</span><span class="n">r</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">q</span><span class="p">)</span> <span class="o">+</span> \
+                <span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">q</span><span class="p">))</span> <span class="o">-</span> \
+                <span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">q</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">q</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">r</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">*</span><span class="n">r_0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">r</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">*</span><span class="n">r_0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">z_0</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">*</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">u</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">*</span><span class="n">v</span><span class="p">))</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">atan</span><span class="p">((</span><span class="n">z</span> <span class="o">+</span> <span class="n">ep_sq</span><span class="o">*</span><span class="n">z_0</span><span class="p">)</span><span class="o">/</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">lambd</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">phi</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">lambd</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">h</span></div></div>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># eof</span>

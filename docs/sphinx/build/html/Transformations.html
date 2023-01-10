@@ -63,6 +63,72 @@ can be imported from the geo_py.datum file</p>
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="geo_py.transform.Transformations.ecef_to_llh">
+<span class="sig-name descname"><span class="pre">ecef_to_llh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/transform.html#Transformations.ecef_to_llh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.transform.Transformations.ecef_to_llh" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – The x-coordinate in ECEF coordinate frame</p></li>
+<li><p><strong>y</strong> – The y-coordinate in ECEF coordinate frame</p></li>
+<li><p><strong>z</strong> – The z-coordinate in ECEF coordinate frame</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return lat, lon, alt<span class="colon">:</span></dt>
+<dd class="field-even"><p>The latitude, longitude, and altitude in the
+LLH coordinate frame. Latitude and longitude
+are in units of decimal degrees, altitude
+in units of meters</p>
+</dd>
+</dl>
+<p>This method will transform a data from an ECEF (Earth Centered Earth
+Fixed) coordinate frame to a LLH (Latitude, Longitude, Height)
+coordinate frame.  The LLH frame is a polar coordinate frame with its
+origin at the center of the Earth.  The ECEF frame is a Cartesian
+coordinate system with its origin at the center of the Earth.</p>
+<p>This method takes the semi-major and semi-minor variables
+(<span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>) from the Datum dataclass and use them with the
+ECEF inputs <span class="math notranslate nohighlight">\(X\)</span>, <span class="math notranslate nohighlight">\(Y\)</span>, <span class="math notranslate nohighlight">\(Z\)</span> to calculate
+latitude, longitude, and height <span class="math notranslate nohighlight">\(\phi\)</span>, <span class="math notranslate nohighlight">\(\lambda\)</span>,
+<span class="math notranslate nohighlight">\(h\)</span> in accordance with the following equations.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split} \begin{eqnarray}
+ e^2 = \frac{a^2-b^2}{a^2} \\
+ e^{\prime 2} = \frac{a^2-b^2}{b^2} \\
+ p = \sqrt[]{X^2+Y^2} \\
+ F = 54b^2\:Z^2 \\
+ G = p^2 + \left(1 - e^2\right)Z^2 - e^2 \left(a^2-b^2\right) \\
+ c = \frac{e^4Fp^2}{G^3} \\
+ s = \sqrt[3]{1 + c + \sqrt[]{c^2 + 2c}} \\
+ k = s + 1 + \frac{1}{s} \\
+ P = \frac{F}{3k^2G^2} \\
+ Q = \sqrt[]{1+2e^4P} \\
+ r_o = \frac{-Pe^2p}{1+Q} \\
+ r_o2 = \frac{1}{2}a\left(1+\frac{1}{Q}\right) \\
+ r_o3 = -\frac{P\left(1-e^2\right)Z^2}{Q\left(1+Q\right)} - \frac{1}{2}Pp^2 \\
+ r_o = r_o + \sqrt[]{r_o2 + r_o3} \\
+ U = \sqrt[]{\left(p-e^2r_o\right)^2+Z^2} \\
+ V = \sqrt[]{\left(p-e^2r_o\right)^2+\left(1-e^2\right)Z^2} \\
+ z_o = \frac{b^2Z}{aV} \\
+ h = U\left(1-\frac{b^2}{aV}\right) \\
+ \phi = arctan\left[\frac{Z+e^{\prime2}z_o}{p}\right] \\
+ \lambda = arctan2\left[Y, X\right]
+\end{eqnarray}\end{split}\]</div>
+<p>Code example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">WGS84</span>
+<span class="kn">from</span> <span class="nn">geo_py.transform</span> <span class="kn">import</span> <span class="n">Transformations</span>
+
+<span class="n">tran</span> <span class="o">=</span> <span class="n">Transformations</span><span class="p">(</span><span class="n">WGS84</span><span class="p">())</span>
+<span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1302839.38</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mf">4177542.21</span>
+<span class="n">z</span> <span class="o">=</span> <span class="mf">4632996.83</span>
+<span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span> <span class="o">=</span> <span class="n">tran</span><span class="o">.</span><span class="n">ecef_to_llh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">46.826</span><span class="p">,</span> <span class="mf">107.321</span><span class="p">,</span> <span class="mf">6097.1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="geo_py.transform.Transformations.llh_to_ecef">
 <span class="sig-name descname"><span class="pre">llh_to_ecef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/transform.html#Transformations.llh_to_ecef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.transform.Transformations.llh_to_ecef" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -97,6 +163,19 @@ derived from the Datum dataclass</p>
 <p>where</p>
 <div class="math notranslate nohighlight">
 \[N\left(\phi\right) = \frac{a}{\sqrt[]{1-e^2sin^2\:\phi}}\]</div>
+<p>Code example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">WGS84</span>
+<span class="kn">from</span> <span class="nn">geo_py.transform</span> <span class="kn">import</span> <span class="n">Transformations</span>
+
+<span class="n">tran</span> <span class="o">=</span> <span class="n">Transformations</span><span class="p">(</span><span class="n">WGS84</span><span class="p">())</span>
+<span class="n">lat</span> <span class="o">=</span> <span class="mf">46.826</span>
+<span class="n">lon</span> <span class="o">=</span> <span class="mf">107.321</span>
+<span class="n">alt</span> <span class="o">=</span> <span class="mf">6096.0</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">tran</span><span class="o">.</span><span class="n">ecef_to_llh</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">-</span><span class="mf">1302839.38</span><span class="p">,</span> <span class="mf">4177542.21</span><span class="p">,</span> <span class="mf">4632996.83</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>
@@ -117,6 +196,7 @@ derived from the Datum dataclass</p>
 <li><a class="reference internal" href="#">transform</a><ul>
 <li><a class="reference internal" href="#transformations">Transformations</a><ul>
 <li><a class="reference internal" href="#geo_py.transform.Transformations"><code class="docutils literal notranslate"><span class="pre">Transformations</span></code></a><ul>
+<li><a class="reference internal" href="#geo_py.transform.Transformations.ecef_to_llh"><code class="docutils literal notranslate"><span class="pre">Transformations.ecef_to_llh()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.transform.Transformations.llh_to_ecef"><code class="docutils literal notranslate"><span class="pre">Transformations.llh_to_ecef()</span></code></a></li>
 </ul>
 </li>
