@@ -10,8 +10,8 @@ and datums.
 
 geo_py is still in development with the Python 3.10.9 language.
 
-**Documentation:**  to_be_updated
+**Documentation:**  `<https://github.com/Jon-Webb-79/geo_py>`_
 
 Contents
 ============
-Describe this software here
+**Datum** :ref:`Datum`

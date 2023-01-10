@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>transform &#8212; geo_py 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Datums" href="Datums.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Datums.html" title="Datums"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">geo_py 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">transform</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="transform">
+<h1>transform<a class="headerlink" href="#transform" title="Permalink to this heading">¶</a></h1>
+<p>The <strong>transform</strong> file contains methods that can be used to transform back and forth
+between geodetic and Cartesian coordinates.  The methods in this file reley on the
+us eod <strong>Datum</strong> dataclasses that are wither created by the user or are selected
+from pre-existing dataclasses in the <code class="docutils literal notranslate"><span class="pre">geo_py.datum</span></code> file.</p>
+<section id="transformations">
+<h2>Transformations<a class="headerlink" href="#transformations" title="Permalink to this heading">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Transformations</span></code> class contains severla methods shown below.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="geo_py.transform.Transformations">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geo_py.transform.</span></span><span class="sig-name descname"><span class="pre">Transformations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datum</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geo_py/transform.html#Transformations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.transform.Transformations" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class acts as a model container for several data geodetic to
+Cartesian, and Cartesian to geodetic coordinate frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>datum</strong> – A geodetic datum of type Datum.  This Protocol dataclass
+can either be created by the user, or an existing datum
+can be imported from the geo_py.datum file</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="geo_py.transform.Transformations.llh_to_ecef">
+<span class="sig-name descname"><span class="pre">llh_to_ecef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/transform.html#Transformations.llh_to_ecef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.transform.Transformations.llh_to_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> – The latitude in decimal degrees</p></li>
+<li><p><strong>lon</strong> – The longitude in decimal degrees</p></li>
+<li><p><strong>alt</strong> – The altitude above sea-level in units of meters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return x, y, z<span class="colon">:</span></dt>
+<dd class="field-even"><p>The ECEF coordinates in units of meters</p>
+</dd>
+</dl>
+<p>This method will transform a data from a LLH (Latitude, Longitude,
+Height) coordinate frame to an ECEF (Earth Centered Earth Fixed)
+coordinate frame.  The LLH frame is a polar coordinate frame with its
+origin at the center of the Earth.  The ECEF frame is a Cartesian
+coordinate system with its origin at the center of the Earth.</p>
+<p>This method solves the following equations for <span class="math notranslate nohighlight">\(X\)</span>, <span class="math notranslate nohighlight">\(Y\)</span>,
+and <span class="math notranslate nohighlight">\(Z\)</span> assuming inputs of latitude (<span class="math notranslate nohighlight">\(\lambda\)</span>),
+longitude (<span class="math notranslate nohighlight">\(\phi\)</span>), and altitude (<span class="math notranslate nohighlight">\(h\)</span>).  The terms
+<span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, and <span class="math notranslate nohighlight">\(e\)</span> represents the semi-major axis,
+the semi-minor axis and the eccentricity of the spheroid, and are
+derived from the Datum dataclass</p>
+<div class="math notranslate nohighlight">
+\[\begin{split} \begin{eqnarray}
+ X = \left(N\left(\phi\right) + h\right)cos\phi \: cos\lambda \\
+ Y = \left(N\left(\phi\right) + h\right)cos\phi \: sin\lambda \\
+ Z = \left(\frac{b^2}{a^2}N\left(\phi\right) + h \right)sin\:\phi
+\end{eqnarray}\end{split}\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[N\left(\phi\right) = \frac{a}{\sqrt[]{1-e^2sin^2\:\phi}}\]</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">transform</a><ul>
+<li><a class="reference internal" href="#transformations">Transformations</a><ul>
+<li><a class="reference internal" href="#geo_py.transform.Transformations"><code class="docutils literal notranslate"><span class="pre">Transformations</span></code></a><ul>
+<li><a class="reference internal" href="#geo_py.transform.Transformations.llh_to_ecef"><code class="docutils literal notranslate"><span class="pre">Transformations.llh_to_ecef()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="Datums.html"
+                          title="previous chapter">Datums</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/Transformations.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="Datums.html" title="Datums"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">geo_py 0.1.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">transform</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Jonathan A. Webb.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    </div>
+  </body>
+</html>
