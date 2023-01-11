@@ -4,7 +4,7 @@ Datums
 
 The datums sub-library contains several geodetic datums that were collected as part
 of the World Geodetic Survey (WGS).  The Datums were drafted in the ``datum.py`` file
-as a **Protocall** dataclass of the following format.
+as a **Protocol** dataclass of the following format.
 
 .. autoclass:: geo_py.datum.Datum
    :members:
@@ -60,7 +60,7 @@ The datum can be retrieved with the following command. **Provide Reference**
 .. code-block::
    :caption: User Defined Datum
 
-   from geo_py.datum import WGS77
+   from geopy.datum import WGS77
 
 WGS80
 *****
@@ -82,5 +82,34 @@ The datum can be retrieved with the following command. `WGS84 <https://apps.dtic
 
    from geo_py.datum import WGS84
 
+NAD83
+*****
+The North American Datum 1983 datum results are implement in a dataclass titled ``NAD83``.
+The datum can be retrieved with the following command.
+
+.. code-block::
+   :caption: User Defined Datum
+
+   from geo_py.datum import NAD83
+
+ETRS89
+******
+The European 1989 datum results are implement in a dataclass titled ``ETRS89``.
+The datum can be retrieved with the following command.
+
+.. code-block::
+   :caption: User Defined Datum
+
+   from geo_py.datum import ETRS89
+
+ITRF
+****
+The International Terrestrial Reference Frame datum results are implement in a dataclass titled ``ITRF``.
+The datum can be retrieved with the following command.
+
+.. code-block::
+   :caption: User Defined Datum
+
+   from geo_py.datum import WGS84
 
    

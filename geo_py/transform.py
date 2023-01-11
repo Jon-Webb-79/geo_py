@@ -4,6 +4,7 @@ import os
 from pathlib import PurePath
 from typing import Tuple
 from math import radians, cos, sin, sqrt, atan, atan2, pi
+import numpy as np
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
 from geo_py.datum import Datum
@@ -96,6 +97,33 @@ class Transformations:
         return xe, ye, ze
 # --------------------------------------------------------------------------------
 
+    def llh_to_enu(self, lat: float, lon: float, alt: float,
+                   ref_lat: float, ref_lon: float,
+                   ref_alt: float) -> Tuple[float, float, float]:
+        """
+        """
+       # ref is aircraft
+        x, y, z = self.llh_to_ecef(lat, lon, alt)
+        xr, yr, zr = self.llh_to_ecef(ref_lat, ref_lon, ref_alt)
+
+        # convert reference latitude and longitude to radians
+        ref_lat = np.deg2rad(ref_lat)
+        ref_lon = np.deg2rad(ref_lon)
+
+        # calculate transformation matrix
+        R = np.array([[-np.sin(ref_lon), np.cos(ref_lon), 0],
+                  [-np.sin(ref_lat)*np.cos(ref_lon),
+                   -np.sin(ref_lat)*np.sin(ref_lon),
+                   np.cos(ref_lat)],
+                  [np.cos(ref_lat)*np.cos(ref_lon),
+                   np.cos(ref_lat)*np.sin(ref_lon),
+                   np.sin(ref_lat)]])
+
+        # transform ECEF coordinates to NED coordinats
+        ned = np.dot(R, np.array([x-xr, y-yr, z-zr]))
+        return tuple(ned)
+# --------------------------------------------------------------------------------
+
     def ecef_to_llh(self, x: float, y: float,
                     z: float) -> Tuple[float, float, float]:
         """
@@ -179,6 +207,184 @@ class Transformations:
         phi = atan((z + ep_sq*z_0)/r)
         lambd = atan2(y, x)
         return phi*180/pi, lambd*180/pi, h
+# --------------------------------------------------------------------------------
+
+    def ecef_to_enu(self, origin_lat: float, origin_lon: float, origin_alt: float,
+                    X: float, Y: float,
+                    Z: float) -> Tuple[float, float, float]:
+        """
+        :param origin_lat: The latitude of the point of interest in units of
+                           decimal degrees
+        :param origin_lon: The longitude of the point of interest in units of
+                           decimal degrees
+        :param origin_alt: The altitude of the point of interest in units of decimal
+                           degrees
+        :param X: The x location of the craft in ECEF coordinates
+        :param Y: The y location of the craft in ECEF coordinates
+        :param Z: The z position of the craft in ECEF coordinats
+        :return E, N, U: The x, y, and z position in the East, North, Up coordinate
+                         frame in units of metersy
+
+        This method transforms a three dimensional location from an ECEF (Earth
+        Centered Earth Fixed) coordinate frame to an ENU (East, North, Up)
+        coordinate frame.  The ENU frame is determined relative to a location,
+        which is the point of interest.  An example would be an aircraft as the
+        reference point, and a runway as the point of interest.  This method
+        solves the following equation where :math:`X_p`, :math:`Y_p`, and :math:`Z_p`
+        are the origin point in ECEF coordinates, :math:`\\lambda`,
+        :math:`\\lambda`, and :math:`\\phi` are the latitude, longitude and altitude
+        of the reference point in decimal degrees and meters.  The term
+        :math:`x`, :math:`y`, and :math:`z` are the NED coordinates in units
+        of meters.  In addition :math:`X_r`, :math:`Y_r`, and :math:`Z_r` are
+        the reference point expressed in ECEF coordinates
+
+        .. math::
+
+            \\begin{bmatrix}
+               x \\\\
+               y \\\\
+               z \\\\
+            \\end{bmatrix}
+            =
+            \\begin{bmatrix}
+               -sin\\lambda & cos\\lambda & 0\\\\
+               -sin\\phi\\:\\cos\\lambda & -sin\\phi\\:\\sin\\lambda & cos\\phi\\\\
+               cos\\phi\\:cos\\lambda & cos\\phi\\:sin\\lambda & sin\\phi
+            \\end{bmatrix}
+            \\cdot
+            \\begin{bmatrix}
+               X_p-X_r \\\\
+               Y_p-Y_r \\\\
+               Z_p-Z_r
+            \\end{bmatrix}
+
+
+        Code example
+
+        .. code-block::
+
+            from geo_py.datum import WGS84
+            from geo_py.transform import Transformations
+
+            tran = Transformations(WGS84())
+            radar_lat = 46.017
+            radar_lon = 7.750
+            radar_alt = 1673.0
+
+            x = 45.976
+            y = 7.658
+            z = 4531.0
+            E, N, U = tran.ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)
+            print(E, N, U)
+            >>> -7126.303, -4562.512, 2863.687
+        """
+        x_r, y_r, z_r = self.llh_to_ecef(origin_lat, origin_lon, origin_alt)
+        ref_lat, ref_lon, ref_alt = self.ecef_to_llh(X, Y, Z)
+
+        ref_lat = np.deg2rad(ref_lat)
+        ref_lon = np.deg2rad(ref_lon)
+
+        r_val = np.array([[-np.sin(ref_lon), np.cos(ref_lon), 0],
+                        [-np.sin(ref_lat)*np.cos(ref_lon),
+                         -np.sin(ref_lat)*np.sin(ref_lon),
+                         np.cos(ref_lat)],
+                       [np.cos(ref_lat)*np.cos(ref_lon),
+                        np.cos(ref_lat)*np.sin(ref_lon),
+                        np.sin(ref_lat)]])
+
+        # transform ECEF coordinates to NED coordinats
+        enu = np.dot(r_val, np.array([X - x_r, Y - y_r, Z - z_r]))
+        return tuple(enu)
+# --------------------------------------------------------------------------------
+
+    def enu_to_ecef(self, ref_lat: float, ref_lon: float, ref_alt: float,
+                    E: float, N: float,
+                    U: float) -> Tuple[float, float, float]:
+        """
+        :param origin_lat: The latitude of the point of interest in units of
+                           decimal degrees
+        :param origin_lon: The longitude of the point of interest in units of
+                           decimal degrees
+        :param origin_alt: The altitude of the point of interest in units of decimal
+                           degrees
+        :param E: The x location of the craft in ENU coordinates
+        :param N: The y location of the craft in ENU coordinates
+        :param U: The z position of the craft in ENU coordinats
+        :return X, Y, Z: The x, y, and z position in ECEF coordinats
+
+        This method transforms a three dimensional location from a ENU (East,
+        North, Up) coordinate frame to an ECEF (Eearth Centered Earth Fixed)
+        coordinate frame.  The ENU frame is determined relative to a location,
+        which is the point of interest.  An example would be an aircraft as the
+        reference point, and a runway as the point of interest.  This method
+        solves the following equation where :math:`X_p`, :math:`Y_p`, and :math:`Z_p`
+        are the origin point in ECEF coordinates, :math:`\\lambda`,
+        :math:`\\lambda`, and :math:`\\phi` are the latitude, longitude and altitude
+        of the reference point in decimal degrees and meters.  The term
+        :math:`x`, :math:`y`, and :math:`z` are the NED coordinates in units
+        of meters.  In addition :math:`X_r`, :math:`Y_r`, and :math:`Z_r` are
+        the reference point expressed in ECEF coordinates
+
+        .. math::
+
+            \\begin{bmatrix}
+               X \\\\
+               Y \\\\
+               Z \\\\
+            \\end{bmatrix}
+            =
+            \\begin{bmatrix}
+               -sin\\lambda & cos\\lambda & 0\\\\
+               -sin\\phi\\:\\cos\\lambda & -sin\\phi\\:\\sin\\lambda & cos\\phi\\\\
+               cos\\phi\\:cos\\lambda & cos\\phi\\:sin\\lambda & sin\\phi
+            \\end{bmatrix}^T
+            \\cdot
+            \\begin{bmatrix}
+               x \\\\
+               y \\\\
+               z \\\\
+            \\end{bmatrix}
+            +
+            \\begin{bmatrix}
+               X_r \\\\
+               Y_r \\\\
+               Z_r
+            \\end{bmatrix}
+
+        Code example
+
+        .. code-block::
+
+            from geo_py.datum import WGS84
+            from geo_py.transform import Transformations
+
+            tran = Transformations(WGS84())
+            radar_lat = 46.017
+            radar_lon = 7.750
+            radar_alt = 1673.0
+
+            E = -7126.303
+            N = -4562.512
+            U = 2863.687
+
+            x, y, z = tran.enu_to_ecef(radar_lat, radar_lon, radar_alt, x, y, z)
+            print(x, y, z)
+            >>> 4403757.60, 592124.58, 4566652.06
+        """
+        x_ref, y_ref, z_ref = self.llh_to_ecef(ref_lat, ref_lon, ref_alt)
+
+        ref_lat = np.deg2rad(ref_lat)
+        ref_lon = np.deg2rad(ref_lon)
+
+        r_val = np.array([[-np.sin(ref_lon), np.cos(ref_lon), 0],
+                        [-np.sin(ref_lat)*np.cos(ref_lon),
+                         -np.sin(ref_lat)*np.sin(ref_lon),
+                         np.cos(ref_lat)],
+                       [np.cos(ref_lat)*np.cos(ref_lon),
+                        np.cos(ref_lat)*np.sin(ref_lon),
+                        np.sin(ref_lat)]])
+        enu = np.dot(r_val.T, np.array([E, N, U])) + np.array([x_ref, y_ref, z_ref])
+        return tuple(enu)
 # ================================================================================
 # ================================================================================
 # eof

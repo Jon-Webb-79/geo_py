@@ -43,6 +43,7 @@
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePath</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">pi</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
 <span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">Datum</span>
@@ -135,6 +136,31 @@
         <span class="k">return</span> <span class="n">xe</span><span class="p">,</span> <span class="n">ye</span><span class="p">,</span> <span class="n">ze</span></div>
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
+    <span class="k">def</span> <span class="nf">llh_to_enu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                   <span class="n">ref_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                   <span class="n">ref_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+       <span class="c1"># ref is aircraft</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+        <span class="n">xr</span><span class="p">,</span> <span class="n">yr</span><span class="p">,</span> <span class="n">zr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">)</span>
+
+        <span class="c1"># convert reference latitude and longitude to radians</span>
+        <span class="n">ref_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
+        <span class="n">ref_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+
+        <span class="c1"># calculate transformation matrix</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                  <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                   <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)],</span>
+                  <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                   <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)]])</span>
+
+        <span class="c1"># transform ECEF coordinates to NED coordinats</span>
+        <span class="n">ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="n">xr</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="n">yr</span><span class="p">,</span> <span class="n">z</span><span class="o">-</span><span class="n">zr</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ned</span><span class="p">)</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
 <div class="viewcode-block" id="Transformations.ecef_to_llh"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.Transformations.ecef_to_llh">[docs]</a>    <span class="k">def</span> <span class="nf">ecef_to_llh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                     <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -217,7 +243,185 @@
         <span class="n">h</span> <span class="o">=</span> <span class="n">u</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">*</span><span class="n">v</span><span class="p">))</span>
         <span class="n">phi</span> <span class="o">=</span> <span class="n">atan</span><span class="p">((</span><span class="n">z</span> <span class="o">+</span> <span class="n">ep_sq</span><span class="o">*</span><span class="n">z_0</span><span class="p">)</span><span class="o">/</span><span class="n">r</span><span class="p">)</span>
         <span class="n">lambd</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">phi</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">lambd</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">h</span></div></div>
+        <span class="k">return</span> <span class="n">phi</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">lambd</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">h</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="Transformations.ecef_to_enu"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.Transformations.ecef_to_enu">[docs]</a>    <span class="k">def</span> <span class="nf">ecef_to_enu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                    <span class="n">X</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                    <span class="n">Z</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param origin_lat: The latitude of the point of interest in units of</span>
+<span class="sd">                           decimal degrees</span>
+<span class="sd">        :param origin_lon: The longitude of the point of interest in units of</span>
+<span class="sd">                           decimal degrees</span>
+<span class="sd">        :param origin_alt: The altitude of the point of interest in units of decimal</span>
+<span class="sd">                           degrees</span>
+<span class="sd">        :param X: The x location of the craft in ECEF coordinates</span>
+<span class="sd">        :param Y: The y location of the craft in ECEF coordinates</span>
+<span class="sd">        :param Z: The z position of the craft in ECEF coordinats</span>
+<span class="sd">        :return E, N, U: The x, y, and z position in the East, North, Up coordinate</span>
+<span class="sd">                         frame in units of metersy</span>
+
+<span class="sd">        This method transforms a three dimensional location from an ECEF (Earth</span>
+<span class="sd">        Centered Earth Fixed) coordinate frame to an ENU (East, North, Up)</span>
+<span class="sd">        coordinate frame.  The ENU frame is determined relative to a location,</span>
+<span class="sd">        which is the point of interest.  An example would be an aircraft as the</span>
+<span class="sd">        reference point, and a runway as the point of interest.  This method</span>
+<span class="sd">        solves the following equation where :math:`X_p`, :math:`Y_p`, and :math:`Z_p`</span>
+<span class="sd">        are the origin point in ECEF coordinates, :math:`\\lambda`,</span>
+<span class="sd">        :math:`\\lambda`, and :math:`\\phi` are the latitude, longitude and altitude</span>
+<span class="sd">        of the reference point in decimal degrees and meters.  The term</span>
+<span class="sd">        :math:`x`, :math:`y`, and :math:`z` are the NED coordinates in units</span>
+<span class="sd">        of meters.  In addition :math:`X_r`, :math:`Y_r`, and :math:`Z_r` are</span>
+<span class="sd">        the reference point expressed in ECEF coordinates</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \\begin{bmatrix}</span>
+<span class="sd">               x \\\\</span>
+<span class="sd">               y \\\\</span>
+<span class="sd">               z \\\\</span>
+<span class="sd">            \\end{bmatrix}</span>
+<span class="sd">            =</span>
+<span class="sd">            \\begin{bmatrix}</span>
+<span class="sd">               -sin\\lambda &amp; cos\\lambda &amp; 0\\\\</span>
+<span class="sd">               -sin\\phi\\:\\cos\\lambda &amp; -sin\\phi\\:\\sin\\lambda &amp; cos\\phi\\\\</span>
+<span class="sd">               cos\\phi\\:cos\\lambda &amp; cos\\phi\\:sin\\lambda &amp; sin\\phi</span>
+<span class="sd">            \\end{bmatrix}</span>
+<span class="sd">            \\cdot</span>
+<span class="sd">            \\begin{bmatrix}</span>
+<span class="sd">               X_p-X_r \\\\</span>
+<span class="sd">               Y_p-Y_r \\\\</span>
+<span class="sd">               Z_p-Z_r</span>
+<span class="sd">            \\end{bmatrix}</span>
+
+
+<span class="sd">        Code example</span>
+
+<span class="sd">        .. code-block::</span>
+
+<span class="sd">            from geo_py.datum import WGS84</span>
+<span class="sd">            from geo_py.transform import Transformations</span>
+
+<span class="sd">            tran = Transformations(WGS84())</span>
+<span class="sd">            radar_lat = 46.017</span>
+<span class="sd">            radar_lon = 7.750</span>
+<span class="sd">            radar_alt = 1673.0</span>
+
+<span class="sd">            x = 45.976</span>
+<span class="sd">            y = 7.658</span>
+<span class="sd">            z = 4531.0</span>
+<span class="sd">            E, N, U = tran.ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)</span>
+<span class="sd">            print(E, N, U)</span>
+<span class="sd">            &gt;&gt;&gt; -7126.303, -4562.512, 2863.687</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_r</span><span class="p">,</span> <span class="n">y_r</span><span class="p">,</span> <span class="n">z_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">)</span>
+        <span class="n">ref_lat</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">,</span> <span class="n">ref_alt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ecef_to_llh</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
+
+        <span class="n">ref_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
+        <span class="n">ref_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+
+        <span class="n">r_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                         <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)],</span>
+                       <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)]])</span>
+
+        <span class="c1"># transform ECEF coordinates to NED coordinats</span>
+        <span class="n">enu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">X</span> <span class="o">-</span> <span class="n">x_r</span><span class="p">,</span> <span class="n">Y</span> <span class="o">-</span> <span class="n">y_r</span><span class="p">,</span> <span class="n">Z</span> <span class="o">-</span> <span class="n">z_r</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">enu</span><span class="p">)</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="Transformations.enu_to_ecef"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.Transformations.enu_to_ecef">[docs]</a>    <span class="k">def</span> <span class="nf">enu_to_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                    <span class="n">E</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                    <span class="n">U</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param origin_lat: The latitude of the point of interest in units of</span>
+<span class="sd">                           decimal degrees</span>
+<span class="sd">        :param origin_lon: The longitude of the point of interest in units of</span>
+<span class="sd">                           decimal degrees</span>
+<span class="sd">        :param origin_alt: The altitude of the point of interest in units of decimal</span>
+<span class="sd">                           degrees</span>
+<span class="sd">        :param E: The x location of the craft in ENU coordinates</span>
+<span class="sd">        :param N: The y location of the craft in ENU coordinates</span>
+<span class="sd">        :param U: The z position of the craft in ENU coordinats</span>
+<span class="sd">        :return X, Y, Z: The x, y, and z position in ECEF coordinats</span>
+
+<span class="sd">        This method transforms a three dimensional location from a ENU (East,</span>
+<span class="sd">        North, Up) coordinate frame to an ECEF (Eearth Centered Earth Fixed)</span>
+<span class="sd">        coordinate frame.  The ENU frame is determined relative to a location,</span>
+<span class="sd">        which is the point of interest.  An example would be an aircraft as the</span>
+<span class="sd">        reference point, and a runway as the point of interest.  This method</span>
+<span class="sd">        solves the following equation where :math:`X_p`, :math:`Y_p`, and :math:`Z_p`</span>
+<span class="sd">        are the origin point in ECEF coordinates, :math:`\\lambda`,</span>
+<span class="sd">        :math:`\\lambda`, and :math:`\\phi` are the latitude, longitude and altitude</span>
+<span class="sd">        of the reference point in decimal degrees and meters.  The term</span>
+<span class="sd">        :math:`x`, :math:`y`, and :math:`z` are the NED coordinates in units</span>
+<span class="sd">        of meters.  In addition :math:`X_r`, :math:`Y_r`, and :math:`Z_r` are</span>
+<span class="sd">        the reference point expressed in ECEF coordinates</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \\begin{bmatrix}</span>
+<span class="sd">               X \\\\</span>
+<span class="sd">               Y \\\\</span>
+<span class="sd">               Z \\\\</span>
+<span class="sd">            \\end{bmatrix}</span>
+<span class="sd">            =</span>
+<span class="sd">            \\begin{bmatrix}</span>
+<span class="sd">               -sin\\lambda &amp; cos\\lambda &amp; 0\\\\</span>
+<span class="sd">               -sin\\phi\\:\\cos\\lambda &amp; -sin\\phi\\:\\sin\\lambda &amp; cos\\phi\\\\</span>
+<span class="sd">               cos\\phi\\:cos\\lambda &amp; cos\\phi\\:sin\\lambda &amp; sin\\phi</span>
+<span class="sd">            \\end{bmatrix}^T</span>
+<span class="sd">            \\cdot</span>
+<span class="sd">            \\begin{bmatrix}</span>
+<span class="sd">               x \\\\</span>
+<span class="sd">               y \\\\</span>
+<span class="sd">               z \\\\</span>
+<span class="sd">            \\end{bmatrix}</span>
+<span class="sd">            +</span>
+<span class="sd">            \\begin{bmatrix}</span>
+<span class="sd">               X_r \\\\</span>
+<span class="sd">               Y_r \\\\</span>
+<span class="sd">               Z_r</span>
+<span class="sd">            \\end{bmatrix}</span>
+
+<span class="sd">        Code example</span>
+
+<span class="sd">        .. code-block::</span>
+
+<span class="sd">            from geo_py.datum import WGS84</span>
+<span class="sd">            from geo_py.transform import Transformations</span>
+
+<span class="sd">            tran = Transformations(WGS84())</span>
+<span class="sd">            radar_lat = 46.017</span>
+<span class="sd">            radar_lon = 7.750</span>
+<span class="sd">            radar_alt = 1673.0</span>
+
+<span class="sd">            E = -7126.303</span>
+<span class="sd">            N = -4562.512</span>
+<span class="sd">            U = 2863.687</span>
+
+<span class="sd">            x, y, z = tran.ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)</span>
+<span class="sd">            print(x, y, z)</span>
+<span class="sd">            &gt;&gt;&gt; 4403757.60, 592124.58, 4566652.06</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_ref</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">,</span> <span class="n">z_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">)</span>
+
+        <span class="n">ref_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
+        <span class="n">ref_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+
+        <span class="n">r_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                        <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                         <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)],</span>
+                       <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)]])</span>
+        <span class="n">enu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">r_val</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">]))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_ref</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">,</span> <span class="n">z_ref</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">enu</span><span class="p">)</span></div></div>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># eof</span>

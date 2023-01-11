@@ -48,7 +48,7 @@
 <h1>Datums<a class="headerlink" href="#datums" title="Permalink to this heading">¶</a></h1>
 <p>The datums sub-library contains several geodetic datums that were collected as part
 of the World Geodetic Survey (WGS).  The Datums were drafted in the <code class="docutils literal notranslate"><span class="pre">datum.py</span></code> file
-as a <strong>Protocall</strong> dataclass of the following format.</p>
+as a <strong>Protocol</strong> dataclass of the following format.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geo_py.datum.Datum">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geo_py.datum.</span></span><span class="sig-name descname"><span class="pre">Datum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geo_py/datum.html#Datum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.datum.Datum" title="Permalink to this definition">¶</a></dt>
@@ -60,13 +60,13 @@ developers to over-ride the attributes.</p>
 <dl>
 <dt>Attributes</dt><dd><p><strong>_a:</strong> The semi-major axis of the oblate spheroid in units of meters</p>
 <p><strong>_b:</strong> The semi-minor axis of the oblate spheriod in units of meters</p>
-<p><strong>_ro:</strong> The average earth radius in units of meters</p>
-<p><strong>_gm:</strong> The gravitational constant in units of m3/s-2</p>
 <p><strong>_f:</strong> The flattening factor</p>
 <p><strong>_e:</strong> The eccentricity of the oblate spheroid</p>
 <p><strong>_e2:</strong> The eccentricity raised to the second power</p>
+<p><strong>_GM:</strong> The gravitational constant in units of m3/s-2</p>
+<p><strong>_R_avg:</strong> The average earth radius in units of meters</p>
 <p><strong>_e24:</strong> The square of the second eccentricity</p>
-<p><strong>_g:</strong> The average gravity or gravity at a latitude of 45 degreesn</p>
+<p><strong>_g_avg:</strong> The average gravity or gravity at a latitude of 45 degreesn</p>
 </dd>
 </dl>
 </dd></dl>
@@ -118,7 +118,7 @@ pre-developed Datum dataclasses</p>
 The datum can be retrieved with the following command. <strong>Provide Reference</strong></p>
 <div class="literal-block-wrapper docutils container" id="id4">
 <div class="code-block-caption"><span class="caption-text">User Defined Datum</span><a class="headerlink" href="#id4" title="Permalink to this code">¶</a></div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">WGS77</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geopy.datum</span> <span class="kn">import</span> <span class="n">WGS77</span>
 </pre></div>
 </div>
 </div>
@@ -145,6 +145,39 @@ The datum can be retrieved with the following command. <a class="reference exter
 </div>
 </div>
 </section>
+<section id="nad83">
+<h3>NAD83<a class="headerlink" href="#nad83" title="Permalink to this heading">¶</a></h3>
+<p>The North American Datum 1983 datum results are implement in a dataclass titled <code class="docutils literal notranslate"><span class="pre">NAD83</span></code>.
+The datum can be retrieved with the following command.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">User Defined Datum</span><a class="headerlink" href="#id7" title="Permalink to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">NAD83</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="etrs89">
+<h3>ETRS89<a class="headerlink" href="#etrs89" title="Permalink to this heading">¶</a></h3>
+<p>The European 1989 datum results are implement in a dataclass titled <code class="docutils literal notranslate"><span class="pre">ETRS89</span></code>.
+The datum can be retrieved with the following command.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">User Defined Datum</span><a class="headerlink" href="#id8" title="Permalink to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">ETRS89</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="itrf">
+<h3>ITRF<a class="headerlink" href="#itrf" title="Permalink to this heading">¶</a></h3>
+<p>The International Terrestrial Reference Frame datum results are implement in a dataclass titled <code class="docutils literal notranslate"><span class="pre">ITRF</span></code>.
+The datum can be retrieved with the following command.</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">User Defined Datum</span><a class="headerlink" href="#id9" title="Permalink to this code">¶</a></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">WGS84</span>
+</pre></div>
+</div>
+</div>
+</section>
 </section>
 </section>
 
@@ -164,6 +197,9 @@ The datum can be retrieved with the following command. <a class="reference exter
 <li><a class="reference internal" href="#wgs77">WGS77</a></li>
 <li><a class="reference internal" href="#wgs80">WGS80</a></li>
 <li><a class="reference internal" href="#wgs84">WGS84</a></li>
+<li><a class="reference internal" href="#nad83">NAD83</a></li>
+<li><a class="reference internal" href="#etrs89">ETRS89</a></li>
+<li><a class="reference internal" href="#itrf">ITRF</a></li>
 </ul>
 </li>
 </ul>
