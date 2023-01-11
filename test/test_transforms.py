@@ -7,7 +7,7 @@ from pathlib import PurePath
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
 from geo_py.datum import WGS84, NAD83, ITRF
-from geo_py.transform import Transformations
+from geo_py.transform import CFTrans
 # ================================================================================
 # ================================================================================
 # File:    test.py
@@ -45,7 +45,7 @@ def test_transform_instantiate():
     This function tests the ability to properly instantiate the Transformations
     class
     """
-    assert isinstance(Transformations(WGS84()), Transformations)
+    assert isinstance(CFTrans(WGS84()), CFTrans)
 # --------------------------------------------------------------------------------
 
 
@@ -56,7 +56,7 @@ def test_llh_to_ecef():
     lat = 46.826
     lon = 107.321
     alt = 6096.0
-    tran = Transformations(WGS84())
+    tran = CFTrans(WGS84())
     x, y, z = tran.llh_to_ecef(lat, lon, alt)
     assert isclose(x, -1302839.38, rel_tol=1.0e-3)
     assert isclose(y, 4177542.21, rel_tol=1.0e-3)
@@ -71,7 +71,7 @@ def test_ecef_to_llh():
     lat = 46.826
     lon = 107.321
     alt = 6096.0
-    tran = Transformations(WGS84())
+    tran = CFTrans(WGS84())
     x, y, z = tran.llh_to_ecef(lat, lon, alt)
     new_lat, new_lon, new_alt = tran.ecef_to_llh(x, y, z)
     assert isclose(new_lat, lat, rel_tol=1.0e-3)
@@ -92,7 +92,7 @@ def test_ecef_to_enu():
     craft_lon = 7.658
     craft_alt = 4531.0
 
-    tran = Transformations(NAD83())
+    tran = CFTrans(NAD83())
     x, y, z = tran.llh_to_ecef(craft_lat, craft_lon, craft_alt)
     new_x, new_y, new_z = tran.ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)
     assert isclose(new_x, -7134.757, rel_tol=1.0e-3)
@@ -110,7 +110,7 @@ def test_enu_to_ecef():
     craft_lon = 7.658
     craft_alt = 4531.0
 
-    tran = Transformations(WGS84())
+    tran = CFTrans(WGS84())
     x, y, z = tran.llh_to_ecef(craft_lat, craft_lon, craft_alt)
     new_x, new_y, new_z = tran.ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)
     xn, yn, zn = tran.enu_to_ecef(radar_lat, radar_lon, radar_alt, new_x, new_y, new_z)

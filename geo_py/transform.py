@@ -370,15 +370,6 @@ class CFTrans:
         X = -sin(ref_lon)*E - cos(ref_lon)*sin(ref_lat)*N + cos(ref_lon)*cos(ref_lat)*U + x_ref;
         Y = cos(ref_lon)*E - sin(ref_lon)*sin(ref_lat)*N + cos(ref_lat)*sin(ref_lon)*U + y_ref;
         Z = cos(ref_lat)*N + sin(ref_lat)*U + z_ref;
-
-        # r_val = np.array([[-np.sin(ref_lon), np.cos(ref_lon), 0],
-        #                 [-np.sin(ref_lat)*np.cos(ref_lon),
-        #                  -np.sin(ref_lat)*np.sin(ref_lon),
-        #                  np.cos(ref_lat)],
-        #                [np.cos(ref_lat)*np.cos(ref_lon),
-        #                 np.cos(ref_lat)*np.sin(ref_lon),
-        #                 np.sin(ref_lat)]])
-        # enu = np.dot(r_val.T, np.array([E, N, U])) + np.array([x_ref, y_ref, z_ref])
         return X, Y, Z
 # ================================================================================
 # ================================================================================
