@@ -7,10 +7,14 @@ between geodetic and Cartesian coordinates.  The methods in this file reley on t
 us eod **Datum** dataclasses that are wither created by the user or are selected
 from pre-existing dataclasses in the ``geo_py.datum`` file.
 
-Transformations
-===============
+Coordinate Transformations
+==========================
 
-The ``Transformations`` class contains severla methods shown below.
+This file contains several classes and functions that are used to transform back
+and forth between different geodetic coordinate reference frames.
 
-.. autoclass:: geo_py.transform.Transformations
+The ``CFTrans`` class contains several coordinate transformation methods that
+are useful in the aviation and maratime professions
+
+.. autoclass:: geo_py.transform.CFTrans
    :members:

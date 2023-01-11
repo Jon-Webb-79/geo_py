@@ -3,7 +3,7 @@ import sys
 import os
 from pathlib import PurePath
 from typing import Tuple
-from math import radians, cos, sin, sqrt, atan, atan2, pi
+from math import radians, cos, sin, sqrt, atan, atan2, pi, degrees
 import numpy as np
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
@@ -23,7 +23,7 @@ __version__ = "1.0"
 # Insert Code here
 
 
-class Transformations:
+class CFTrans:
     """
     This class acts as a model container for several data geodetic to
     Cartesian, and Cartesian to geodetic coordinate frames.
@@ -76,7 +76,7 @@ class Transformations:
         .. code-block::
 
             from geo_py.datum import WGS84
-            from geo_py.transform import Transformations
+            from geo_py.transform import CFTrans
 
             tran = Transformations(WGS84())
             lat = 46.826
@@ -177,7 +177,7 @@ class Transformations:
         .. code-block::
 
             from geo_py.datum import WGS84
-            from geo_py.transform import Transformations
+            from geo_py.transform import CFTrans
 
             tran = Transformations(WGS84())
             x = -1302839.38
@@ -264,7 +264,7 @@ class Transformations:
         .. code-block::
 
             from geo_py.datum import WGS84
-            from geo_py.transform import Transformations
+            from geo_py.transform import CFTrans
 
             tran = Transformations(WGS84())
             radar_lat = 46.017
@@ -279,22 +279,13 @@ class Transformations:
             >>> -7126.303, -4562.512, 2863.687
         """
         x_r, y_r, z_r = self.llh_to_ecef(origin_lat, origin_lon, origin_alt)
-        ref_lat, ref_lon, ref_alt = self.ecef_to_llh(X, Y, Z)
 
-        ref_lat = np.deg2rad(ref_lat)
-        ref_lon = np.deg2rad(ref_lon)
-
-        r_val = np.array([[-np.sin(ref_lon), np.cos(ref_lon), 0],
-                        [-np.sin(ref_lat)*np.cos(ref_lon),
-                         -np.sin(ref_lat)*np.sin(ref_lon),
-                         np.cos(ref_lat)],
-                       [np.cos(ref_lat)*np.cos(ref_lon),
-                        np.cos(ref_lat)*np.sin(ref_lon),
-                        np.sin(ref_lat)]])
-
-        # transform ECEF coordinates to NED coordinats
-        enu = np.dot(r_val, np.array([X - x_r, Y - y_r, Z - z_r]))
-        return tuple(enu)
+        lat = np.deg2rad(origin_lat)
+        lon = np.deg2rad(origin_lon)
+        E = -sin(lon)*(X-x_r) + cos(lon)*(Y-y_r);
+        N = -sin(lat)*cos(lon)*(X-x_r) - sin(lat)*sin(lon)*(Y-y_r) + cos(lat)*(Z-z_r);
+        U = cos(lat)*cos(lon)*(X-x_r) + cos(lat)*sin(lon)*(Y-y_r) + sin(lat)*(Z-z_r);
+        return E, N, U
 # --------------------------------------------------------------------------------
 
     def enu_to_ecef(self, ref_lat: float, ref_lon: float, ref_alt: float,
@@ -356,7 +347,7 @@ class Transformations:
         .. code-block::
 
             from geo_py.datum import WGS84
-            from geo_py.transform import Transformations
+            from geo_py.transform import CFTrans
 
             tran = Transformations(WGS84())
             radar_lat = 46.017
@@ -376,15 +367,19 @@ class Transformations:
         ref_lat = np.deg2rad(ref_lat)
         ref_lon = np.deg2rad(ref_lon)
 
-        r_val = np.array([[-np.sin(ref_lon), np.cos(ref_lon), 0],
-                        [-np.sin(ref_lat)*np.cos(ref_lon),
-                         -np.sin(ref_lat)*np.sin(ref_lon),
-                         np.cos(ref_lat)],
-                       [np.cos(ref_lat)*np.cos(ref_lon),
-                        np.cos(ref_lat)*np.sin(ref_lon),
-                        np.sin(ref_lat)]])
-        enu = np.dot(r_val.T, np.array([E, N, U])) + np.array([x_ref, y_ref, z_ref])
-        return tuple(enu)
+        X = -sin(ref_lon)*E - cos(ref_lon)*sin(ref_lat)*N + cos(ref_lon)*cos(ref_lat)*U + x_ref;
+        Y = cos(ref_lon)*E - sin(ref_lon)*sin(ref_lat)*N + cos(ref_lat)*sin(ref_lon)*U + y_ref;
+        Z = cos(ref_lat)*N + sin(ref_lat)*U + z_ref;
+
+        # r_val = np.array([[-np.sin(ref_lon), np.cos(ref_lon), 0],
+        #                 [-np.sin(ref_lat)*np.cos(ref_lon),
+        #                  -np.sin(ref_lat)*np.sin(ref_lon),
+        #                  np.cos(ref_lat)],
+        #                [np.cos(ref_lat)*np.cos(ref_lon),
+        #                 np.cos(ref_lat)*np.sin(ref_lon),
+        #                 np.sin(ref_lat)]])
+        # enu = np.dot(r_val.T, np.array([E, N, U])) + np.array([x_ref, y_ref, z_ref])
+        return X, Y, Z
 # ================================================================================
 # ================================================================================
 # eof
