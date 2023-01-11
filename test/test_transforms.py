@@ -74,6 +74,8 @@ def test_ecef_to_llh():
     tran = Transformations(WGS84())
     x, y, z = tran.llh_to_ecef(lat, lon, alt)
     new_lat, new_lon, new_alt = tran.ecef_to_llh(x, y, z)
+    print(new_lat, new_lon, new_alt)
+    # The altitude is 6097.017 as opposed to 6096.0
     assert isclose(new_lat, lat, rel_tol=1.0e-3)
     assert isclose(new_lon, lon, rel_tol=1.0e-3)
     assert isclose(new_alt, alt, rel_tol=1.0e-3)
@@ -94,7 +96,6 @@ def test_ecef_to_enu():
 
     tran = Transformations(WGS84())
     x, y, z = tran.llh_to_ecef(craft_lat, craft_lon, craft_alt)
-    print(x, y, z)
     new_x, new_y, new_z = tran.ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)
     assert isclose(new_x, -7126.303, rel_tol=1.0e-3)
     assert isclose(new_y, -4562.512, rel_tol=1.0e-3)
@@ -116,7 +117,6 @@ def test_enu_to_ecef():
     new_x, new_y, new_z = tran.ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)
     xn, yn, zn = tran.enu_to_ecef(radar_lat, radar_lon, radar_alt, new_x, new_y, new_z)
     new_lat, new_lon, new_alt = tran.ecef_to_llh(xn, yn, zn)
-    print(new_lat, new_lon, new_alt)
 # ================================================================================
 # ================================================================================
 # eof
