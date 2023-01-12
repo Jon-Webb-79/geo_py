@@ -3,12 +3,12 @@ import sys
 import os
 from math import isclose
 from pathlib import PurePath
-import pytest
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
-from geo_py.datum import WGS84, NAD83, ITRF
+from geo_py.datum import ITRF
 from geo_py.frames import llh_to_ecef, ecef_to_llh, ecef_to_enu, enu_to_ecef
-from geo_py.frames import llh_to_enu
+from geo_py.frames import llh_to_enu, enu_to_llh, ecef_to_ned, ned_to_ecef
+from geo_py.frames import llh_to_ned
 # ================================================================================
 # ================================================================================
 # File:    test.py
@@ -72,6 +72,25 @@ def test_llh_to_enu():
 # --------------------------------------------------------------------------------
 
 
+def test_llh_to_ned():
+    radar_lat = 46.017
+    radar_lon = 7.750
+    radar_alt = 1673.0
+
+    craft_lat = 45.976
+    craft_lon = 7.658
+    craft_alt = 4531.0
+
+    N, E, D = llh_to_ned(radar_lat, radar_lon, radar_alt,
+                         craft_lat, craft_lon, craft_alt)
+    assert isclose(N, -4556.321, rel_tol=1.0e-3)
+    assert isclose(E, -7134.752, rel_tol=1.0e-3)
+    assert isclose(D, -2852.39, rel_tol=1.0e-3)
+# ================================================================================
+# ================================================================================
+# TEST ECEF FUNCTIONS
+
+
 def test_ecef_to_llh():
     """
     This method tests the llh_to_ecef method for correct results
@@ -84,7 +103,7 @@ def test_ecef_to_llh():
     assert isclose(new_lat, lat, rel_tol=1.0e-3)
     assert isclose(new_lon, lon, rel_tol=1.0e-3)
     assert isclose(new_alt, alt, rel_tol=1.0e-3)
-# # --------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
 
 
 def test_ecef_to_enu():
@@ -104,7 +123,25 @@ def test_ecef_to_enu():
     assert isclose(new_x, -7134.757, rel_tol=1.0e-3)
     assert isclose(new_y, -4556.321, rel_tol=1.0e-3)
     assert isclose(new_z, 2852.39, rel_tol=1.0e-3)
-# # --------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
+
+
+def test_ecef_to_ned():
+    radar_lat = 46.017
+    radar_lon = 7.750
+    radar_alt = 1673.0
+
+    x = -7134.757
+    y = -4556.321
+    z = 2852.39
+
+    new_x, new_y, new_z = ecef_to_ned(radar_lat, radar_lon, radar_alt, x, y, z)
+    assert isclose(new_x, 28882.282, rel_tol=1.0e-3)
+    assert isclose(new_y, -3552.574, rel_tol=1.0e-3)
+    assert isclose(new_z, 6372030.823, rel_tol=1.0e-3)
+# ================================================================================
+# ================================================================================
+# TEST ENU FUNCTIONS
 
 
 def test_enu_to_ecef():
@@ -123,6 +160,40 @@ def test_enu_to_ecef():
     assert isclose(new_lat, 45.976, rel_tol=1.0e-3)
     assert isclose(new_lon, 7.6518, rel_tol=1.0e-3)
     assert isclose(new_alt, 4531.0, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_enu_to_llh():
+    radar_lat = 46.017
+    radar_lon = 7.750
+    radar_alt = 1673.0
+
+    E = -7134.757
+    N = -4556.321
+    U = 2852.39
+
+    lat, lon, alt = enu_to_llh(radar_lat, radar_lon, radar_alt, E, N, U)
+    assert isclose(lat, 45.976, rel_tol=1.0e-3)
+    assert isclose(lon, 7.6518, rel_tol=1.0e-3)
+    assert isclose(alt, 4531.0, rel_tol=1.0e-3)
+# ================================================================================
+# ================================================================================
+# TEST NED FUNCTIONS
+
+
+def test_ned_to_ecef():
+    radar_lat = 46.017
+    radar_lon = 7.750
+    radar_alt = 1673.0
+
+    N = 28882.282
+    E = -3552.574
+    D = 6372030.823
+
+    x, y, z = ned_to_ecef(radar_lat, radar_lon, radar_alt, N, E, D)
+    assert isclose(x, -7134.757, rel_tol=1.0e-3)
+    assert isclose(y, -4556.321, rel_tol=1.0e-3)
+    assert isclose(z, 2852.389, rel_tol=1.0e-3)
 # ================================================================================
 # ================================================================================
 # eof

@@ -165,6 +165,52 @@ converts the LLH frame to an ECEF frame, then to an ENU frame.</p>
 </dd></dl>
 
 </section>
+<section id="llh-to-ned">
+<h3>llh_to_ned()<a class="headerlink" href="#llh-to-ned" title="Permalink to this heading">¶</a></h3>
+<p>This function will transform a LLH (Latitude, Longitude, Height) coordinate frame
+to an NED (North, East, Down) frame.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.frames.llh_to_ned">
+<span class="sig-prename descclassname"><span class="pre">geo_py.frames.</span></span><span class="sig-name descname"><span class="pre">llh_to_ned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WGS84(a=6378137.0,</span> <span class="pre">b=6356752.314245,</span> <span class="pre">f=0.0033528106647474805,</span> <span class="pre">e=0.08181919084262157,</span> <span class="pre">e2=0.00669437999014132,</span> <span class="pre">GM=398600500000000.0,</span> <span class="pre">R_avg=6371008.8,</span> <span class="pre">e24=0.006694317779487594,</span> <span class="pre">g_avg=9.7803253359)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/frames.html#llh_to_ned"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.frames.llh_to_ned" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin_lat</strong> – The latitude of the origin in units of decimal degrees</p></li>
+<li><p><strong>origin_lon</strong> – The longitude of the origin in units of decimal degrees</p></li>
+<li><p><strong>origin_alt</strong> – The altitude of the origin in units of meters</p></li>
+<li><p><strong>lat</strong> – The latitude of the point of interest in units of decimal
+degrees</p></li>
+<li><p><strong>lon</strong> – The longitude of the point of interest in units of decimal
+degrees</p></li>
+<li><p><strong>alt</strong> – The altitude of the point of interest in units of meters</p></li>
+<li><p><strong>dat</strong> – A Datum dataclass, defaulted to WGS84</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return N, E, D<span class="colon">:</span></dt>
+<dd class="field-even"><p>The North, East, Down coordinates in units of meters</p>
+</dd>
+</dl>
+<p>This function transforms coordinates from a LLH (Latitude, Longitude,
+Height) frame to a NED (North, East, Down) Frame.</p>
+<p>Code Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">ITRF</span>
+<span class="kn">from</span> <span class="nn">geo_py.transform</span> <span class="kn">import</span> <span class="n">llh_to_enu</span>
+
+<span class="n">radar_lat</span> <span class="o">=</span> <span class="mf">46.017</span>
+<span class="n">radar_lon</span> <span class="o">=</span> <span class="mf">7.750</span>
+<span class="n">radar_alt</span> <span class="o">=</span> <span class="mf">1673.0</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="mf">45.976</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mf">7.658</span>
+<span class="n">z</span> <span class="o">=</span> <span class="mf">4531.0</span>
+<span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">llh_to_ned</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">-</span><span class="mf">4556.321</span><span class="p">,</span> <span class="o">-</span><span class="mf">7134.752</span><span class="p">,</span> <span class="o">-</span><span class="mf">2852.39</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
 <section id="ecef-to-llh">
 <h3>ecef_to_llh()<a class="headerlink" href="#ecef-to-llh" title="Permalink to this heading">¶</a></h3>
 <p>This function will transform a ECEF (Earth Centered Earth Fixed) coordinate frame
@@ -322,6 +368,301 @@ the reference point expressed in ECEF coordinates</p>
 </dd></dl>
 
 </section>
+<section id="ecef-to-ned">
+<h3>ecef_to_ned()<a class="headerlink" href="#ecef-to-ned" title="Permalink to this heading">¶</a></h3>
+<p>This function will transform an ECEF (Earth Centered Earth Fixed) coordinate frame
+to an NED (North, East, Down) frame.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.frames.ecef_to_ned">
+<span class="sig-prename descclassname"><span class="pre">geo_py.frames.</span></span><span class="sig-name descname"><span class="pre">ecef_to_ned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WGS84(a=6378137.0,</span> <span class="pre">b=6356752.314245,</span> <span class="pre">f=0.0033528106647474805,</span> <span class="pre">e=0.08181919084262157,</span> <span class="pre">e2=0.00669437999014132,</span> <span class="pre">GM=398600500000000.0,</span> <span class="pre">R_avg=6371008.8,</span> <span class="pre">e24=0.006694317779487594,</span> <span class="pre">g_avg=9.7803253359)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/frames.html#ecef_to_ned"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.frames.ecef_to_ned" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin_lat</strong> – The latitude of the point of interest in units of
+decimal degrees</p></li>
+<li><p><strong>origin_lon</strong> – The longitude of the point of interest in units of
+decimal degrees</p></li>
+<li><p><strong>origin_alt</strong> – The altitude of the point of interest in units of decimal
+degrees</p></li>
+<li><p><strong>dat</strong> – A Datum dataclasse, defaulted to WGS84</p></li>
+<li><p><strong>X</strong> – The x location of the craft in ECEF coordinates</p></li>
+<li><p><strong>Y</strong> – The y location of the craft in ECEF coordinates</p></li>
+<li><p><strong>Z</strong> – The z position of the craft in ECEF coordinats</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return N, E, D<span class="colon">:</span></dt>
+<dd class="field-even"><p>The x, y, and z position in the North, East, Down coordinate
+frame in units of meters</p>
+</dd>
+</dl>
+<p>This function converts the ECEF (Earth Centered Earth Fixed) coordinate
+frame to the NED (North, East, Down) coordinate frame. This function
+solves the following equations where <span class="math notranslate nohighlight">\(e\)</span> represents the body’s
+eccentricity, <span class="math notranslate nohighlight">\(a\)</span> represents the bodies semi-major axis length,
+<span class="math notranslate nohighlight">\(X\)</span>, <span class="math notranslate nohighlight">\(Y', and :math:`Z\)</span> represents the ECEF coordinates
+of the origin point.  Finally <span class="math notranslate nohighlight">\(\phi\)</span>, <span class="math notranslate nohighlight">\(\lambda\)</span>, and
+<span class="math notranslate nohighlight">\(h\)</span> represent the latitude, longitude and height of the origin
+point above sea level.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+    N \\
+    E \\
+    D \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+    -sin\lambda\:cos\phi &amp; sin\lambda\:sin\phi &amp; cos\lambda\\
+    -sin\phi &amp; cos\phi &amp; 0\\
+    cos\lambda\:cos\phi &amp; -cos\lambda\:sin\phi &amp; -sin\lambda
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+    X-X_r \\
+    Y-Y_r \\
+    Z-Z_r
+\end{bmatrix}\end{split}\]</div>
+<p>Code Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">ITRF</span>
+<span class="kn">from</span> <span class="nn">geo_py.transform</span> <span class="kn">import</span> <span class="n">ecef_to_ned</span>
+
+<span class="n">radar_lat</span> <span class="o">=</span> <span class="mf">46.017</span>
+<span class="n">radar_lon</span> <span class="o">=</span> <span class="mf">7.750</span>
+<span class="n">radar_alt</span> <span class="o">=</span> <span class="mf">1673.0</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mf">7134.757</span>
+<span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4556.321</span>
+<span class="n">z</span> <span class="o">=</span> <span class="mf">2852.390</span>
+
+<span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">ecef_to_ned</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">28882.282</span><span class="p">,</span> <span class="o">-</span><span class="mf">3552.574</span><span class="p">,</span> <span class="mf">6372030.823</span>
+
+<span class="c1"># Use another datum</span>
+<span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">ecef_to_ned</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">ITRF</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">28882.297</span><span class="p">,</span> <span class="o">-</span><span class="mf">3552.574</span><span class="p">,</span> <span class="mf">6372030.407</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="enu-to-ecef">
+<h3>enu_to_ecef()<a class="headerlink" href="#enu-to-ecef" title="Permalink to this heading">¶</a></h3>
+<p>This function will transform an ENU (East, North, Up) coordinate frame
+to an ECEF (Earth Centered Earth Fixed) frame.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.frames.enu_to_ecef">
+<span class="sig-prename descclassname"><span class="pre">geo_py.frames.</span></span><span class="sig-name descname"><span class="pre">enu_to_ecef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WGS84(a=6378137.0,</span> <span class="pre">b=6356752.314245,</span> <span class="pre">f=0.0033528106647474805,</span> <span class="pre">e=0.08181919084262157,</span> <span class="pre">e2=0.00669437999014132,</span> <span class="pre">GM=398600500000000.0,</span> <span class="pre">R_avg=6371008.8,</span> <span class="pre">e24=0.006694317779487594,</span> <span class="pre">g_avg=9.7803253359)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/frames.html#enu_to_ecef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.frames.enu_to_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin_lat</strong> – The latitude of the point of interest in units of
+decimal degrees</p></li>
+<li><p><strong>origin_lon</strong> – The longitude of the point of interest in units of
+decimal degrees</p></li>
+<li><p><strong>origin_alt</strong> – The altitude of the point of interest in units of decimal
+degrees</p></li>
+<li><p><strong>E</strong> – The x location of the craft in ENU coordinates</p></li>
+<li><p><strong>N</strong> – The y location of the craft in ENU coordinates</p></li>
+<li><p><strong>U</strong> – The z position of the craft in ENU coordinats</p></li>
+<li><p><strong>dat</strong> – A Datum dataclasse, defaulted to WGS84</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return X, Y, Z<span class="colon">:</span></dt>
+<dd class="field-even"><p>The x, y, and z position in ECEF coordinats</p>
+</dd>
+</dl>
+<p>This method transforms a three dimensional location from a ENU (East,
+North, Up) coordinate frame to an ECEF (Eearth Centered Earth Fixed)
+coordinate frame.  The ENU frame is determined relative to a location,
+which is the point of interest.  An example would be an aircraft as the
+reference point, and a runway as the point of interest.  This method
+solves the following equation where <span class="math notranslate nohighlight">\(X_p\)</span>, <span class="math notranslate nohighlight">\(Y_p\)</span>, and <span class="math notranslate nohighlight">\(Z_p\)</span>
+are the origin point in ECEF coordinates, <span class="math notranslate nohighlight">\(\lambda\)</span>,
+<span class="math notranslate nohighlight">\(\lambda\)</span>, and <span class="math notranslate nohighlight">\(\phi\)</span> are the latitude, longitude and altitude
+of the reference point in decimal degrees and meters.  The term
+<span class="math notranslate nohighlight">\(x\)</span>, <span class="math notranslate nohighlight">\(y\)</span>, and <span class="math notranslate nohighlight">\(z\)</span> are the NED coordinates in units
+of meters.  In addition <span class="math notranslate nohighlight">\(X_r\)</span>, <span class="math notranslate nohighlight">\(Y_r\)</span>, and <span class="math notranslate nohighlight">\(Z_r\)</span> are
+the reference point expressed in ECEF coordinates</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+    X \\
+    Y \\
+    Z \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+    -sin\lambda &amp; cos\lambda &amp; 0\\
+    -sin\phi\:\cos\lambda &amp; -sin\phi\:\sin\lambda &amp; cos\phi\\
+    cos\phi\:cos\lambda &amp; cos\phi\:sin\lambda &amp; sin\phi
+\end{bmatrix}^T
+\cdot
+\begin{bmatrix}
+    x \\
+    y \\
+    z \\
+\end{bmatrix}
++
+\begin{bmatrix}
+    X_r \\
+    Y_r \\
+    Z_r
+\end{bmatrix}\end{split}\]</div>
+<p>Code example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">ITRF</span>
+<span class="kn">from</span> <span class="nn">geo_py.transform</span> <span class="kn">import</span> <span class="n">enu_to_ecef</span>
+
+<span class="n">radar_lat</span> <span class="o">=</span> <span class="mf">46.017</span>
+<span class="n">radar_lon</span> <span class="o">=</span> <span class="mf">7.750</span>
+<span class="n">radar_alt</span> <span class="o">=</span> <span class="mf">1673.0</span>
+
+<span class="n">E</span> <span class="o">=</span> <span class="o">-</span><span class="mf">7134.757</span>
+<span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4556.321</span>
+<span class="n">U</span> <span class="o">=</span> <span class="mf">2852.390</span>
+
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">enu_to_ecef</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">4403757.605</span><span class="p">,</span> <span class="mf">592124.579</span><span class="p">,</span> <span class="mf">45666.52</span>
+
+<span class="c1"># Use another datum</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">enu_to_ecef</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">ITRF</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">440357.328</span><span class="p">,</span> <span class="mf">592124.546</span><span class="p">,</span> <span class="mf">4566651.751</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="enu-to-llh">
+<h3>enu_to_llh()<a class="headerlink" href="#enu-to-llh" title="Permalink to this heading">¶</a></h3>
+<p>This function will transform an ENU (East, North, Up) coordinate frame
+to an LLH (Latitude, Longitude, Height) frame.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.frames.enu_to_llh">
+<span class="sig-prename descclassname"><span class="pre">geo_py.frames.</span></span><span class="sig-name descname"><span class="pre">enu_to_llh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WGS84(a=6378137.0,</span> <span class="pre">b=6356752.314245,</span> <span class="pre">f=0.0033528106647474805,</span> <span class="pre">e=0.08181919084262157,</span> <span class="pre">e2=0.00669437999014132,</span> <span class="pre">GM=398600500000000.0,</span> <span class="pre">R_avg=6371008.8,</span> <span class="pre">e24=0.006694317779487594,</span> <span class="pre">g_avg=9.7803253359)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/frames.html#enu_to_llh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.frames.enu_to_llh" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin_lat</strong> – The latitude of the point of interest in units of
+decimal degrees</p></li>
+<li><p><strong>origin_lon</strong> – The longitude of the point of interest in units of
+decimal degrees</p></li>
+<li><p><strong>origin_alt</strong> – The altitude of the point of interest in units of decimal
+degrees</p></li>
+<li><p><strong>E</strong> – The x location of the craft in ENU coordinates</p></li>
+<li><p><strong>N</strong> – The y location of the craft in ENU coordinates</p></li>
+<li><p><strong>U</strong> – The z position of the craft in ENU coordinats</p></li>
+<li><p><strong>dat</strong> – A Datum dataclasse, defaulted to WGS84</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return lat, lon, alt<span class="colon">:</span></dt>
+<dd class="field-even"><p>The latitude, longitude, and altitude position
+in LLH coordinats</p>
+</dd>
+</dl>
+<p>Code Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">ITRF</span>
+<span class="kn">from</span> <span class="nn">geo_py.transform</span> <span class="kn">import</span> <span class="n">enu_to_llh</span>
+
+<span class="n">radar_lat</span> <span class="o">=</span> <span class="mf">46.017</span>
+<span class="n">radar_lon</span> <span class="o">=</span> <span class="mf">7.750</span>
+<span class="n">radar_alt</span> <span class="o">=</span> <span class="mf">1673.0</span>
+
+<span class="n">E</span> <span class="o">=</span> <span class="o">-</span><span class="mf">7134.757</span>
+<span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4556.321</span>
+<span class="n">U</span> <span class="o">=</span> <span class="mf">2852.390</span>
+
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">enu_to_llh</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">45.976</span><span class="p">,</span> <span class="mf">7.658</span><span class="p">,</span> <span class="mf">4531.989</span>
+
+<span class="c1"># Use another datum</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">enu_to_ecef</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">ITRF</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">45.976</span><span class="p">,</span> <span class="mf">7.678</span><span class="p">,</span> <span class="mf">4532.004</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="ned-to-ecef">
+<h3>ned_to_ecef()<a class="headerlink" href="#ned-to-ecef" title="Permalink to this heading">¶</a></h3>
+<p>This function will transform an NED (North, East, Down) coordinate frame
+to an ECEF (Earth Centered Earth Fixed) frame.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.frames.ned_to_ecef">
+<span class="sig-prename descclassname"><span class="pre">geo_py.frames.</span></span><span class="sig-name descname"><span class="pre">ned_to_ecef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">origin_lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin_alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WGS84(a=6378137.0,</span> <span class="pre">b=6356752.314245,</span> <span class="pre">f=0.0033528106647474805,</span> <span class="pre">e=0.08181919084262157,</span> <span class="pre">e2=0.00669437999014132,</span> <span class="pre">GM=398600500000000.0,</span> <span class="pre">R_avg=6371008.8,</span> <span class="pre">e24=0.006694317779487594,</span> <span class="pre">g_avg=9.7803253359)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/frames.html#ned_to_ecef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.frames.ned_to_ecef" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>origin_lat</strong> – The latitude of the point of interest in units of
+decimal degrees</p></li>
+<li><p><strong>origin_lon</strong> – The longitude of the point of interest in units of
+decimal degrees</p></li>
+<li><p><strong>origin_alt</strong> – The altitude of the point of interest in units of decimal
+degrees</p></li>
+<li><p><strong>N</strong> – The x location of the craft in NED coordinates</p></li>
+<li><p><strong>E</strong> – The y location of the craft in NED coordinates</p></li>
+<li><p><strong>D</strong> – The z position of the craft in NED coordinats</p></li>
+<li><p><strong>dat</strong> – A Datum dataclasse, defaulted to WGS84</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return x, y, z<span class="colon">:</span></dt>
+<dd class="field-even"><p>The x, y, and z position in the in ECEF coordinats</p>
+</dd>
+</dl>
+<p>This function converts NED (North, East, Down) coordinates into ECEF
+(Earth Centered Earth Fixed) coordinates by solving the following equations
+where <span class="math notranslate nohighlight">\(X_r\)</span>, <span class="math notranslate nohighlight">\(Y_r\)</span>, <span class="math notranslate nohighlight">\(Z_r\)</span> represent the ECEF coordinates of
+the origin, <span class="math notranslate nohighlight">\(\lambda\)</span>, <span class="math notranslate nohighlight">\(\phi\)</span>, and <span class="math notranslate nohighlight">\(h\)</span> represents the
+latitude, longitude and height of the origin, and <span class="math notranslate nohighlight">\(N\)</span>, <span class="math notranslate nohighlight">\(E\)</span>,
+and <span class="math notranslate nohighlight">\(D\)</span> represents the NED coordinats.</p>
+<p>Code Example</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+    X \\
+    Y \\
+    Z \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+    -sin\lambda\:cos\phi &amp; -sin\lambda &amp; -cos\lambda\:\cos\phi\\
+    -sin\lambda\:\sin\phi &amp; cos\phi &amp; -cos\lambda\:sin\phi\\
+    cos\lambda &amp; 0 &amp; -sin\lambda
+\end{bmatrix}
+\cdot
+\begin{bmatrix}
+    N \\
+    E \\
+    D \\
+\end{bmatrix}
++
+\begin{bmatrix}
+    X_r \\
+    Y_r \\
+    Z_r
+\end{bmatrix}\end{split}\]</div>
+<p>Code Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">ITRF</span>
+<span class="kn">from</span> <span class="nn">geo_py.transform</span> <span class="kn">import</span> <span class="n">ned_to_ecef</span>
+
+<span class="n">radar_lat</span> <span class="o">=</span> <span class="mf">46.017</span>
+<span class="n">radar_lon</span> <span class="o">=</span> <span class="mf">7.750</span>
+<span class="n">radar_alt</span> <span class="o">=</span> <span class="mf">1673.0</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">28882</span><span class="p">,</span><span class="mi">283</span>
+<span class="n">E</span> <span class="o">=</span> <span class="o">-</span><span class="mf">3552.574</span>
+<span class="n">D</span> <span class="o">=</span> <span class="mf">6372030.823</span>
+
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">enu_to_llh</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">-</span><span class="mf">7135.757</span><span class="p">,</span> <span class="o">-</span><span class="mf">4556.321</span><span class="p">,</span> <span class="mf">2852.390</span>
+
+<span class="c1"># Use another datum</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">enu_to_ecef</span><span class="p">(</span><span class="n">radar_lat</span><span class="p">,</span> <span class="n">radar_lon</span><span class="p">,</span> <span class="n">radar_alt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">ITRF</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">-</span><span class="mf">7135.038</span><span class="p">,</span> <span class="o">-</span><span class="mf">4556.358</span><span class="p">,</span> <span class="mf">2852.081</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
 </section>
 </section>
 
@@ -345,12 +686,32 @@ the reference point expressed in ECEF coordinates</p>
 <li><a class="reference internal" href="#geo_py.frames.llh_to_enu"><code class="docutils literal notranslate"><span class="pre">llh_to_enu()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#llh-to-ned">llh_to_ned()</a><ul>
+<li><a class="reference internal" href="#geo_py.frames.llh_to_ned"><code class="docutils literal notranslate"><span class="pre">llh_to_ned()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#ecef-to-llh">ecef_to_llh()</a><ul>
 <li><a class="reference internal" href="#geo_py.frames.ecef_to_llh"><code class="docutils literal notranslate"><span class="pre">ecef_to_llh()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#ecef-to-enu">ecef_to_enu()</a><ul>
 <li><a class="reference internal" href="#geo_py.frames.ecef_to_enu"><code class="docutils literal notranslate"><span class="pre">ecef_to_enu()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ecef-to-ned">ecef_to_ned()</a><ul>
+<li><a class="reference internal" href="#geo_py.frames.ecef_to_ned"><code class="docutils literal notranslate"><span class="pre">ecef_to_ned()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#enu-to-ecef">enu_to_ecef()</a><ul>
+<li><a class="reference internal" href="#geo_py.frames.enu_to_ecef"><code class="docutils literal notranslate"><span class="pre">enu_to_ecef()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#enu-to-llh">enu_to_llh()</a><ul>
+<li><a class="reference internal" href="#geo_py.frames.enu_to_llh"><code class="docutils literal notranslate"><span class="pre">enu_to_llh()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ned-to-ecef">ned_to_ecef()</a><ul>
+<li><a class="reference internal" href="#geo_py.frames.ned_to_ecef"><code class="docutils literal notranslate"><span class="pre">ned_to_ecef()</span></code></a></li>
 </ul>
 </li>
 </ul>

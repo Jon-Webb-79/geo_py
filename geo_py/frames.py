@@ -139,10 +139,48 @@ def llh_to_enu(origin_lat: float, origin_lon: float, origin_alt: float,
 # --------------------------------------------------------------------------------
 
 
-def llh_to_ned(lat: float, lon: float, alt: float, ref_lat: float,
-               ref_lon: float, ref_alt: float):
-    pass
-# --------------------------------------------------------------------------------
+def llh_to_ned(origin_lat: float, origin_lon: float,
+               origin_alt: float, lat: float, lon: float,
+               alt: float, dat: Datum = WGS84()) -> Tuple[float, float, float]:
+    """
+    :param origin_lat: The latitude of the origin in units of decimal degrees
+    :param origin_lon: The longitude of the origin in units of decimal degrees
+    :param origin_alt: The altitude of the origin in units of meters
+    :param lat: The latitude of the point of interest in units of decimal
+                degrees
+    :param lon: The longitude of the point of interest in units of decimal
+                degrees
+    :param alt: The altitude of the point of interest in units of meters
+    :param dat: A Datum dataclass, defaulted to WGS84
+    :return N, E, D: The North, East, Down coordinates in units of meters
+
+    This function transforms coordinates from a LLH (Latitude, Longitude,
+    Height) frame to a NED (North, East, Down) Frame.
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.datum import ITRF
+        from geo_py.transform import llh_to_enu
+
+        radar_lat = 46.017
+        radar_lon = 7.750
+        radar_alt = 1673.0
+
+        x = 45.976
+        y = 7.658
+        z = 4531.0
+        N, E, D = llh_to_ned(radar_lat, radar_lon, radar_alt, x, y, z)
+        print(N, E, D)
+        >>> -4556.321, -7134.752, -2852.39
+    """
+    x, y, z = llh_to_ecef(lat, lon, alt, dat=dat)
+    return ecef_to_ned(origin_lat, origin_lon, origin_alt, x, y, z, dat=dat)
+# ================================================================================
+# ================================================================================
+# ECEF FUNCTIONS
+
 
 def ecef_to_llh(x: float, y: float,
                 z: float, dat: Datum = WGS84()) -> Tuple[float, float, float]:
@@ -318,10 +356,98 @@ def ecef_to_enu(origin_lat: float, origin_lon: float, origin_alt: float,
 # --------------------------------------------------------------------------------
 
 
-def ecef_to_ned(ref_lat: float, ref_lon: float, ref_alt: float,
-                N: float, E: float, D: float):
-    pass
-# --------------------------------------------------------------------------------
+def ecef_to_ned(origin_lat: float, origin_lon: float, origin_alt: float,
+                x: float, y: float, z: float,
+                dat: Datum = WGS84()) -> Tuple[float, float, float]:
+    """
+    :param origin_lat: The latitude of the point of interest in units of
+                       decimal degrees
+    :param origin_lon: The longitude of the point of interest in units of
+                       decimal degrees
+    :param origin_alt: The altitude of the point of interest in units of decimal
+                       degrees
+    :param dat: A Datum dataclasse, defaulted to WGS84
+    :param X: The x location of the craft in ECEF coordinates
+    :param Y: The y location of the craft in ECEF coordinates
+    :param Z: The z position of the craft in ECEF coordinats
+    :return N, E, D: The x, y, and z position in the North, East, Down coordinate
+            frame in units of meters
+
+    This function converts the ECEF (Earth Centered Earth Fixed) coordinate
+    frame to the NED (North, East, Down) coordinate frame. This function
+    solves the following equations where :math:`e` represents the body's
+    eccentricity, :math:`a` represents the bodies semi-major axis length,
+    :math:`X`, :math:`Y', and :math:`Z` represents the ECEF coordinates
+    of the origin point.  Finally :math:`\\phi`, :math:`\\lambda`, and
+    :math:`h` represent the latitude, longitude and height of the origin
+    point above sea level.
+
+    .. math::
+
+        \\begin{bmatrix}
+            N \\\\
+            E \\\\
+            D \\\\
+        \\end{bmatrix}
+        =
+        \\begin{bmatrix}
+            -sin\\lambda\\:cos\\phi & sin\\lambda\\:sin\\phi & cos\\lambda\\\\
+            -sin\\phi & cos\\phi & 0\\\\
+            cos\\lambda\\:cos\\phi & -cos\\lambda\\:sin\\phi & -sin\\lambda
+        \\end{bmatrix}
+        \\cdot
+        \\begin{bmatrix}
+            X-X_r \\\\
+            Y-Y_r \\\\
+            Z-Z_r
+        \\end{bmatrix}
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.datum import ITRF
+        from geo_py.transform import ecef_to_ned
+
+        radar_lat = 46.017
+        radar_lon = 7.750
+        radar_alt = 1673.0
+
+        x = -7134.757
+        y = -4556.321
+        z = 2852.390
+
+        N, E, D = ecef_to_ned(radar_lat, radar_lon, radar_alt, x, y, z)
+        print(x, y, z)
+        >>> 28882.282, -3552.574, 6372030.823
+
+        # Use another datum
+        N, E, D = ecef_to_ned(radar_lat, radar_lon, radar_alt, x, y, z, ITRF())
+        >>> 28882.297, -3552.574, 6372030.407
+    """
+    # Convert latitude, longitude to radians
+    lat_o = np.deg2rad(origin_lat)
+    lon_o = np.deg2rad(origin_lon)
+
+    x_o, y_o, z_o = llh_to_ecef(origin_lat, origin_lon, origin_alt, dat=dat)
+
+    # Compute the offset of the point from the origin
+    dx = x - x_o
+    dy = y - y_o
+    dz = z - z_o
+
+    # Compute the rotation matrix from ECEF to NED
+    R_e2n = np.array([[-sin(lat_o)*cos(lon_o), -sin(lat_o)*sin(lon_o),  cos(lat_o)],
+                      [-sin(lon_o),               cos(lon_o),           0        ],
+                      [-cos(lat_o)*cos(lon_o), -cos(lat_o)*sin(lon_o), -sin(lat_o)]])
+
+    # Rotate the offset vector from ECEF to NED frame
+    offset_ned = np.dot(R_e2n, np.array([dx, dy, dz]))
+
+    return tuple(offset_ned)
+# ================================================================================
+# ================================================================================
+# ENU FUNCTIONS
 
 
 def enu_to_ecef(ref_lat: float, ref_lon: float, ref_alt: float,
@@ -394,12 +520,12 @@ def enu_to_ecef(ref_lat: float, ref_lon: float, ref_alt: float,
         N = -4556.321
         U = 2852.390
 
-        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, x, y, z)
+        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, E, N, U)
         print(x, y, z)
         >>> 4403757.605, 592124.579, 45666.52
 
         # Use another datum
-        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, x, y, z, ITRF())
+        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, E, N, U, ITRF())
         >>> 440357.328, 592124.546, 4566651.751
     """
     x_ref, y_ref, z_ref = llh_to_ecef(ref_lat, ref_lon, ref_alt, dat=dat)
@@ -407,10 +533,156 @@ def enu_to_ecef(ref_lat: float, ref_lon: float, ref_alt: float,
     ref_lat = np.deg2rad(ref_lat)
     ref_lon = np.deg2rad(ref_lon)
 
-    X = -sin(ref_lon)*E - cos(ref_lon)*sin(ref_lat)*N + cos(ref_lon)*cos(ref_lat)*U + x_ref;
-    Y = cos(ref_lon)*E - sin(ref_lon)*sin(ref_lat)*N + cos(ref_lat)*sin(ref_lon)*U + y_ref;
+    X = -sin(ref_lon)*E - cos(ref_lon)*sin(ref_lat)*N + \
+            cos(ref_lon)*cos(ref_lat)*U + x_ref;
+    Y = cos(ref_lon)*E - sin(ref_lon)*sin(ref_lat)*N + \
+            cos(ref_lat)*sin(ref_lon)*U + y_ref;
     Z = cos(ref_lat)*N + sin(ref_lat)*U + z_ref;
     return X, Y, Z
+# --------------------------------------------------------------------------------
+
+
+def enu_to_llh(origin_lat: float, origin_lon: float, origin_alt: float,
+               E: float, N: float, U: float,
+               dat: Datum = WGS84()) -> Tuple[float, float, float]:
+    """
+    :param origin_lat: The latitude of the point of interest in units of
+                       decimal degrees
+    :param origin_lon: The longitude of the point of interest in units of
+                       decimal degrees
+    :param origin_alt: The altitude of the point of interest in units of decimal
+                       degrees
+    :param E: The x location of the craft in ENU coordinates
+    :param N: The y location of the craft in ENU coordinates
+    :param U: The z position of the craft in ENU coordinats
+    :param dat: A Datum dataclasse, defaulted to WGS84
+    :return lat, lon, alt: The latitude, longitude, and altitude position
+                           in LLH coordinats
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.datum import ITRF
+        from geo_py.transform import enu_to_llh
+
+        radar_lat = 46.017
+        radar_lon = 7.750
+        radar_alt = 1673.0
+
+        E = -7134.757
+        N = -4556.321
+        U = 2852.390
+
+        x, y, z = enu_to_llh(radar_lat, radar_lon, radar_alt, E, N, U)
+        print(x, y, z)
+        >>> 45.976, 7.658, 4531.989
+
+        # Use another datum
+        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, E, N, U, ITRF())
+        >>> 45.976, 7.678, 4532.004
+    """
+    x, y, z = enu_to_ecef(origin_lat, origin_lon, origin_alt, E, N, U, dat)
+    return ecef_to_llh(x, y, z, dat)
+# ================================================================================
+# ================================================================================
+# NED FUNCTIONS
+
+
+def ned_to_ecef(origin_lat: float, origin_lon: float, origin_alt: float,
+                N: float, E: float, D: float,
+                dat: Datum = WGS84()) -> Tuple[float, float, float]:
+    """
+    :param origin_lat: The latitude of the point of interest in units of
+                       decimal degrees
+    :param origin_lon: The longitude of the point of interest in units of
+                       decimal degrees
+    :param origin_alt: The altitude of the point of interest in units of decimal
+                       degrees
+    :param N: The x location of the craft in NED coordinates
+    :param E: The y location of the craft in NED coordinates
+    :param D: The z position of the craft in NED coordinats
+    :param dat: A Datum dataclasse, defaulted to WGS84
+    :return x, y, z: The x, y, and z position in the in ECEF coordinats
+
+    This function converts NED (North, East, Down) coordinates into ECEF
+    (Earth Centered Earth Fixed) coordinates by solving the following equations
+    where :math:`X_r`, :math:`Y_r`, :math:`Z_r` represent the ECEF coordinates of
+    the origin, :math:`\\lambda`, :math:`\\phi`, and :math:`h` represents the
+    latitude, longitude and height of the origin, and :math:`N`, :math:`E`,
+    and :math:`D` represents the NED coordinats.
+
+    Code Example
+
+    .. math::
+
+        \\begin{bmatrix}
+            X \\\\
+            Y \\\\
+            Z \\\\
+        \\end{bmatrix}
+        =
+        \\begin{bmatrix}
+            -sin\\lambda\\:cos\\phi & -sin\\lambda & -cos\\lambda\\:\\cos\\phi\\\\
+            -sin\\lambda\\:\\sin\\phi & cos\\phi & -cos\\lambda\\:sin\\phi\\\\
+            cos\\lambda & 0 & -sin\\lambda
+        \\end{bmatrix}
+        \\cdot
+        \\begin{bmatrix}
+            N \\\\
+            E \\\\
+            D \\\\
+        \\end{bmatrix}
+        +
+        \\begin{bmatrix}
+            X_r \\\\
+            Y_r \\\\
+            Z_r
+        \\end{bmatrix}
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.datum import ITRF
+        from geo_py.transform import ned_to_ecef
+
+        radar_lat = 46.017
+        radar_lon = 7.750
+        radar_alt = 1673.0
+
+        N = 28882,283
+        E = -3552.574
+        D = 6372030.823
+
+        x, y, z = enu_to_llh(radar_lat, radar_lon, radar_alt, N, E, D)
+        print(x, y, z)
+        >>> -7135.757, -4556.321, 2852.390
+
+        # Use another datum
+        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, N, E, D, ITRF())
+        >>> -7135.038, -4556.358, 2852.081
+    """
+    # Convert latitude, longitude to radians
+    lat_o = np.deg2rad(origin_lat)
+    lon_o = np.deg2rad(origin_lon)
+
+    x_o, y_o, z_o = llh_to_ecef(origin_lat, origin_lon, origin_alt, dat=dat)
+
+    # Compute the rotation matrix from NED to ECEF
+    R_n2e = np.array([[-sin(lat_o)*cos(lon_o), -sin(lon_o), -cos(lat_o)*cos(lon_o)],
+                      [-sin(lat_o)*sin(lon_o),  cos(lon_o), -cos(lat_o)*sin(lon_o)],
+                      [ cos(lat_o),            0,           -sin(lat_o)           ]])
+
+    # Rotate the NED vector to ECEF frame
+    offset_ecef = np.dot(R_n2e, np.array([N, E, D]))
+
+    # Compute the ECEF coordinates of the point
+    x = x_o + offset_ecef[0]
+    y = y_o + offset_ecef[1]
+    z = z_o + offset_ecef[2]
+
+    return x, y, z
 # ================================================================================
 # ================================================================================
 # eof
