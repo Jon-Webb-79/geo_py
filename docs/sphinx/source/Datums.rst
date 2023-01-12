@@ -34,17 +34,17 @@ can contain extra attributes and methods.
    from geo_py.datum import Datum
    from dataclasses import dataclasses
 
-   @dataclass(Frozen=False)
+   @dataclass(slots=True)
    class SaturnDatum(Datum):
-       _a: float = 60268000.0  # meters
-       _b: float = 54363000.0  # meters
-       _ro: float = 58232000.0  # meters
-       _gm: float = 37931000.0  # m3/s-2
-       _f: float = 0.09796
-       _e: float = 0.43169221
-       _e2: float = 0.18635
-       _e24: float = 0.18621
-       _g: float = 10.44  # m/s2
+       a: float = 60268000.0  # meters
+       b: float = 54363000.0  # meters
+       ro: float = 58232000.0  # meters
+       gm: float = 37931000.0  # m3/s-2
+       f: float = 0.09796
+       e: float = 0.43169221
+       e2: float = 0.18635
+       e24: float = 0.18621
+       g: float = 10.44  # m/s2
 
 Pre Existing Datums
 ===================

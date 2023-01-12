@@ -13,8 +13,31 @@ Coordinate Transformations
 This file contains several classes and functions that are used to transform back
 and forth between different geodetic coordinate reference frames.
 
-The ``CFTrans`` class contains several coordinate transformation methods that
-are useful in the aviation and maratime professions
+llh_to_ecef()
+*************
+This function will transform a LLH (Latitude, Longitude, Height) coordinate frame
+to an ECEF (Earth Centered Earth Fixed) frame.
 
-.. autoclass:: geo_py.transform.CFTrans
-   :members:
+.. autofunction:: geo_py.transform.llh_to_ecef
+
+llh_to_enu()
+*************
+This function will transform a LLH (Latitude, Longitude, Height) coordinate frame
+to an ENU (East, North, Up) frame.
+
+.. autofunction:: geo_py.transform.llh_to_enu
+
+ecef_to_llh()
+*************
+This function will transform a ECEF (Earth Centered Earth Fixed) coordinate frame
+to a LLH (Latitude, Longitude, Height) frame.
+
+.. autofunction:: geo_py.transform.ecef_to_llh
+
+ecef_to_enu()
+*************
+This function will transform an ECEF (Earth Centered Earth Fixed) coordinate frame
+to an ENU (East, North, Up) frame.
+
+.. autofunction:: geo_py.transform.ecef_to_enu
+

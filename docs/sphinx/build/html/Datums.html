@@ -58,15 +58,15 @@ data types listed in this class.  Each attribute is created as a
 semi-private attribute in an effort to make it more difficult for future
 developers to over-ride the attributes.</p>
 <dl>
-<dt>Attributes</dt><dd><p><strong>_a:</strong> The semi-major axis of the oblate spheroid in units of meters</p>
-<p><strong>_b:</strong> The semi-minor axis of the oblate spheriod in units of meters</p>
-<p><strong>_f:</strong> The flattening factor</p>
-<p><strong>_e:</strong> The eccentricity of the oblate spheroid</p>
-<p><strong>_e2:</strong> The eccentricity raised to the second power</p>
-<p><strong>_GM:</strong> The gravitational constant in units of m3/s-2</p>
-<p><strong>_R_avg:</strong> The average earth radius in units of meters</p>
-<p><strong>_e24:</strong> The square of the second eccentricity</p>
-<p><strong>_g_avg:</strong> The average gravity or gravity at a latitude of 45 degreesn</p>
+<dt>Attributes</dt><dd><p><strong>a:</strong> The semi-major axis of the oblate spheroid in units of meters</p>
+<p><strong>b:</strong> The semi-minor axis of the oblate spheriod in units of meters</p>
+<p><strong>f:</strong> The flattening factor</p>
+<p><strong>e:</strong> The eccentricity of the oblate spheroid</p>
+<p><strong>e2:</strong> The eccentricity raised to the second power</p>
+<p><strong>GM:</strong> The gravitational constant in units of m3/s-2</p>
+<p><strong>R_avg:</strong> The average earth radius in units of meters</p>
+<p><strong>e24:</strong> The square of the second eccentricity</p>
+<p><strong>g_avg:</strong> The average gravity or gravity at a latitude of 45 degreesn</p>
 </dd>
 </dl>
 </dd></dl>
@@ -94,17 +94,17 @@ can contain extra attributes and methods.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">Datum</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclasses</span>
 
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">Frozen</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">SaturnDatum</span><span class="p">(</span><span class="n">Datum</span><span class="p">):</span>
-    <span class="n">_a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60268000.0</span>  <span class="c1"># meters</span>
-    <span class="n">_b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">54363000.0</span>  <span class="c1"># meters</span>
-    <span class="n">_ro</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">58232000.0</span>  <span class="c1"># meters</span>
-    <span class="n">_gm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">37931000.0</span>  <span class="c1"># m3/s-2</span>
-    <span class="n">_f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.09796</span>
-    <span class="n">_e</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.43169221</span>
-    <span class="n">_e2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.18635</span>
-    <span class="n">_e24</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.18621</span>
-    <span class="n">_g</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.44</span>  <span class="c1"># m/s2</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60268000.0</span>  <span class="c1"># meters</span>
+    <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">54363000.0</span>  <span class="c1"># meters</span>
+    <span class="n">ro</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">58232000.0</span>  <span class="c1"># meters</span>
+    <span class="n">gm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">37931000.0</span>  <span class="c1"># m3/s-2</span>
+    <span class="n">f</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.09796</span>
+    <span class="n">e</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.43169221</span>
+    <span class="n">e2</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.18635</span>
+    <span class="n">e24</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.18621</span>
+    <span class="n">g</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.44</span>  <span class="c1"># m/s2</span>
 </pre></div>
 </div>
 </div>

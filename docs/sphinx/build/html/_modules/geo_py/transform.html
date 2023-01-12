@@ -37,16 +37,15 @@
           <div class="body" role="main">
             
   <h1>Source code for geo_py.transform</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Import necessary packages here</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePath</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">degrees</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">pi</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
-<span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">Datum</span>
+<span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">Datum</span><span class="p">,</span> <span class="n">WGS84</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># File:    transform.py</span>
@@ -62,363 +61,395 @@
 <span class="c1"># Insert Code here</span>
 
 
-<div class="viewcode-block" id="CFTrans"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.CFTrans">[docs]</a><span class="k">class</span> <span class="nc">CFTrans</span><span class="p">:</span>
+<div class="viewcode-block" id="llh_to_ecef"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.llh_to_ecef">[docs]</a><span class="k">def</span> <span class="nf">llh_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This class acts as a model container for several data geodetic to</span>
-<span class="sd">    Cartesian, and Cartesian to geodetic coordinate frames.</span>
+<span class="sd">    :param lat: The latitude in decimal degrees</span>
+<span class="sd">    :param lon: The longitude in decimal degrees</span>
+<span class="sd">    :param alt: The altitude above sea-level in units of meters</span>
+<span class="sd">    :param datum: A Datum dataclass, defaulted to WGS84</span>
+<span class="sd">    :return x, y, z: The ECEF coordinates in units of meters</span>
 
-<span class="sd">    :param datum: A geodetic datum of type Datum.  This Protocol dataclass</span>
-<span class="sd">                  can either be created by the user, or an existing datum</span>
-<span class="sd">                  can be imported from the geo_py.datum file</span>
+<span class="sd">    This method will transform a data from a LLH (Latitude, Longitude,</span>
+<span class="sd">    Height) coordinate frame to an ECEF (Earth Centered Earth Fixed)</span>
+<span class="sd">    coordinate frame.  The LLH frame is a polar coordinate frame with its</span>
+<span class="sd">    origin at the center of the Earth.  The ECEF frame is a Cartesian</span>
+<span class="sd">    coordinate system with its origin at the center of the Earth.</span>
+
+<span class="sd">    This method solves the following equations for :math:`X`, :math:`Y`,</span>
+<span class="sd">    and :math:`Z` assuming inputs of latitude (:math:`\\lambda`),</span>
+<span class="sd">    longitude (:math:`\\phi`), and altitude (:math:`h`).  The terms</span>
+<span class="sd">    :math:`a`, :math:`b`, and :math:`e` represents the semi-major axis,</span>
+<span class="sd">    the semi-minor axis and the eccentricity of the spheroid, and are</span>
+<span class="sd">    derived from the Datum dataclass</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \\begin{eqnarray}</span>
+<span class="sd">       X = \\left(N\\left(\\phi\\right) + h\\right)cos\\phi \\: cos\\lambda \\\\</span>
+<span class="sd">       Y = \\left(N\\left(\\phi\\right) + h\\right)cos\\phi \\: sin\\lambda \\\\</span>
+<span class="sd">       Z = \\left(\\frac{b^2}{a^2}N\\left(\\phi\\right) + h \\right)sin\\:\\phi</span>
+<span class="sd">           \\end{eqnarray}</span>
+
+<span class="sd">    where</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       N\\left(\\phi\\right) = \\frac{a}{\\sqrt[]{1-e^2sin^2\\:\\phi}}</span>
+
+<span class="sd">    Code example</span>
+
+<span class="sd">    .. code-block::</span>
+
+<span class="sd">        from geo_py.datum import ITRF</span>
+<span class="sd">        from geo_py.transform import llh_to_ecef</span>
+
+<span class="sd">        lat = 46.826</span>
+<span class="sd">        lon = 107.321</span>
+<span class="sd">        alt = 6096.0</span>
+<span class="sd">        x, y, z = llh_to_ecef(lat, lon, alt)</span>
+<span class="sd">        print(x, y, z)</span>
+<span class="sd">        &gt;&gt;&gt; -1302839.38, 4177542.21, 4632996.83</span>
+
+<span class="sd">        # Use a different datum</span>
+<span class="sd">        x, y, z = llh_to_ecef(lat, lon, alt, dat=ITRF())</span>
+<span class="sd">        print(x, y, z)</span>
+<span class="sd">        &gt;&gt;&gt; -1303839.30, 4177541.94, 4632996.51</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">datum</span><span class="p">:</span> <span class="n">Datum</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">datum</span> <span class="o">=</span> <span class="n">datum</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">a</span> <span class="o">/</span> <span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> \
+        <span class="n">dat</span><span class="o">.</span><span class="n">e</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">))</span>
+    <span class="n">xe</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">ye</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">ze</span> <span class="o">=</span> <span class="p">(((</span><span class="n">dat</span><span class="o">.</span><span class="n">b</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">dat</span><span class="o">.</span><span class="n">a</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span> <span class="o">+</span> \
+       <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">xe</span><span class="p">,</span> <span class="n">ye</span><span class="p">,</span> <span class="n">ze</span></div>
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="CFTrans.llh_to_ecef"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.CFTrans.llh_to_ecef">[docs]</a>    <span class="k">def</span> <span class="nf">llh_to_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                    <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param lat: The latitude in decimal degrees</span>
-<span class="sd">        :param lon: The longitude in decimal degrees</span>
-<span class="sd">        :param alt: The altitude above sea-level in units of meters</span>
-<span class="sd">        :return x, y, z: The ECEF coordinates in units of meters</span>
 
-<span class="sd">        This method will transform a data from a LLH (Latitude, Longitude,</span>
-<span class="sd">        Height) coordinate frame to an ECEF (Earth Centered Earth Fixed)</span>
-<span class="sd">        coordinate frame.  The LLH frame is a polar coordinate frame with its</span>
-<span class="sd">        origin at the center of the Earth.  The ECEF frame is a Cartesian</span>
-<span class="sd">        coordinate system with its origin at the center of the Earth.</span>
+<div class="viewcode-block" id="llh_to_enu"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.llh_to_enu">[docs]</a><span class="k">def</span> <span class="nf">llh_to_enu</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param origin_lat: The latitude for the coordinate origin in units of</span>
+<span class="sd">                       decimal degrees</span>
+<span class="sd">    :param origin_lon: The longitude for the coordinate origin in units of</span>
+<span class="sd">                       decimal degrees</span>
+<span class="sd">    :param origin_alt: The altitude for the coordinate of the origin in units</span>
+<span class="sd">                       of meters</span>
+<span class="sd">    :param lat: The latitude for the point of interest in units of decimal</span>
+<span class="sd">                degrees</span>
+<span class="sd">    :param lon: The latitude for the point of interest in units of decimal</span>
+<span class="sd">                degrees</span>
+<span class="sd">    :param alt: The altitude for the point of interest in units od meters</span>
+<span class="sd">    :return E, N, U: Cartesian coordinates in the East, North and Up directions.</span>
 
-<span class="sd">        This method solves the following equations for :math:`X`, :math:`Y`,</span>
-<span class="sd">        and :math:`Z` assuming inputs of latitude (:math:`\\lambda`),</span>
-<span class="sd">        longitude (:math:`\\phi`), and altitude (:math:`h`).  The terms</span>
-<span class="sd">        :math:`a`, :math:`b`, and :math:`e` represents the semi-major axis,</span>
-<span class="sd">        the semi-minor axis and the eccentricity of the spheroid, and are</span>
-<span class="sd">        derived from the Datum dataclass</span>
+<span class="sd">    This function will transfomr coordinate from a LLH (Latitude, Longitude,</span>
+<span class="sd">    Height) from to an ENU (East, North, Up) frame.  This function first</span>
+<span class="sd">    converts the LLH frame to an ECEF frame, then to an ENU frame.</span>
 
-<span class="sd">        .. math::</span>
+<span class="sd">    Code Example</span>
 
-<span class="sd">           \\begin{eqnarray}</span>
-<span class="sd">           X = \\left(N\\left(\\phi\\right) + h\\right)cos\\phi \\: cos\\lambda \\\\</span>
-<span class="sd">           Y = \\left(N\\left(\\phi\\right) + h\\right)cos\\phi \\: sin\\lambda \\\\</span>
-<span class="sd">           Z = \\left(\\frac{b^2}{a^2}N\\left(\\phi\\right) + h \\right)sin\\:\\phi</span>
-<span class="sd">          \\end{eqnarray}</span>
+<span class="sd">    .. code-block::</span>
 
-<span class="sd">        where</span>
+<span class="sd">        from geo_py.datum import ITRF</span>
+<span class="sd">        from geo_py.transform import llh_to_enu</span>
 
-<span class="sd">        .. math::</span>
+<span class="sd">        radar_lat = 46.017</span>
+<span class="sd">        radar_lon = 7.750</span>
+<span class="sd">        radar_alt = 1673.0</span>
 
-<span class="sd">           N\\left(\\phi\\right) = \\frac{a}{\\sqrt[]{1-e^2sin^2\\:\\phi}}</span>
+<span class="sd">        x = 45.976</span>
+<span class="sd">        y = 7.658</span>
+<span class="sd">        z = 4531.0</span>
+<span class="sd">        E, N, U = llh_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)</span>
+<span class="sd">        print(E, N, U)</span>
+<span class="sd">        &gt;&gt;&gt; -7134.757, -4556.321, 2852.390</span>
 
-<span class="sd">        Code example</span>
-
-<span class="sd">        .. code-block::</span>
-
-<span class="sd">            from geo_py.datum import WGS84</span>
-<span class="sd">            from geo_py.transform import CFTrans</span>
-
-<span class="sd">            tran = Transformations(WGS84())</span>
-<span class="sd">            lat = 46.826</span>
-<span class="sd">            lon = 107.321</span>
-<span class="sd">            alt = 6096.0</span>
-<span class="sd">            x, y, z = tran.ecef_to_llh(lat, lon, alt)</span>
-<span class="sd">            print(x, y, z)</span>
-<span class="sd">            &gt;&gt;&gt; -1302839.38, 4177542.21, 4632996.83</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">lon</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
-        <span class="n">lat</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
-        <span class="n">N</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span> <span class="o">/</span> <span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">))</span>
-        <span class="n">xe</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
-        <span class="n">ye</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
-        <span class="n">ze</span> <span class="o">=</span> <span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">N</span><span class="p">)</span> <span class="o">+</span> \
-                <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">xe</span><span class="p">,</span> <span class="n">ye</span><span class="p">,</span> <span class="n">ze</span></div>
+<span class="sd">        # Try another coordinate frame</span>
+<span class="sd">        E, N, U = llh_to_enu(radar_lat, radar_lon, radar_alt, x, y, z, dat=ITRF())</span>
+<span class="sd">        print(E, N, U)</span>
+<span class="sd">        &gt;&gt;&gt; -7134.757, -4556.307, 2852.806</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># ref is aircraft</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ecef_to_enu</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span></div>
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="CFTrans.llh_to_enu"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.CFTrans.llh_to_enu">[docs]</a>    <span class="k">def</span> <span class="nf">llh_to_enu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                   <span class="n">ref_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                   <span class="n">ref_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-       <span class="c1"># ref is aircraft</span>
-        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
-        <span class="n">xr</span><span class="p">,</span> <span class="n">yr</span><span class="p">,</span> <span class="n">zr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">)</span>
 
-        <span class="c1"># convert reference latitude and longitude to radians</span>
-        <span class="n">ref_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
-        <span class="n">ref_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
-
-        <span class="c1"># calculate transformation matrix</span>
-        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
-                  <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
-                   <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
-                   <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)],</span>
-                  <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
-                   <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">),</span>
-                   <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)]])</span>
-
-        <span class="c1"># transform ECEF coordinates to NED coordinats</span>
-        <span class="n">ned</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="o">-</span><span class="n">xr</span><span class="p">,</span> <span class="n">y</span><span class="o">-</span><span class="n">yr</span><span class="p">,</span> <span class="n">z</span><span class="o">-</span><span class="n">zr</span><span class="p">]))</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ned</span><span class="p">)</span></div>
+<span class="k">def</span> <span class="nf">llh_to_ned</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">ref_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">pass</span>
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="CFTrans.ecef_to_llh"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.CFTrans.ecef_to_llh">[docs]</a>    <span class="k">def</span> <span class="nf">ecef_to_llh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                    <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param x: The x-coordinate in ECEF coordinate frame</span>
-<span class="sd">        :param y: The y-coordinate in ECEF coordinate frame</span>
-<span class="sd">        :param z: The z-coordinate in ECEF coordinate frame</span>
-<span class="sd">        :return lat, lon, alt: The latitude, longitude, and altitude in the</span>
-<span class="sd">                               LLH coordinate frame. Latitude and longitude</span>
-<span class="sd">                               are in units of decimal degrees, altitude</span>
-<span class="sd">                               in units of meters</span>
+<div class="viewcode-block" id="ecef_to_llh"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.ecef_to_llh">[docs]</a><span class="k">def</span> <span class="nf">ecef_to_llh</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param x: The x-coordinate in ECEF coordinate frame</span>
+<span class="sd">    :param y: The y-coordinate in ECEF coordinate frame</span>
+<span class="sd">    :param z: The z-coordinate in ECEF coordinate frame</span>
+<span class="sd">    :param dat: A Datum dataclass, defaulted to WGS84</span>
+<span class="sd">    :return lat, lon, alt: The latitude, longitude, and altitude in the</span>
+<span class="sd">                           LLH coordinate frame. Latitude and longitude</span>
+<span class="sd">                           are in units of decimal degrees, altitude</span>
+<span class="sd">                           in units of meters</span>
 
-<span class="sd">        This method will transform a data from an ECEF (Earth Centered Earth</span>
-<span class="sd">        Fixed) coordinate frame to a LLH (Latitude, Longitude, Height)</span>
-<span class="sd">        coordinate frame.  The LLH frame is a polar coordinate frame with its</span>
-<span class="sd">        origin at the center of the Earth.  The ECEF frame is a Cartesian</span>
-<span class="sd">        coordinate system with its origin at the center of the Earth.</span>
+<span class="sd">    This method will transform a data from an ECEF (Earth Centered Earth</span>
+<span class="sd">    Fixed) coordinate frame to a LLH (Latitude, Longitude, Height)</span>
+<span class="sd">    coordinate frame.  The LLH frame is a polar coordinate frame with its</span>
+<span class="sd">    origin at the center of the Earth.  The ECEF frame is a Cartesian</span>
+<span class="sd">    coordinate system with its origin at the center of the Earth.</span>
 
-<span class="sd">        This method takes the semi-major and semi-minor variables</span>
-<span class="sd">        (:math:`a`, :math:`b`) from the Datum dataclass and use them with the</span>
-<span class="sd">        ECEF inputs :math:`X`, :math:`Y`, :math:`Z` to calculate</span>
-<span class="sd">        latitude, longitude, and height :math:`\\phi`, :math:`\\lambda`,</span>
-<span class="sd">        :math:`h` in accordance with the following equations.</span>
+<span class="sd">    This method takes the semi-major and semi-minor variables</span>
+<span class="sd">    (:math:`a`, :math:`b`) from the Datum dataclass and use them with the</span>
+<span class="sd">    ECEF inputs :math:`X`, :math:`Y`, :math:`Z` to calculate</span>
+<span class="sd">    latitude, longitude, and height :math:`\\phi`, :math:`\\lambda`,</span>
+<span class="sd">    :math:`h` in accordance with the following equations.</span>
 
-<span class="sd">        .. math::</span>
+<span class="sd">    .. math::</span>
 
-<span class="sd">           \\begin{eqnarray}</span>
-<span class="sd">           e^2 = \\frac{a^2-b^2}{a^2} \\\\</span>
-<span class="sd">           e^{\\prime 2} = \\frac{a^2-b^2}{b^2} \\\\</span>
-<span class="sd">           p = \\sqrt[]{X^2+Y^2} \\\\</span>
-<span class="sd">           F = 54b^2\\:Z^2 \\\\</span>
-<span class="sd">           G = p^2 + \\left(1 - e^2\\right)Z^2 - e^2 \\left(a^2-b^2\\right) \\\\</span>
-<span class="sd">           c = \\frac{e^4Fp^2}{G^3} \\\\</span>
-<span class="sd">           s = \\sqrt[3]{1 + c + \\sqrt[]{c^2 + 2c}} \\\\</span>
-<span class="sd">           k = s + 1 + \\frac{1}{s} \\\\</span>
-<span class="sd">           P = \\frac{F}{3k^2G^2} \\\\</span>
-<span class="sd">           Q = \\sqrt[]{1+2e^4P} \\\\</span>
-<span class="sd">           r_o = \\frac{-Pe^2p}{1+Q} \\\\</span>
-<span class="sd">           r_o2 = \\frac{1}{2}a\\left(1+\\frac{1}{Q}\\right) \\\\</span>
-<span class="sd">           r_o3 = -\\frac{P\\left(1-e^2\\right)Z^2}{Q\\left(1+Q\\right)} - \\frac{1}{2}Pp^2 \\\\</span>
-<span class="sd">           r_o = r_o + \\sqrt[]{r_o2 + r_o3} \\\\</span>
-<span class="sd">           U = \\sqrt[]{\\left(p-e^2r_o\\right)^2+Z^2} \\\\</span>
-<span class="sd">           V = \\sqrt[]{\\left(p-e^2r_o\\right)^2+\\left(1-e^2\\right)Z^2} \\\\</span>
-<span class="sd">           z_o = \\frac{b^2Z}{aV} \\\\</span>
-<span class="sd">           h = U\\left(1-\\frac{b^2}{aV}\\right) \\\\</span>
-<span class="sd">           \\phi = arctan\\left[\\frac{Z+e^{\\prime2}z_o}{p}\\right] \\\\</span>
-<span class="sd">           \\lambda = arctan2\\left[Y, X\\right]</span>
-<span class="sd">          \\end{eqnarray}</span>
+<span class="sd">        \\begin{eqnarray}</span>
+<span class="sd">        e^2 = \\frac{a^2-b^2}{a^2} \\\\</span>
+<span class="sd">        e^{\\prime 2} = \\frac{a^2-b^2}{b^2} \\\\</span>
+<span class="sd">        p = \\sqrt[]{X^2+Y^2} \\\\</span>
+<span class="sd">        F = 54b^2\\:Z^2 \\\\</span>
+<span class="sd">        G = p^2 + \\left(1 - e^2\\right)Z^2 - e^2 \\left(a^2-b^2\\right) \\\\</span>
+<span class="sd">        c = \\frac{e^4Fp^2}{G^3} \\\\</span>
+<span class="sd">        s = \\sqrt[3]{1 + c + \\sqrt[]{c^2 + 2c}} \\\\</span>
+<span class="sd">        k = s + 1 + \\frac{1}{s} \\\\</span>
+<span class="sd">        P = \\frac{F}{3k^2G^2} \\\\</span>
+<span class="sd">        Q = \\sqrt[]{1+2e^4P} \\\\</span>
+<span class="sd">        r_o = \\frac{-Pe^2p}{1+Q} \\\\</span>
+<span class="sd">        r_o2 = \\frac{1}{2}a\\left(1+\\frac{1}{Q}\\right) \\\\</span>
+<span class="sd">        r_o3 = -\\frac{P\\left(1-e^2\\right)Z^2}{Q\\left(1+Q\\right)} - \\frac{1}{2}Pp^2 \\\\</span>
+<span class="sd">        r_o = r_o + \\sqrt[]{r_o2 + r_o3} \\\\</span>
+<span class="sd">        U = \\sqrt[]{\\left(p-e^2r_o\\right)^2+Z^2} \\\\</span>
+<span class="sd">        V = \\sqrt[]{\\left(p-e^2r_o\\right)^2+\\left(1-e^2\\right)Z^2} \\\\</span>
+<span class="sd">        z_o = \\frac{b^2Z}{aV} \\\\</span>
+<span class="sd">        h = U\\left(1-\\frac{b^2}{aV}\\right) \\\\</span>
+<span class="sd">        \\phi = arctan\\left[\\frac{Z+e^{\\prime2}z_o}{p}\\right] \\\\</span>
+<span class="sd">        \\lambda = arctan2\\left[Y, X\\right]</span>
+<span class="sd">        \\end{eqnarray}</span>
 
-<span class="sd">        Code example</span>
+<span class="sd">    Code example</span>
 
-<span class="sd">        .. code-block::</span>
+<span class="sd">    .. code-block::</span>
 
-<span class="sd">            from geo_py.datum import WGS84</span>
-<span class="sd">            from geo_py.transform import CFTrans</span>
+<span class="sd">        from geo_py.datum import ITRF</span>
+<span class="sd">        from geo_py.transform import ecef_to_llh</span>
 
-<span class="sd">            tran = Transformations(WGS84())</span>
-<span class="sd">            x = -1302839.38</span>
-<span class="sd">            y = 4177542.21</span>
-<span class="sd">            z = 4632996.83</span>
-<span class="sd">            lat, lon, alt = tran.ecef_to_llh(x, y, z)</span>
-<span class="sd">            print(lat, lon, alt)</span>
-<span class="sd">            &gt;&gt;&gt; 46.826, 107.321, 6097.1</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># calculations:</span>
-        <span class="n">r</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">ep_sq</span>  <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span>
-        <span class="n">ee</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="mi">54</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">*</span><span class="n">ee</span><span class="o">*</span><span class="mi">2</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="o">*</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">g</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">c</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">c</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span>
-        <span class="n">p</span> <span class="o">=</span> <span class="n">f</span><span class="o">/</span><span class="p">(</span><span class="mf">3.</span><span class="o">*</span><span class="p">(</span><span class="n">g</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">q</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">r_0</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">*</span><span class="n">r</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">q</span><span class="p">)</span> <span class="o">+</span> \
-                <span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">q</span><span class="p">))</span> <span class="o">-</span> \
-                <span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">q</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">q</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">r</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">*</span><span class="n">r_0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">r</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="o">*</span><span class="n">r_0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_e2</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">z_0</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">*</span><span class="n">v</span><span class="p">)</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="n">u</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_b</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datum</span><span class="o">.</span><span class="n">_a</span><span class="o">*</span><span class="n">v</span><span class="p">))</span>
-        <span class="n">phi</span> <span class="o">=</span> <span class="n">atan</span><span class="p">((</span><span class="n">z</span> <span class="o">+</span> <span class="n">ep_sq</span><span class="o">*</span><span class="n">z_0</span><span class="p">)</span><span class="o">/</span><span class="n">r</span><span class="p">)</span>
-        <span class="n">lambd</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">phi</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">lambd</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">h</span></div>
+<span class="sd">        tran = Transformations(WGS84())</span>
+<span class="sd">        x = -1302839.38</span>
+<span class="sd">        y = 4177542.21</span>
+<span class="sd">        z = 4632996.83</span>
+<span class="sd">        lat, lon, alt = ecef_to_llh(x, y, z)</span>
+<span class="sd">        print(lat, lon, alt)</span>
+<span class="sd">        &gt;&gt;&gt; 46.826, 107.321, 6097.1</span>
+
+<span class="sd">        # Use a different datum</span>
+<span class="sd">        lat, lon, alt = ecef_to_llh(x, y, z, dat=ITRF())</span>
+<span class="sd">        &gt;&gt;&gt; 46.826, 107.321, 6097.448</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># calculations:</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ep_sq</span>  <span class="o">=</span> <span class="p">(</span><span class="n">dat</span><span class="o">.</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">dat</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">dat</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">ee</span> <span class="o">=</span> <span class="p">(</span><span class="n">dat</span><span class="o">.</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="n">dat</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="p">(</span><span class="mi">54</span><span class="o">*</span><span class="n">dat</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">r</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="o">*</span><span class="n">ee</span><span class="o">*</span><span class="mi">2</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="o">*</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">g</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">c</span> <span class="o">+</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">c</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">c</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">f</span><span class="o">/</span><span class="p">(</span><span class="mf">3.</span><span class="o">*</span><span class="p">(</span><span class="n">g</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">r_0</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">p</span><span class="o">*</span><span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="o">*</span><span class="n">r</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">q</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">dat</span><span class="o">.</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">q</span><span class="p">))</span> <span class="o">-</span> \
+            <span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">q</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">q</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">r</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="o">*</span><span class="n">r_0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">r</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="o">*</span><span class="n">r_0</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e2</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">z_0</span> <span class="o">=</span> <span class="p">(</span><span class="n">dat</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">z</span><span class="o">/</span><span class="p">(</span><span class="n">dat</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="n">v</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">u</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">dat</span><span class="o">.</span><span class="n">a</span><span class="o">*</span><span class="n">v</span><span class="p">))</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">atan</span><span class="p">((</span><span class="n">z</span> <span class="o">+</span> <span class="n">ep_sq</span><span class="o">*</span><span class="n">z_0</span><span class="p">)</span><span class="o">/</span><span class="n">r</span><span class="p">)</span>
+    <span class="n">lambd</span> <span class="o">=</span> <span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">phi</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">lambd</span><span class="o">*</span><span class="mi">180</span><span class="o">/</span><span class="n">pi</span><span class="p">,</span> <span class="n">h</span></div>
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="CFTrans.ecef_to_enu"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.CFTrans.ecef_to_enu">[docs]</a>    <span class="k">def</span> <span class="nf">ecef_to_enu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                    <span class="n">X</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                    <span class="n">Z</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param origin_lat: The latitude of the point of interest in units of</span>
-<span class="sd">                           decimal degrees</span>
-<span class="sd">        :param origin_lon: The longitude of the point of interest in units of</span>
-<span class="sd">                           decimal degrees</span>
-<span class="sd">        :param origin_alt: The altitude of the point of interest in units of decimal</span>
-<span class="sd">                           degrees</span>
-<span class="sd">        :param X: The x location of the craft in ECEF coordinates</span>
-<span class="sd">        :param Y: The y location of the craft in ECEF coordinates</span>
-<span class="sd">        :param Z: The z position of the craft in ECEF coordinats</span>
-<span class="sd">        :return E, N, U: The x, y, and z position in the East, North, Up coordinate</span>
-<span class="sd">                         frame in units of metersy</span>
+<div class="viewcode-block" id="ecef_to_enu"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.ecef_to_enu">[docs]</a><span class="k">def</span> <span class="nf">ecef_to_enu</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">X</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">Z</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param origin_lat: The latitude of the point of interest in units of</span>
+<span class="sd">                       decimal degrees</span>
+<span class="sd">    :param origin_lon: The longitude of the point of interest in units of</span>
+<span class="sd">                       decimal degrees</span>
+<span class="sd">    :param origin_alt: The altitude of the point of interest in units of decimal</span>
+<span class="sd">                       degrees</span>
+<span class="sd">    :param dat: A Datum dataclasse, defaulted to WGS84</span>
+<span class="sd">    :param X: The x location of the craft in ECEF coordinates</span>
+<span class="sd">    :param Y: The y location of the craft in ECEF coordinates</span>
+<span class="sd">    :param Z: The z position of the craft in ECEF coordinats</span>
+<span class="sd">    :return E, N, U: The x, y, and z position in the East, North, Up coordinate</span>
+<span class="sd">            frame in units of metersy</span>
 
-<span class="sd">        This method transforms a three dimensional location from an ECEF (Earth</span>
-<span class="sd">        Centered Earth Fixed) coordinate frame to an ENU (East, North, Up)</span>
-<span class="sd">        coordinate frame.  The ENU frame is determined relative to a location,</span>
-<span class="sd">        which is the point of interest.  An example would be an aircraft as the</span>
-<span class="sd">        reference point, and a runway as the point of interest.  This method</span>
-<span class="sd">        solves the following equation where :math:`X_p`, :math:`Y_p`, and :math:`Z_p`</span>
-<span class="sd">        are the origin point in ECEF coordinates, :math:`\\lambda`,</span>
-<span class="sd">        :math:`\\lambda`, and :math:`\\phi` are the latitude, longitude and altitude</span>
-<span class="sd">        of the reference point in decimal degrees and meters.  The term</span>
-<span class="sd">        :math:`x`, :math:`y`, and :math:`z` are the NED coordinates in units</span>
-<span class="sd">        of meters.  In addition :math:`X_r`, :math:`Y_r`, and :math:`Z_r` are</span>
-<span class="sd">        the reference point expressed in ECEF coordinates</span>
+<span class="sd">    This method transforms a three dimensional location from an ECEF (Earth</span>
+<span class="sd">    Centered Earth Fixed) coordinate frame to an ENU (East, North, Up)</span>
+<span class="sd">    coordinate frame.  The ENU frame is determined relative to a location,</span>
+<span class="sd">    which is the point of interest.  An example would be an aircraft as the</span>
+<span class="sd">    reference point, and a runway as the point of interest.  This method</span>
+<span class="sd">    solves the following equation where :math:`X_p`, :math:`Y_p`, and :math:`Z_p`</span>
+<span class="sd">    are the origin point in ECEF coordinates, :math:`\\lambda`,</span>
+<span class="sd">    :math:`\\lambda`, and :math:`\\phi` are the latitude, longitude and altitude</span>
+<span class="sd">    of the reference point in decimal degrees and meters.  The term</span>
+<span class="sd">    :math:`x`, :math:`y`, and :math:`z` are the NED coordinates in units</span>
+<span class="sd">    of meters.  In addition :math:`X_r`, :math:`Y_r`, and :math:`Z_r` are</span>
+<span class="sd">    the reference point expressed in ECEF coordinates</span>
 
-<span class="sd">        .. math::</span>
+<span class="sd">    .. math::</span>
 
-<span class="sd">            \\begin{bmatrix}</span>
-<span class="sd">               x \\\\</span>
-<span class="sd">               y \\\\</span>
-<span class="sd">               z \\\\</span>
-<span class="sd">            \\end{bmatrix}</span>
-<span class="sd">            =</span>
-<span class="sd">            \\begin{bmatrix}</span>
-<span class="sd">               -sin\\lambda &amp; cos\\lambda &amp; 0\\\\</span>
-<span class="sd">               -sin\\phi\\:\\cos\\lambda &amp; -sin\\phi\\:\\sin\\lambda &amp; cos\\phi\\\\</span>
-<span class="sd">               cos\\phi\\:cos\\lambda &amp; cos\\phi\\:sin\\lambda &amp; sin\\phi</span>
-<span class="sd">            \\end{bmatrix}</span>
-<span class="sd">            \\cdot</span>
-<span class="sd">            \\begin{bmatrix}</span>
-<span class="sd">               X_p-X_r \\\\</span>
-<span class="sd">               Y_p-Y_r \\\\</span>
-<span class="sd">               Z_p-Z_r</span>
-<span class="sd">            \\end{bmatrix}</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            x \\\\</span>
+<span class="sd">            y \\\\</span>
+<span class="sd">            z \\\\</span>
+<span class="sd">        \\end{bmatrix}</span>
+<span class="sd">        =</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            -sin\\lambda &amp; cos\\lambda &amp; 0\\\\</span>
+<span class="sd">            -sin\\phi\\:\\cos\\lambda &amp; -sin\\phi\\:\\sin\\lambda &amp; cos\\phi\\\\</span>
+<span class="sd">            cos\\phi\\:cos\\lambda &amp; cos\\phi\\:sin\\lambda &amp; sin\\phi</span>
+<span class="sd">        \\end{bmatrix}</span>
+<span class="sd">        \\cdot</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            X_p-X_r \\\\</span>
+<span class="sd">            Y_p-Y_r \\\\</span>
+<span class="sd">            Z_p-Z_r</span>
+<span class="sd">        \\end{bmatrix}</span>
 
+<span class="sd">    Code example</span>
 
-<span class="sd">        Code example</span>
+<span class="sd">    .. code-block::</span>
 
-<span class="sd">        .. code-block::</span>
+<span class="sd">        from geo_py.datum import ITRF</span>
+<span class="sd">        from geo_py.transform import ecef_to_enu</span>
 
-<span class="sd">            from geo_py.datum import WGS84</span>
-<span class="sd">            from geo_py.transform import CFTrans</span>
+<span class="sd">        radar_lat = 46.017</span>
+<span class="sd">        radar_lon = 7.750</span>
+<span class="sd">        radar_alt = 1673.0</span>
 
-<span class="sd">            tran = Transformations(WGS84())</span>
-<span class="sd">            radar_lat = 46.017</span>
-<span class="sd">            radar_lon = 7.750</span>
-<span class="sd">            radar_alt = 1673.0</span>
+<span class="sd">        x = 440357.328</span>
+<span class="sd">        y = 592124.546</span>
+<span class="sd">        z = 4566651.751</span>
+<span class="sd">        E, N, U = ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)</span>
+<span class="sd">        print(E, N, U)</span>
+<span class="sd">        &gt;&gt;&gt; -7134.757, -4556.321, 2852.390</span>
 
-<span class="sd">            x = 45.976</span>
-<span class="sd">            y = 7.658</span>
-<span class="sd">            z = 4531.0</span>
-<span class="sd">            E, N, U = tran.ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z)</span>
-<span class="sd">            print(E, N, U)</span>
-<span class="sd">            &gt;&gt;&gt; -7126.303, -4562.512, 2863.687</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">x_r</span><span class="p">,</span> <span class="n">y_r</span><span class="p">,</span> <span class="n">z_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">)</span>
+<span class="sd">        # Try another coordinate frame</span>
+<span class="sd">        E, N, U = ecef_to_enu(radar_lat, radar_lon, radar_alt, x, y, z, dat=ITRF())</span>
+<span class="sd">        print(E, N, U)</span>
+<span class="sd">        &gt;&gt;&gt; -7134.757, -4556.307, 2852.806</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_r</span><span class="p">,</span> <span class="n">y_r</span><span class="p">,</span> <span class="n">z_r</span> <span class="o">=</span> <span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span>
 
-        <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">)</span>
-        <span class="n">lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">origin_lon</span><span class="p">)</span>
-        <span class="n">E</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">x_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Y</span><span class="o">-</span><span class="n">y_r</span><span class="p">);</span>
-        <span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">x_r</span><span class="p">)</span> <span class="o">-</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Y</span><span class="o">-</span><span class="n">y_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Z</span><span class="o">-</span><span class="n">z_r</span><span class="p">);</span>
-        <span class="n">U</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">x_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Y</span><span class="o">-</span><span class="n">y_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Z</span><span class="o">-</span><span class="n">z_r</span><span class="p">);</span>
-        <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span></div>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">)</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">origin_lon</span><span class="p">)</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">x_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Y</span><span class="o">-</span><span class="n">y_r</span><span class="p">);</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">x_r</span><span class="p">)</span> <span class="o">-</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Y</span><span class="o">-</span><span class="n">y_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Z</span><span class="o">-</span><span class="n">z_r</span><span class="p">);</span>
+    <span class="n">U</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">x_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Y</span><span class="o">-</span><span class="n">y_r</span><span class="p">)</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Z</span><span class="o">-</span><span class="n">z_r</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span></div>
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="CFTrans.enu_to_ecef"><a class="viewcode-back" href="../../Transformations.html#geo_py.transform.CFTrans.enu_to_ecef">[docs]</a>    <span class="k">def</span> <span class="nf">enu_to_ecef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ref_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                    <span class="n">E</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                    <span class="n">U</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param origin_lat: The latitude of the point of interest in units of</span>
-<span class="sd">                           decimal degrees</span>
-<span class="sd">        :param origin_lon: The longitude of the point of interest in units of</span>
-<span class="sd">                           decimal degrees</span>
-<span class="sd">        :param origin_alt: The altitude of the point of interest in units of decimal</span>
-<span class="sd">                           degrees</span>
-<span class="sd">        :param E: The x location of the craft in ENU coordinates</span>
-<span class="sd">        :param N: The y location of the craft in ENU coordinates</span>
-<span class="sd">        :param U: The z position of the craft in ENU coordinats</span>
-<span class="sd">        :return X, Y, Z: The x, y, and z position in ECEF coordinats</span>
 
-<span class="sd">        This method transforms a three dimensional location from a ENU (East,</span>
-<span class="sd">        North, Up) coordinate frame to an ECEF (Eearth Centered Earth Fixed)</span>
-<span class="sd">        coordinate frame.  The ENU frame is determined relative to a location,</span>
-<span class="sd">        which is the point of interest.  An example would be an aircraft as the</span>
-<span class="sd">        reference point, and a runway as the point of interest.  This method</span>
-<span class="sd">        solves the following equation where :math:`X_p`, :math:`Y_p`, and :math:`Z_p`</span>
-<span class="sd">        are the origin point in ECEF coordinates, :math:`\\lambda`,</span>
-<span class="sd">        :math:`\\lambda`, and :math:`\\phi` are the latitude, longitude and altitude</span>
-<span class="sd">        of the reference point in decimal degrees and meters.  The term</span>
-<span class="sd">        :math:`x`, :math:`y`, and :math:`z` are the NED coordinates in units</span>
-<span class="sd">        of meters.  In addition :math:`X_r`, :math:`Y_r`, and :math:`Z_r` are</span>
-<span class="sd">        the reference point expressed in ECEF coordinates</span>
+<span class="k">def</span> <span class="nf">ecef_to_ned</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">N</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">D</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">pass</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
 
-<span class="sd">        .. math::</span>
 
-<span class="sd">            \\begin{bmatrix}</span>
-<span class="sd">               X \\\\</span>
-<span class="sd">               Y \\\\</span>
-<span class="sd">               Z \\\\</span>
-<span class="sd">            \\end{bmatrix}</span>
-<span class="sd">            =</span>
-<span class="sd">            \\begin{bmatrix}</span>
-<span class="sd">               -sin\\lambda &amp; cos\\lambda &amp; 0\\\\</span>
-<span class="sd">               -sin\\phi\\:\\cos\\lambda &amp; -sin\\phi\\:\\sin\\lambda &amp; cos\\phi\\\\</span>
-<span class="sd">               cos\\phi\\:cos\\lambda &amp; cos\\phi\\:sin\\lambda &amp; sin\\phi</span>
-<span class="sd">            \\end{bmatrix}^T</span>
-<span class="sd">            \\cdot</span>
-<span class="sd">            \\begin{bmatrix}</span>
-<span class="sd">               x \\\\</span>
-<span class="sd">               y \\\\</span>
-<span class="sd">               z \\\\</span>
-<span class="sd">            \\end{bmatrix}</span>
-<span class="sd">            +</span>
-<span class="sd">            \\begin{bmatrix}</span>
-<span class="sd">               X_r \\\\</span>
-<span class="sd">               Y_r \\\\</span>
-<span class="sd">               Z_r</span>
-<span class="sd">            \\end{bmatrix}</span>
+<span class="k">def</span> <span class="nf">enu_to_ecef</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">E</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="n">U</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param origin_lat: The latitude of the point of interest in units of</span>
+<span class="sd">                       decimal degrees</span>
+<span class="sd">    :param origin_lon: The longitude of the point of interest in units of</span>
+<span class="sd">                       decimal degrees</span>
+<span class="sd">    :param origin_alt: The altitude of the point of interest in units of decimal</span>
+<span class="sd">                       degrees</span>
+<span class="sd">    :param E: The x location of the craft in ENU coordinates</span>
+<span class="sd">    :param N: The y location of the craft in ENU coordinates</span>
+<span class="sd">    :param U: The z position of the craft in ENU coordinats</span>
+<span class="sd">    :param dat: A Datum dataclasse, defaulted to WGS84</span>
+<span class="sd">    :return X, Y, Z: The x, y, and z position in ECEF coordinats</span>
 
-<span class="sd">        Code example</span>
+<span class="sd">    This method transforms a three dimensional location from a ENU (East,</span>
+<span class="sd">    North, Up) coordinate frame to an ECEF (Eearth Centered Earth Fixed)</span>
+<span class="sd">    coordinate frame.  The ENU frame is determined relative to a location,</span>
+<span class="sd">    which is the point of interest.  An example would be an aircraft as the</span>
+<span class="sd">    reference point, and a runway as the point of interest.  This method</span>
+<span class="sd">    solves the following equation where :math:`X_p`, :math:`Y_p`, and :math:`Z_p`</span>
+<span class="sd">    are the origin point in ECEF coordinates, :math:`\\lambda`,</span>
+<span class="sd">    :math:`\\lambda`, and :math:`\\phi` are the latitude, longitude and altitude</span>
+<span class="sd">    of the reference point in decimal degrees and meters.  The term</span>
+<span class="sd">    :math:`x`, :math:`y`, and :math:`z` are the NED coordinates in units</span>
+<span class="sd">    of meters.  In addition :math:`X_r`, :math:`Y_r`, and :math:`Z_r` are</span>
+<span class="sd">    the reference point expressed in ECEF coordinates</span>
 
-<span class="sd">        .. code-block::</span>
+<span class="sd">    .. math::</span>
 
-<span class="sd">            from geo_py.datum import WGS84</span>
-<span class="sd">            from geo_py.transform import CFTrans</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            X \\\\</span>
+<span class="sd">            Y \\\\</span>
+<span class="sd">            Z \\\\</span>
+<span class="sd">        \\end{bmatrix}</span>
+<span class="sd">        =</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            -sin\\lambda &amp; cos\\lambda &amp; 0\\\\</span>
+<span class="sd">            -sin\\phi\\:\\cos\\lambda &amp; -sin\\phi\\:\\sin\\lambda &amp; cos\\phi\\\\</span>
+<span class="sd">            cos\\phi\\:cos\\lambda &amp; cos\\phi\\:sin\\lambda &amp; sin\\phi</span>
+<span class="sd">        \\end{bmatrix}^T</span>
+<span class="sd">        \\cdot</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            x \\\\</span>
+<span class="sd">            y \\\\</span>
+<span class="sd">            z \\\\</span>
+<span class="sd">        \\end{bmatrix}</span>
+<span class="sd">        +</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            X_r \\\\</span>
+<span class="sd">            Y_r \\\\</span>
+<span class="sd">            Z_r</span>
+<span class="sd">        \\end{bmatrix}</span>
 
-<span class="sd">            tran = Transformations(WGS84())</span>
-<span class="sd">            radar_lat = 46.017</span>
-<span class="sd">            radar_lon = 7.750</span>
-<span class="sd">            radar_alt = 1673.0</span>
+<span class="sd">    Code example</span>
 
-<span class="sd">            E = -7126.303</span>
-<span class="sd">            N = -4562.512</span>
-<span class="sd">            U = 2863.687</span>
+<span class="sd">    .. code-block::</span>
 
-<span class="sd">            x, y, z = tran.enu_to_ecef(radar_lat, radar_lon, radar_alt, x, y, z)</span>
-<span class="sd">            print(x, y, z)</span>
-<span class="sd">            &gt;&gt;&gt; 4403757.60, 592124.58, 4566652.06</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">x_ref</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">,</span> <span class="n">z_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">)</span>
+<span class="sd">        from geo_py.datum import ITRF</span>
+<span class="sd">        from geo_py.transform import enu_to_ecef</span>
 
-        <span class="n">ref_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
-        <span class="n">ref_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+<span class="sd">        radar_lat = 46.017</span>
+<span class="sd">        radar_lon = 7.750</span>
+<span class="sd">        radar_alt = 1673.0</span>
 
-        <span class="n">X</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">E</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">N</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">U</span> <span class="o">+</span> <span class="n">x_ref</span><span class="p">;</span>
-        <span class="n">Y</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">E</span> <span class="o">-</span> <span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">N</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">U</span> <span class="o">+</span> <span class="n">y_ref</span><span class="p">;</span>
-        <span class="n">Z</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">N</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">U</span> <span class="o">+</span> <span class="n">z_ref</span><span class="p">;</span>
+<span class="sd">        E = -7134.757</span>
+<span class="sd">        N = -4556.321</span>
+<span class="sd">        U = 2852.390</span>
 
-        <span class="c1"># r_val = np.array([[-np.sin(ref_lon), np.cos(ref_lon), 0],</span>
-        <span class="c1">#                 [-np.sin(ref_lat)*np.cos(ref_lon),</span>
-        <span class="c1">#                  -np.sin(ref_lat)*np.sin(ref_lon),</span>
-        <span class="c1">#                  np.cos(ref_lat)],</span>
-        <span class="c1">#                [np.cos(ref_lat)*np.cos(ref_lon),</span>
-        <span class="c1">#                 np.cos(ref_lat)*np.sin(ref_lon),</span>
-        <span class="c1">#                 np.sin(ref_lat)]])</span>
-        <span class="c1"># enu = np.dot(r_val.T, np.array([E, N, U])) + np.array([x_ref, y_ref, z_ref])</span>
-        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span></div></div>
+<span class="sd">        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, x, y, z)</span>
+<span class="sd">        print(x, y, z)</span>
+<span class="sd">        &gt;&gt;&gt; 4403757.605, 592124.579, 45666.52</span>
+
+<span class="sd">        # Use another datum</span>
+<span class="sd">        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, x, y, z, ITRF())</span>
+<span class="sd">        &gt;&gt;&gt; 440357.328, 592124.546, 4566651.751</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_ref</span><span class="p">,</span> <span class="n">y_ref</span><span class="p">,</span> <span class="n">z_ref</span> <span class="o">=</span> <span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">,</span> <span class="n">ref_lon</span><span class="p">,</span> <span class="n">ref_alt</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span>
+
+    <span class="n">ref_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span>
+    <span class="n">ref_lon</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">deg2rad</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">E</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">N</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">U</span> <span class="o">+</span> <span class="n">x_ref</span><span class="p">;</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">E</span> <span class="o">-</span> <span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">N</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">ref_lon</span><span class="p">)</span><span class="o">*</span><span class="n">U</span> <span class="o">+</span> <span class="n">y_ref</span><span class="p">;</span>
+    <span class="n">Z</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">N</span> <span class="o">+</span> <span class="n">sin</span><span class="p">(</span><span class="n">ref_lat</span><span class="p">)</span><span class="o">*</span><span class="n">U</span> <span class="o">+</span> <span class="n">z_ref</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># eof</span>
