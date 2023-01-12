@@ -7,8 +7,8 @@ import pytest
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
 from geo_py.datum import WGS84, NAD83, ITRF
-from geo_py.transform import llh_to_ecef, ecef_to_llh, ecef_to_enu, enu_to_ecef
-from geo_py.transform import llh_to_enu
+from geo_py.frames import llh_to_ecef, ecef_to_llh, ecef_to_enu, enu_to_ecef
+from geo_py.frames import llh_to_enu
 # ================================================================================
 # ================================================================================
 # File:    test.py

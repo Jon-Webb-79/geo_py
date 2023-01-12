@@ -12,7 +12,7 @@ Welcome to Core Utilities's documentation!
 
    Introduction
    Datums
-   Transformations
+   Frames
 
 
 Indices and tables

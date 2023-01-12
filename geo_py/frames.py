@@ -91,7 +91,7 @@ def llh_to_ecef(lat: float, lon: float,
 
 def llh_to_enu(origin_lat: float, origin_lon: float, origin_alt: float,
                lat: float, lon: float,
-               alt: float) -> Tuple[float, float, float]:
+               alt: float, dat: Datum = WGS84()) -> Tuple[float, float, float]:
     """
     :param origin_lat: The latitude for the coordinate origin in units of
                        decimal degrees
@@ -135,7 +135,7 @@ def llh_to_enu(origin_lat: float, origin_lon: float, origin_alt: float,
     """
     # ref is aircraft
     x, y, z = llh_to_ecef(lat, lon, alt)
-    return ecef_to_enu(origin_lat, origin_lon, origin_alt, x, y, z)
+    return ecef_to_enu(origin_lat, origin_lon, origin_alt, x, y, z, dat=dat)
 # --------------------------------------------------------------------------------
 
 
