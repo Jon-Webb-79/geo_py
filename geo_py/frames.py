@@ -584,6 +584,44 @@ def enu_to_llh(origin_lat: float, origin_lon: float, origin_alt: float,
     """
     x, y, z = enu_to_ecef(origin_lat, origin_lon, origin_alt, E, N, U, dat)
     return ecef_to_llh(x, y, z, dat)
+# --------------------------------------------------------------------------------
+
+
+def enu_to_ned(origin_lat: float, origin_lon: float, origin_alt: float,
+               E: float, N: float, U: float,
+               dat: Datum = WGS84()) -> Tuple[float, float, float]:
+    """
+    :param origin_lat: The latitude of the point of interest in units of
+                       decimal degrees
+    :param origin_lon: The longitude of the point of interest in units of
+                       decimal degrees
+    :param origin_alt: The altitude of the point of interest in units of decimal
+                       degrees
+    :param E: The x location of the craft in ENU coordinates
+    :param N: The y location of the craft in ENU coordinates
+    :param U: The z position of the craft in ENU coordinats
+    :param dat: A Datum dataclasse, defaulted to WGS84
+    :return lat, lon, alt: The latitude, longitude, and altitude position
+                           in LLH coordinats
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.transform import enu_to_ned
+
+        radar_lat = 46.017
+        radar_lon = 7.750
+        radar_alt = 1673.0
+        E = -7134.757
+        N = -4556.321
+        U = 2852.390
+        x, y, z = enu_to_ned(radar_lat, radar_lon, radar_alt, E, N, U)
+        print(x, y, z)
+        >>> -4556.321, -7134.757, -2852.39
+    """
+    x, y, z = enu_to_ecef(origin_lat, origin_lon, origin_alt, E, N, U, dat=dat)
+    return ecef_to_ned(origin_lat, origin_lon, origin_alt, x, y, z)
 # ================================================================================
 # ================================================================================
 # NED FUNCTIONS
@@ -655,12 +693,12 @@ def ned_to_ecef(origin_lat: float, origin_lon: float, origin_alt: float,
         E = -3552.574
         D = 6372030.823
 
-        x, y, z = enu_to_llh(radar_lat, radar_lon, radar_alt, N, E, D)
+        x, y, z = ned_to_ecef(radar_lat, radar_lon, radar_alt, N, E, D)
         print(x, y, z)
         >>> -7135.757, -4556.321, 2852.390
 
         # Use another datum
-        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, N, E, D, ITRF())
+        x, y, z = ned_to_ecef(radar_lat, radar_lon, radar_alt, N, E, D, ITRF())
         >>> -7135.038, -4556.358, 2852.081
     """
     # Convert latitude, longitude to radians
@@ -683,6 +721,89 @@ def ned_to_ecef(origin_lat: float, origin_lon: float, origin_alt: float,
     z = z_o + offset_ecef[2]
 
     return x, y, z
+# --------------------------------------------------------------------------------
+
+
+def ned_to_llh(origin_lat: float, origin_lon: float, origin_alt: float,
+               N: float, E: float, D: float,
+               dat: Datum = WGS84()) -> Tuple[float, float, float]:
+    """
+    :param origin_lat: The origin latitude in units of decimal degrres
+    :param origin_lat: The origin longitude in units of decimal degrees
+    :param origin_alt: The origin altitude in units of meters
+    :param N: The northing direction of the NED frame
+    :param E: The easting direction of the NED frame
+    :param D: The down direction of the NED frame
+    :param dat: A Datum dataclasse, defaulted to WGS84
+    :return lat, lon, alt: The latitude, longitude, and altitude of the
+                           point of interest
+
+    This function translates a NED (North, East, Down) coordinate frame
+    to a LLH (Latitude, Longitude, Height) frame.
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.datum import ITRF
+        from geo_py.transform import ned_to_llh
+
+        radar_lat = 46.017
+        radar_lon = 7.750
+        radar_alt = 1673.0
+
+        N = 28882,283
+        E = -3552.574
+        D = 6372030.823
+
+        lat, lon, alt = ned_to_llh(radar_lat, radar_lon, radar_alt, N, E, D)
+        print(lat, lon, alt)
+        >>> 45.976, -7.658, 4531.0
+    """
+    E, N, U = ned_to_ecef(origin_lat, origin_lon, origin_alt,
+                          N, E, D, dat=dat)
+    return ecef_to_llh(E, N, U, dat=dat)
+# --------------------------------------------------------------------------------
+
+
+def ned_to_enu(origin_lat: float, origin_lon: float, origin_alt,
+               N: float, E: float, D: float,
+               dat: Datum = WGS84()) -> Tuple[float, float, float]:
+    """
+    :param origin_lat: The origin latitude in units of decimal degrres
+    :param origin_lat: The origin longitude in units of decimal degrees
+    :param origin_alt: The origin altitude in units of meters
+    :param N: The northing direction of the NED frame
+    :param E: The easting direction of the NED frame
+    :param D: The down direction of the NED frame
+    :param dat: A Datum dataclasse, defaulted to WGS84
+    :return lat, lon, alt: The latitude, longitude, and altitude of the
+                           point of interest
+
+    This function translates a NED (North, East, Down) coordinate frame
+    to a LLH (Latitude, Longitude, Height) frame.  WARNING: The values
+    of origin_lat, origin_lon, and origin_alt should be the same ones
+    used to transform to ENU coordinates
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.transform import ned_to_enu
+
+        radar_lat = 46.017
+        radar_lon = 7.750
+        radar_alt = 1673.0
+        N = 28882,283
+        E = -3552.574
+        D = 6372030.823
+
+        lat, lon, alt = ned_to_enu(radar_lat, radar_lon, radar_alt, N, E, D)
+        print(lat, lon, alt)
+        >>> -7134.757, -4556.321, 2852.390
+    """
+    x, y, z = ned_to_ecef(origin_lat, origin_lon, origin_alt, N, E, D, dat=dat)
+    return ecef_to_enu(origin_lat, origin_lon, origin_alt, x, y, z, dat=dat)
 # ================================================================================
 # ================================================================================
 # eof

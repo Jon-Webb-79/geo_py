@@ -211,7 +211,7 @@
 <span class="sd">        y = 7.658</span>
 <span class="sd">        z = 4531.0</span>
 <span class="sd">        N, E, D = llh_to_ned(radar_lat, radar_lon, radar_alt, x, y, z)</span>
-<span class="sd">        print(E, N, U)</span>
+<span class="sd">        print(N, E, D)</span>
 <span class="sd">        &gt;&gt;&gt; -4556.321, -7134.752, -2852.39</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span>
@@ -623,6 +623,44 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">enu_to_ecef</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">dat</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ecef_to_llh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">dat</span><span class="p">)</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="enu_to_ned"><a class="viewcode-back" href="../../Frames.html#geo_py.frames.enu_to_ned">[docs]</a><span class="k">def</span> <span class="nf">enu_to_ned</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">E</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">N</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">U</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param origin_lat: The latitude of the point of interest in units of</span>
+<span class="sd">                       decimal degrees</span>
+<span class="sd">    :param origin_lon: The longitude of the point of interest in units of</span>
+<span class="sd">                       decimal degrees</span>
+<span class="sd">    :param origin_alt: The altitude of the point of interest in units of decimal</span>
+<span class="sd">                       degrees</span>
+<span class="sd">    :param E: The x location of the craft in ENU coordinates</span>
+<span class="sd">    :param N: The y location of the craft in ENU coordinates</span>
+<span class="sd">    :param U: The z position of the craft in ENU coordinats</span>
+<span class="sd">    :param dat: A Datum dataclasse, defaulted to WGS84</span>
+<span class="sd">    :return lat, lon, alt: The latitude, longitude, and altitude position</span>
+<span class="sd">                           in LLH coordinats</span>
+
+<span class="sd">    Code Example</span>
+
+<span class="sd">    .. code-block::</span>
+
+<span class="sd">        from geo_py.transform import enu_to_ned</span>
+
+<span class="sd">        radar_lat = 46.017</span>
+<span class="sd">        radar_lon = 7.750</span>
+<span class="sd">        radar_alt = 1673.0</span>
+<span class="sd">        E = -7134.757</span>
+<span class="sd">        N = -4556.321</span>
+<span class="sd">        U = 2852.390</span>
+<span class="sd">        x, y, z = enu_to_ned(radar_lat, radar_lon, radar_alt, E, N, U)</span>
+<span class="sd">        print(x, y, z)</span>
+<span class="sd">        &gt;&gt;&gt; -4556.321, -7134.757, -2852.39</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">enu_to_ecef</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ecef_to_ned</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span></div>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># NED FUNCTIONS</span>
@@ -694,12 +732,12 @@
 <span class="sd">        E = -3552.574</span>
 <span class="sd">        D = 6372030.823</span>
 
-<span class="sd">        x, y, z = enu_to_llh(radar_lat, radar_lon, radar_alt, N, E, D)</span>
+<span class="sd">        x, y, z = ned_to_ecef(radar_lat, radar_lon, radar_alt, N, E, D)</span>
 <span class="sd">        print(x, y, z)</span>
 <span class="sd">        &gt;&gt;&gt; -7135.757, -4556.321, 2852.390</span>
 
 <span class="sd">        # Use another datum</span>
-<span class="sd">        x, y, z = enu_to_ecef(radar_lat, radar_lon, radar_alt, N, E, D, ITRF())</span>
+<span class="sd">        x, y, z = ned_to_ecef(radar_lat, radar_lon, radar_alt, N, E, D, ITRF())</span>
 <span class="sd">        &gt;&gt;&gt; -7135.038, -4556.358, 2852.081</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Convert latitude, longitude to radians</span>
@@ -722,6 +760,89 @@
     <span class="n">z</span> <span class="o">=</span> <span class="n">z_o</span> <span class="o">+</span> <span class="n">offset_ecef</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="ned_to_llh"><a class="viewcode-back" href="../../Frames.html#geo_py.frames.ned_to_llh">[docs]</a><span class="k">def</span> <span class="nf">ned_to_llh</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">N</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">D</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param origin_lat: The origin latitude in units of decimal degrres</span>
+<span class="sd">    :param origin_lat: The origin longitude in units of decimal degrees</span>
+<span class="sd">    :param origin_alt: The origin altitude in units of meters</span>
+<span class="sd">    :param N: The northing direction of the NED frame</span>
+<span class="sd">    :param E: The easting direction of the NED frame</span>
+<span class="sd">    :param D: The down direction of the NED frame</span>
+<span class="sd">    :param dat: A Datum dataclasse, defaulted to WGS84</span>
+<span class="sd">    :return lat, lon, alt: The latitude, longitude, and altitude of the</span>
+<span class="sd">                           point of interest</span>
+
+<span class="sd">    This function translates a NED (North, East, Down) coordinate frame</span>
+<span class="sd">    to a LLH (Latitude, Longitude, Height) frame.</span>
+
+<span class="sd">    Code Example</span>
+
+<span class="sd">    .. code-block::</span>
+
+<span class="sd">        from geo_py.datum import ITRF</span>
+<span class="sd">        from geo_py.transform import ned_to_llh</span>
+
+<span class="sd">        radar_lat = 46.017</span>
+<span class="sd">        radar_lon = 7.750</span>
+<span class="sd">        radar_alt = 1673.0</span>
+
+<span class="sd">        N = 28882,283</span>
+<span class="sd">        E = -3552.574</span>
+<span class="sd">        D = 6372030.823</span>
+
+<span class="sd">        lat, lon, alt = ned_to_llh(radar_lat, radar_lon, radar_alt, N, E, D)</span>
+<span class="sd">        print(lat, lon, alt)</span>
+<span class="sd">        &gt;&gt;&gt; 45.976, -7.658, 4531.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span> <span class="o">=</span> <span class="n">ned_to_ecef</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span>
+                          <span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ecef_to_llh</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="ned_to_enu"><a class="viewcode-back" href="../../Frames.html#geo_py.frames.ned_to_enu">[docs]</a><span class="k">def</span> <span class="nf">ned_to_enu</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span>
+               <span class="n">N</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">E</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">D</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param origin_lat: The origin latitude in units of decimal degrres</span>
+<span class="sd">    :param origin_lat: The origin longitude in units of decimal degrees</span>
+<span class="sd">    :param origin_alt: The origin altitude in units of meters</span>
+<span class="sd">    :param N: The northing direction of the NED frame</span>
+<span class="sd">    :param E: The easting direction of the NED frame</span>
+<span class="sd">    :param D: The down direction of the NED frame</span>
+<span class="sd">    :param dat: A Datum dataclasse, defaulted to WGS84</span>
+<span class="sd">    :return lat, lon, alt: The latitude, longitude, and altitude of the</span>
+<span class="sd">                           point of interest</span>
+
+<span class="sd">    This function translates a NED (North, East, Down) coordinate frame</span>
+<span class="sd">    to a LLH (Latitude, Longitude, Height) frame.  WARNING: The values</span>
+<span class="sd">    of origin_lat, origin_lon, and origin_alt should be the same ones</span>
+<span class="sd">    used to transform to ENU coordinates</span>
+
+<span class="sd">    Code Example</span>
+
+<span class="sd">    .. code-block::</span>
+
+<span class="sd">        from geo_py.transform import ned_to_enu</span>
+
+<span class="sd">        radar_lat = 46.017</span>
+<span class="sd">        radar_lon = 7.750</span>
+<span class="sd">        radar_alt = 1673.0</span>
+<span class="sd">        N = 28882,283</span>
+<span class="sd">        E = -3552.574</span>
+<span class="sd">        D = 6372030.823</span>
+
+<span class="sd">        lat, lon, alt = ned_to_enu(radar_lat, radar_lon, radar_alt, N, E, D)</span>
+<span class="sd">        print(lat, lon, alt)</span>
+<span class="sd">        &gt;&gt;&gt; -7134.757, -4556.321, 2852.390</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">ned_to_ecef</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ecef_to_enu</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span></div>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># eof</span>

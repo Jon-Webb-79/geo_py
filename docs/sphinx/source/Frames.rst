@@ -69,9 +69,30 @@ to an LLH (Latitude, Longitude, Height) frame.
 
 .. autofunction:: geo_py.frames.enu_to_llh
 
+enu_to_ned()
+*************
+This function will transform an ENU (East, North, Up) coordinate frame
+to an NED (North, East, Down) frame.
+
+.. autofunction:: geo_py.frames.enu_to_ned
+
 ned_to_ecef()
 *************
 This function will transform an NED (North, East, Down) coordinate frame
 to an ECEF (Earth Centered Earth Fixed) frame.
 
 .. autofunction:: geo_py.frames.ned_to_ecef
+
+ned_to_llh()
+*************
+This function will transform an NED (North, East, Down) coordinate frame
+to a LLH (Latitude, Longitude, Height) frame.
+
+.. autofunction:: geo_py.frames.ned_to_llh
+
+ned_to_enu()
+*************
+This function will transform an NED (North, East, Down) coordinate frame
+to a ENU (East, North, UP) frame.
+
+.. autofunction:: geo_py.frames.ned_to_enu

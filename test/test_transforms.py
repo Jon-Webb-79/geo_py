@@ -8,7 +8,7 @@ sys.path.insert(1, os.path.abspath(p))
 from geo_py.datum import ITRF
 from geo_py.frames import llh_to_ecef, ecef_to_llh, ecef_to_enu, enu_to_ecef
 from geo_py.frames import llh_to_enu, enu_to_llh, ecef_to_ned, ned_to_ecef
-from geo_py.frames import llh_to_ned
+from geo_py.frames import llh_to_ned, ned_to_llh, ned_to_enu, enu_to_ned
 # ================================================================================
 # ================================================================================
 # File:    test.py
@@ -176,6 +176,23 @@ def test_enu_to_llh():
     assert isclose(lat, 45.976, rel_tol=1.0e-3)
     assert isclose(lon, 7.6518, rel_tol=1.0e-3)
     assert isclose(alt, 4531.0, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_enu_to_ned():
+    radar_lat = 46.017
+    radar_lon = 7.750
+    radar_alt = 1673.0
+
+    E = -7134.757
+    N = -4556.321
+    U = 2852.39
+
+    NN, EE, DD = enu_to_ned(radar_lat, radar_lon, radar_alt, E, N, U)
+    assert isclose(NN, -4556.321, rel_tol=1.0e-3)
+    assert isclose(EE, -7134.757, rel_tol=1.0e-3)
+    assert isclose(DD, -2852.39, rel_tol=1.0e-3)
+
 # ================================================================================
 # ================================================================================
 # TEST NED FUNCTIONS
@@ -194,6 +211,44 @@ def test_ned_to_ecef():
     assert isclose(x, -7134.757, rel_tol=1.0e-3)
     assert isclose(y, -4556.321, rel_tol=1.0e-3)
     assert isclose(z, 2852.389, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_ned_to_llh():
+    radar_lat = 46.017
+    radar_lon = 7.750
+    radar_alt = 1673.0
+
+    craft_lat = 45.976
+    craft_lon = 7.658
+    craft_alt = 4531.0
+
+    N, E, D = llh_to_ned(radar_lat, radar_lon, radar_alt,
+                         craft_lat, craft_lon, craft_alt)
+    lat, lon, alt = ned_to_llh(radar_lat, radar_lon, radar_alt,
+                               N, E, D)
+    assert isclose(lat, craft_lat, rel_tol=1.0e-3)
+    assert isclose(lon, craft_lon, rel_tol=1.0e-3)
+    assert isclose(alt, craft_alt, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_ned_to_enu():
+    radar_lat = 46.017
+    radar_lon = 7.750
+    radar_alt = 1673.0
+
+    craft_lat = 45.976
+    craft_lon = 7.658
+    craft_alt = 4531.0
+
+    N, E, D = llh_to_ned(radar_lat, radar_lon, radar_alt,
+                         craft_lat, craft_lon, craft_alt)
+    EE, NN, UU = ned_to_enu(radar_lat, radar_lon, radar_alt,
+                            N, E, D)
+    assert isclose(EE, -7134.757, rel_tol=1.0e-3)
+    assert isclose(NN, -4556.321, rel_tol=1.0e-3)
+    assert isclose(UU, 2852.390, rel_tol=1.0e-3)
 # ================================================================================
 # ================================================================================
 # eof
