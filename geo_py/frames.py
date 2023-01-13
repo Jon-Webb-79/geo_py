@@ -63,7 +63,7 @@ def llh_to_ecef(lat: float, lon: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import llh_to_ecef
+        from geo_py.frames import llh_to_ecef
 
         lat = 46.826
         lon = 107.321
@@ -115,7 +115,7 @@ def llh_to_enu(origin_lat: float, origin_lon: float, origin_alt: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import llh_to_enu
+        from geo_py.frames import llh_to_enu
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -162,7 +162,7 @@ def llh_to_ned(origin_lat: float, origin_lon: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import llh_to_enu
+        from geo_py.frames import llh_to_enu
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -236,7 +236,7 @@ def ecef_to_llh(x: float, y: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import ecef_to_llh
+        from geo_py.frames import ecef_to_llh
 
         tran = Transformations(WGS84())
         x = -1302839.38
@@ -327,7 +327,7 @@ def ecef_to_enu(origin_lat: float, origin_lon: float, origin_alt: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import ecef_to_enu
+        from geo_py.frames import ecef_to_enu
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -407,7 +407,7 @@ def ecef_to_ned(origin_lat: float, origin_lon: float, origin_alt: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import ecef_to_ned
+        from geo_py.frames import ecef_to_ned
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -510,7 +510,7 @@ def enu_to_ecef(ref_lat: float, ref_lon: float, ref_alt: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import enu_to_ecef
+        from geo_py.frames import enu_to_ecef
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -564,7 +564,7 @@ def enu_to_llh(origin_lat: float, origin_lon: float, origin_alt: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import enu_to_llh
+        from geo_py.frames import enu_to_llh
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -608,7 +608,7 @@ def enu_to_ned(origin_lat: float, origin_lon: float, origin_alt: float,
 
     .. code-block::
 
-        from geo_py.transform import enu_to_ned
+        from geo_py.frames import enu_to_ned
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -650,8 +650,6 @@ def ned_to_ecef(origin_lat: float, origin_lon: float, origin_alt: float,
     latitude, longitude and height of the origin, and :math:`N`, :math:`E`,
     and :math:`D` represents the NED coordinats.
 
-    Code Example
-
     .. math::
 
         \\begin{bmatrix}
@@ -683,7 +681,7 @@ def ned_to_ecef(origin_lat: float, origin_lon: float, origin_alt: float,
     .. code-block::
 
         from geo_py.datum import ITRF
-        from geo_py.transform import ned_to_ecef
+        from geo_py.frames import ned_to_ecef
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -745,8 +743,7 @@ def ned_to_llh(origin_lat: float, origin_lon: float, origin_alt: float,
 
     .. code-block::
 
-        from geo_py.datum import ITRF
-        from geo_py.transform import ned_to_llh
+        from geo_py.frames import ned_to_llh
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -789,7 +786,7 @@ def ned_to_enu(origin_lat: float, origin_lon: float, origin_alt,
 
     .. code-block::
 
-        from geo_py.transform import ned_to_enu
+        from geo_py.frames import ned_to_enu
 
         radar_lat = 46.017
         radar_lon = 7.750
@@ -804,6 +801,94 @@ def ned_to_enu(origin_lat: float, origin_lon: float, origin_alt,
     """
     x, y, z = ned_to_ecef(origin_lat, origin_lon, origin_alt, N, E, D, dat=dat)
     return ecef_to_enu(origin_lat, origin_lon, origin_alt, x, y, z, dat=dat)
+# ================================================================================
+# ================================================================================
+# DIRECTION COSINE FUNCTIONS
+
+
+def pry_to_dcm(pitch: float, roll: float, yaw: float) -> np.ndarray:
+    """
+    :param pitch: The angle of attack of the craft relative to the x-axis in
+                  units of radians.
+    :param roll: The angle of the craft relative to the y-axis in units of
+                 radians
+    :param yaw: The angle of the craft relative to the z-axis, also
+                the same as heading, in units of radians.
+    :return dcm: The direction cosine matrix specific for rotations
+                 around the Y, X, and Z axis, or the pitch, roll,
+                 and yaw axis.
+
+    This function is written to calcualte the Diection Cosine Matrix
+    in the proper order for determining the orientation of a craft
+    with knowledge of its pitch, roll, and yaw. This function returns the
+    matrix of the following format where :math:`\\theta`, :math:`\\phi`,
+    and :math:`\\psi` represent pitch, roll, and yaw respectively.
+
+    .. math::
+
+        R_{xyz}=
+        \\begin{bmatrix}
+            cos\\theta\\:cos\\psi & cos\\theta\\:sin\\psi & -sin\\theta \\\\
+            sin\\phi\\:sin\\theta\\:cos\\psi & sin\\phi\\:sin\\theta\\:sin\\psi & cos\\theta\\:sin\\phi \\\\
+            cos\\phi\\:sin\\theta\\:cos\\psi+sin\\phi\\:sin\\psi &
+            cos\\phi\\:sin\\theta\\:sin\\psi-sin\\phi\\:cos\\psi & cos\\theta\\:cos\\phi \\\\
+        \\end{bmatrix}
+
+    Code Example
+
+    .. code-block::
+
+        from geopy.frames import pry_to_dcm
+        pitch = 0.1
+        roll = 0.0
+        yaw = 0.7854
+        dcm = pry_to_dcm(pitch, roll, yaw)
+        print(dcm)
+        >>> [[ 0.7035729 0.70357548 -0.09983342]
+             [-0.70710808 0.70710548 0.]
+             [0.07059276 0.07059302 0.9950417]]
+    """
+    x_axis = [cos(pitch)*cos(yaw), cos(pitch)*sin(yaw), -sin(pitch)]
+    y_axis = [sin(roll)*sin(pitch)*cos(yaw)-cos(roll)*sin(yaw),
+         sin(roll)*sin(pitch)*sin(yaw)+cos(roll)*cos(yaw),
+         cos(pitch)*sin(roll)]
+    z_axis = [cos(roll)*sin(pitch)*cos(yaw)+sin(roll)*sin(yaw),
+         cos(roll)*sin(pitch)*sin(yaw)-sin(roll)*cos(yaw),
+         cos(pitch)*cos(roll)]
+    return np.array([x_axis, y_axis, z_axis])
+# --------------------------------------------------------------------------------
+
+
+def direction_cosines(vector: np.ndarray) -> Tuple[float, float, float]:
+    """
+    :param vector: A three dimensional vector
+    :return cos_x, cos_y, cos_z: The direction cosines for a vector
+
+    This function returns the direction cosines of a vector
+    (:math:`\\alpha`, :math:`\\beta`, :math:`\\gamma`) via the
+    following equation.
+
+    .. math::
+
+        v = ai + bj + ck \\\\
+        cos\\alpha = \\frac{a}{\\sqrt[]{a^2+b^2+c^2}} \\\\
+        cos\\beta = \\frac{b}{\\sqrt[]{a^2+b^2+c^2}} \\\\
+        cos\\gamma = \\frac{c}{\\sqrt[]{a^2+b^2+c^2}} \\\\
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.frames import direction_cosines
+        vec = np.array([1., 2., 3.])
+        cos_x, cos_y, cos_z = direction_cosines(vec)
+        print(cos_x, cos_y, cos_z)
+        >>> 0.26726, 0.53452, 0.801783
+    """
+    cos_x = vector[0] / sqrt(vector[0]**2 + vector[1]**2 + vector[2]**2)
+    cos_y = vector[1] / sqrt(vector[0]**2 + vector[1]**2 + vector[2]**2)
+    cos_z = vector[2] / sqrt(vector[0]**2 + vector[1]**2 + vector[2]**2)
+    return cos_x, cos_y, cos_z
 # ================================================================================
 # ================================================================================
 # eof
