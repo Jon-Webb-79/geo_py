@@ -20,6 +20,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="rotations" href="Rotations.html" />
     <link rel="prev" title="Datums" href="Datums.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -28,6 +29,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="Rotations.html" title="rotations"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="Datums.html" title="Datums"
              accesskey="P">previous</a> |</li>
@@ -739,87 +743,6 @@ used to transform to ENU coordinates</p>
 </dd></dl>
 
 </section>
-<section id="euler-angles">
-<h2>Euler Angles<a class="headerlink" href="#euler-angles" title="Permalink to this heading">¶</a></h2>
-<p>The following functions will conduct passive rotations based on Direction Cosines
-or Quaternians.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="geo_py.frames.pry_to_dcm">
-<span class="sig-prename descclassname"><span class="pre">geo_py.frames.</span></span><span class="sig-name descname"><span class="pre">pry_to_dcm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/geo_py/frames.html#pry_to_dcm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.frames.pry_to_dcm" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pitch</strong> – The angle of attack of the craft relative to the x-axis in
-units of radians.</p></li>
-<li><p><strong>roll</strong> – The angle of the craft relative to the y-axis in units of
-radians</p></li>
-<li><p><strong>yaw</strong> – The angle of the craft relative to the z-axis, also
-the same as heading, in units of radians.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return dcm<span class="colon">:</span></dt>
-<dd class="field-even"><p>The direction cosine matrix specific for rotations
-around the Y, X, and Z axis, or the pitch, roll,
-and yaw axis.</p>
-</dd>
-</dl>
-<p>This function is written to calcualte the Diection Cosine Matrix
-in the proper order for determining the orientation of a craft
-with knowledge of its pitch, roll, and yaw. This function returns the
-matrix of the following format where <span class="math notranslate nohighlight">\(\theta\)</span>, <span class="math notranslate nohighlight">\(\phi\)</span>,
-and <span class="math notranslate nohighlight">\(\psi\)</span> represent pitch, roll, and yaw respectively.</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}R_{xyz}=
-\begin{bmatrix}
-    cos\theta\:cos\psi &amp; cos\theta\:sin\psi &amp; -sin\theta \\
-    sin\phi\:sin\theta\:cos\psi &amp; sin\phi\:sin\theta\:sin\psi &amp; cos\theta\:sin\phi \\
-    cos\phi\:sin\theta\:cos\psi+sin\phi\:sin\psi &amp;
-    cos\phi\:sin\theta\:sin\psi-sin\phi\:cos\psi &amp; cos\theta\:cos\phi \\
-\end{bmatrix}\end{split}\]</div>
-<p>Code Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geopy.frames</span> <span class="kn">import</span> <span class="n">pry_to_dcm</span>
-<span class="n">pitch</span> <span class="o">=</span> <span class="mf">0.1</span>
-<span class="n">roll</span> <span class="o">=</span> <span class="mf">0.0</span>
-<span class="n">yaw</span> <span class="o">=</span> <span class="mf">0.7854</span>
-<span class="n">dcm</span> <span class="o">=</span> <span class="n">pry_to_dcm</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">,</span> <span class="n">yaw</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">dcm</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="p">[[</span> <span class="mf">0.7035729</span> <span class="mf">0.70357548</span> <span class="o">-</span><span class="mf">0.09983342</span><span class="p">]</span>
-     <span class="p">[</span><span class="o">-</span><span class="mf">0.70710808</span> <span class="mf">0.70710548</span> <span class="mf">0.</span><span class="p">]</span>
-     <span class="p">[</span><span class="mf">0.07059276</span> <span class="mf">0.07059302</span> <span class="mf">0.9950417</span><span class="p">]]</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geo_py.frames.direction_cosines">
-<span class="sig-prename descclassname"><span class="pre">geo_py.frames.</span></span><span class="sig-name descname"><span class="pre">direction_cosines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/frames.html#direction_cosines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.frames.direction_cosines" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>vector</strong> – A three dimensional vector</p>
-</dd>
-<dt class="field-even">Return cos_x, cos_y, cos_z<span class="colon">:</span></dt>
-<dd class="field-even"><p>The direction cosines for a vector</p>
-</dd>
-</dl>
-<p>This function returns the direction cosines of a vector
-(<span class="math notranslate nohighlight">\(\alpha\)</span>, <span class="math notranslate nohighlight">\(\beta\)</span>, <span class="math notranslate nohighlight">\(\gamma\)</span>) via the
-following equation.</p>
-<div class="math notranslate nohighlight">
-\[\begin{split}v = ai + bj + ck \\
-cos\alpha = \frac{a}{\sqrt[]{a^2+b^2+c^2}} \\
-cos\beta = \frac{b}{\sqrt[]{a^2+b^2+c^2}} \\
-cos\gamma = \frac{c}{\sqrt[]{a^2+b^2+c^2}} \\\end{split}\]</div>
-<p>Code Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.frames</span> <span class="kn">import</span> <span class="n">direction_cosines</span>
-<span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">])</span>
-<span class="n">cos_x</span><span class="p">,</span> <span class="n">cos_y</span><span class="p">,</span> <span class="n">cos_z</span> <span class="o">=</span> <span class="n">direction_cosines</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">cos_x</span><span class="p">,</span> <span class="n">cos_y</span><span class="p">,</span> <span class="n">cos_z</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="mf">0.26726</span><span class="p">,</span> <span class="mf">0.53452</span><span class="p">,</span> <span class="mf">0.801783</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</section>
 </section>
 
 
@@ -848,11 +771,6 @@ cos\gamma = \frac{c}{\sqrt[]{a^2+b^2+c^2}} \\\end{split}\]</div>
 <li><a class="reference internal" href="#geo_py.frames.ned_to_enu"><code class="docutils literal notranslate"><span class="pre">ned_to_enu()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#euler-angles">Euler Angles</a><ul>
-<li><a class="reference internal" href="#geo_py.frames.pry_to_dcm"><code class="docutils literal notranslate"><span class="pre">pry_to_dcm()</span></code></a></li>
-<li><a class="reference internal" href="#geo_py.frames.direction_cosines"><code class="docutils literal notranslate"><span class="pre">direction_cosines()</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -862,6 +780,11 @@ cos\gamma = \frac{c}{\sqrt[]{a^2+b^2+c^2}} \\\end{split}\]</div>
     <h4>Previous topic</h4>
     <p class="topless"><a href="Datums.html"
                           title="previous chapter">Datums</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="Rotations.html"
+                          title="next chapter">rotations</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -890,6 +813,9 @@ cos\gamma = \frac{c}{\sqrt[]{a^2+b^2+c^2}} \\\end{split}\]</div>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="Rotations.html" title="rotations"
+             >next</a> |</li>
         <li class="right" >
           <a href="Datums.html" title="Datums"
              >previous</a> |</li>

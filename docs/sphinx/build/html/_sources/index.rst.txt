@@ -13,6 +13,7 @@ Welcome to Core Utilities's documentation!
    Introduction
    Datums
    Frames
+   Rotations
 
 
 Indices and tables

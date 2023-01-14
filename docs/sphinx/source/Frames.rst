@@ -37,12 +37,3 @@ ENU (East, North, Up), and NED (North, East, Down) coordinate frames.
 .. autofunction:: geo_py.frames.ned_to_llh
 
 .. autofunction:: geo_py.frames.ned_to_enu
-
-Euler Angles
-============
-The following functions will conduct passive rotations based on Direction Cosines
-or Quaternians.
-
-.. autofunction:: geo_py.frames.pry_to_dcm
-
-.. autofunction:: geo_py.frames.direction_cosines

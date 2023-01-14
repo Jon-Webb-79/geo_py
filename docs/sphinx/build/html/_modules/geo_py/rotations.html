@@ -1,0 +1,293 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>geo_py.rotations &#8212; geo_py 0.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">geo_py 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">geo_py.rotations</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for geo_py.rotations</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Import necessary packages here</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sin</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># File:    rotations.py</span>
+<span class="c1"># Date:    January 14, 2023</span>
+<span class="c1"># Purpose: Describe the purpose of functions of this file</span>
+
+<span class="c1"># Source Code Metadata</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Jonathan A. Webb&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2023, Jon Webb Inc.&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># DIRECTION COSINE FUNCTIONS</span>
+
+
+<div class="viewcode-block" id="extrinsic_dir_cos_mat"><a class="viewcode-back" href="../../Rotations.html#geo_py.rotations.extrinsic_dir_cos_mat">[docs]</a><span class="k">def</span> <span class="nf">extrinsic_dir_cos_mat</span><span class="p">(</span><span class="n">pitch</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">roll</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">yaw</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param pitch: The angle of attack of the craft relative to the x-axis in</span>
+<span class="sd">                  units of radians.</span>
+<span class="sd">    :param roll: The angle of the craft relative to the y-axis in units of</span>
+<span class="sd">                 radians</span>
+<span class="sd">    :param yaw: The angle of the craft relative to the z-axis, also</span>
+<span class="sd">                the same as heading, in units of radians.</span>
+<span class="sd">    :return dcm: The direction cosine matrix specific for rotations</span>
+<span class="sd">                 around the Y, X, and Z axis, or the pitch, roll,</span>
+<span class="sd">                 and yaw axis.</span>
+
+<span class="sd">    This function will build an extrinsic direction cosine matrix.</span>
+<span class="sd">    This function conducts an extrsinsic Euler rotation about all axis</span>
+<span class="sd">    This function returns the</span>
+<span class="sd">    matrix of the following format where :math:`\\theta`, :math:`\\phi`,</span>
+<span class="sd">    and :math:`\\psi` represent pitch, roll, and yaw respectively.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        R_{xyz}=</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            cos\\theta\\:cos\\psi &amp; cos\\theta\\:sin\\psi &amp; -sin\\theta \\\\</span>
+<span class="sd">            sin\\phi\\:sin\\theta\\:cos\\psi &amp; sin\\phi\\:sin\\theta\\:sin\\psi &amp; cos\\theta\\:sin\\phi \\\\</span>
+<span class="sd">            cos\\phi\\:sin\\theta\\:cos\\psi+sin\\phi\\:sin\\psi &amp;</span>
+<span class="sd">            cos\\phi\\:sin\\theta\\:sin\\psi-sin\\phi\\:cos\\psi &amp; cos\\theta\\:cos\\phi \\\\</span>
+<span class="sd">        \\end{bmatrix}</span>
+
+<span class="sd">    Code Example</span>
+
+<span class="sd">    .. code-block::</span>
+
+<span class="sd">        from geopy.frames import pry_to_dcm</span>
+<span class="sd">        pitch = 0.1</span>
+<span class="sd">        roll = 0.0</span>
+<span class="sd">        yaw = 0.7854</span>
+<span class="sd">        dcm = pry_to_dcm(pitch, roll, yaw)</span>
+<span class="sd">        print(dcm)</span>
+<span class="sd">        &gt;&gt;&gt; [[ 0.7035729 0.70357548 -0.09983342]</span>
+<span class="sd">             [-0.70710808 0.70710548 0.]</span>
+<span class="sd">             [0.07059276 0.07059302 0.9950417]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x_axis</span> <span class="o">=</span> <span class="p">[</span><span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)]</span>
+    <span class="n">y_axis</span> <span class="o">=</span> <span class="p">[</span><span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span><span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span>
+         <span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span><span class="o">+</span><span class="n">cos</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span>
+         <span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">)]</span>
+    <span class="n">z_axis</span> <span class="o">=</span> <span class="p">[</span><span class="n">cos</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span><span class="o">+</span><span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span>
+         <span class="n">cos</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">yaw</span><span class="p">)</span><span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">yaw</span><span class="p">),</span>
+         <span class="n">cos</span><span class="p">(</span><span class="n">pitch</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">roll</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_axis</span><span class="p">,</span> <span class="n">y_axis</span><span class="p">,</span> <span class="n">z_axis</span><span class="p">])</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="intrinsic_dir_cos_mat"><a class="viewcode-back" href="../../Rotations.html#geo_py.rotations.intrinsic_dir_cos_mat">[docs]</a><span class="k">def</span> <span class="nf">intrinsic_dir_cos_mat</span><span class="p">(</span><span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                            <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;XYZ&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param alpha: The rotation angle for the x rotation matrix</span>
+<span class="sd">    :param beta: The rotation angle for the y rotation matrix</span>
+<span class="sd">    :param gamma: The rotation angle for the z rotation matrix</span>
+<span class="sd">    :param order: The order of rotation, such as &#39;XYZ&#39;, &#39;XZY&#39;,</span>
+<span class="sd">                  &#39;YXZ&#39;, &#39;YZX&#39;, &#39;ZXY&#39;, or &#39;ZYX&#39;</span>
+
+<span class="sd">    This function will produce an intrinsic direction cosine</span>
+<span class="sd">    matrix in the order specified.  This function returns</span>
+<span class="sd">    the following matrices in the user specified order</span>
+<span class="sd">    of operations.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \\begin{align}</span>
+<span class="sd">           R_x =</span>
+<span class="sd">           \\begin{bmatrix}</span>
+<span class="sd">               1 &amp; 0 &amp; 0 \\\\</span>
+<span class="sd">               0 &amp; cos\\alpha &amp; sin\\alpha \\\\</span>
+<span class="sd">               0 &amp; -sin\\alpha &amp; cos\\alpha \\\\</span>
+<span class="sd">           \\end{bmatrix} \\\\</span>
+<span class="sd">           \\\\</span>
+<span class="sd">           R_y =</span>
+<span class="sd">           \\begin{bmatrix}</span>
+<span class="sd">               cos\\beta &amp; 0 &amp; -sin\\beta \\\\</span>
+<span class="sd">               0 &amp; 1 &amp; 0 \\\\</span>
+<span class="sd">               sin\\beta &amp; 0 &amp; cos\\beta</span>
+<span class="sd">           \\end{bmatrix} \\\\</span>
+<span class="sd">           \\\\</span>
+<span class="sd">           R_z =</span>
+<span class="sd">           \\begin{bmatrix}</span>
+<span class="sd">               cos\\gamma &amp; sin\\gamma &amp; 0 \\\\</span>
+<span class="sd">               -sin\\gamma &amp; cos\\gamma &amp; 0 \\\\</span>
+<span class="sd">               0 &amp; 0 &amp; 1 \\\\</span>
+<span class="sd">           \\end{bmatrix}</span>
+<span class="sd">       \\end{align}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create rotation matrices for each axis</span>
+    <span class="n">Rx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alpha</span><span class="p">)],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">)]])</span>
+    <span class="n">Ry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="p">)],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">)]])</span>
+    <span class="n">Rz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">gamma</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">gamma</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                   <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="c1"># Multiply rotation matrices according to the order of rotations</span>
+    <span class="k">if</span> <span class="n">order</span> <span class="o">==</span> <span class="s2">&quot;XYZ&quot;</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rx</span><span class="p">,</span> <span class="n">Ry</span><span class="p">),</span> <span class="n">Rz</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="s2">&quot;XZY&quot;</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rx</span><span class="p">,</span> <span class="n">Rz</span><span class="p">),</span> <span class="n">Ry</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="s2">&quot;YXZ&quot;</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Ry</span><span class="p">,</span> <span class="n">Rx</span><span class="p">),</span> <span class="n">Rz</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="s2">&quot;YZX&quot;</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Ry</span><span class="p">,</span> <span class="n">Rz</span><span class="p">),</span> <span class="n">Rx</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="s2">&quot;ZXY&quot;</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rz</span><span class="p">,</span> <span class="n">Rx</span><span class="p">),</span> <span class="n">Ry</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="s2">&quot;ZYX&quot;</span><span class="p">:</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">Rz</span><span class="p">,</span> <span class="n">Ry</span><span class="p">),</span> <span class="n">Rx</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid rotation order&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">R</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="direction_cosines"><a class="viewcode-back" href="../../Rotations.html#geo_py.rotations.direction_cosines">[docs]</a><span class="k">def</span> <span class="nf">direction_cosines</span><span class="p">(</span><span class="n">vector</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param vector: A three dimensional vector</span>
+<span class="sd">    :return cos_x, cos_y, cos_z: The direction cosines for a vector</span>
+
+<span class="sd">    This function returns the direction cosines of a vector</span>
+<span class="sd">    (:math:`\\alpha`, :math:`\\beta`, :math:`\\gamma`) via the</span>
+<span class="sd">    following equation.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        v = ai + bj + ck \\\\</span>
+<span class="sd">        cos\\alpha = \\frac{a}{\\sqrt[]{a^2+b^2+c^2}} \\\\</span>
+<span class="sd">        cos\\beta = \\frac{b}{\\sqrt[]{a^2+b^2+c^2}} \\\\</span>
+<span class="sd">        cos\\gamma = \\frac{c}{\\sqrt[]{a^2+b^2+c^2}} \\\\</span>
+
+<span class="sd">    Code Example</span>
+
+<span class="sd">    .. code-block::</span>
+
+<span class="sd">        from geo_py.frames import direction_cosines</span>
+<span class="sd">        vec = np.array([1., 2., 3.])</span>
+<span class="sd">        cos_x, cos_y, cos_z = direction_cosines(vec)</span>
+<span class="sd">        print(cos_x, cos_y, cos_z)</span>
+<span class="sd">        &gt;&gt;&gt; 0.26726, 0.53452, 0.801783</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cos_x</span> <span class="o">=</span> <span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">vector</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">cos_y</span> <span class="o">=</span> <span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">vector</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">cos_z</span> <span class="o">=</span> <span class="n">vector</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">vector</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">vector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">vector</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cos_x</span><span class="p">,</span> <span class="n">cos_y</span><span class="p">,</span> <span class="n">cos_z</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span> <span class="nf">dcm_to_quaternion</span><span class="p">(</span><span class="n">dcm</span><span class="p">):</span>
+    <span class="n">tr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">dcm</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tr</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tr</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="mf">0.25</span> <span class="o">*</span> <span class="n">s</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.25</span> <span class="o">*</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="mf">0.25</span> <span class="o">*</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="mf">0.25</span> <span class="o">*</span> <span class="n">s</span><span class="p">,</span>
+                      <span class="p">(</span><span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">s</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">q</span>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># QUATERNIANS</span>
+
+
+<span class="k">def</span> <span class="nf">quaternion_to_dcm</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="n">q0</span><span class="p">,</span> <span class="n">q1</span><span class="p">,</span> <span class="n">q2</span><span class="p">,</span> <span class="n">q3</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">dcm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">q0</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">q1</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">q2</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">q3</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q1</span><span class="o">*</span><span class="n">q2</span> <span class="o">-</span> <span class="n">q0</span><span class="o">*</span><span class="n">q3</span><span class="p">),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q1</span><span class="o">*</span><span class="n">q3</span> <span class="o">+</span> <span class="n">q0</span><span class="o">*</span><span class="n">q2</span><span class="p">)],</span>
+                    <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q1</span><span class="o">*</span><span class="n">q2</span> <span class="o">+</span> <span class="n">q0</span><span class="o">*</span><span class="n">q3</span><span class="p">),</span> <span class="n">q0</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">q1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">q2</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">q3</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q2</span><span class="o">*</span><span class="n">q3</span> <span class="o">-</span> <span class="n">q0</span><span class="o">*</span><span class="n">q1</span><span class="p">)],</span>
+                    <span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q1</span><span class="o">*</span><span class="n">q3</span> <span class="o">-</span> <span class="n">q0</span><span class="o">*</span><span class="n">q2</span><span class="p">),</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">q2</span><span class="o">*</span><span class="n">q3</span> <span class="o">+</span> <span class="n">q0</span><span class="o">*</span><span class="n">q1</span><span class="p">),</span> <span class="n">q0</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">q1</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">q2</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">q3</span><span class="o">**</span><span class="mi">2</span><span class="p">]])</span>
+    <span class="k">return</span> <span class="n">dcm</span>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># eof</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">geo_py 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">geo_py.rotations</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2023, Jonathan A. Webb.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    </div>
+  </body>
+</html>

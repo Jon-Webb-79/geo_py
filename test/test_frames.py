@@ -10,7 +10,6 @@ from geo_py.datum import ITRF
 from geo_py.frames import llh_to_ecef, ecef_to_llh, ecef_to_enu, enu_to_ecef
 from geo_py.frames import llh_to_enu, enu_to_llh, ecef_to_ned, ned_to_ecef
 from geo_py.frames import llh_to_ned, ned_to_llh, ned_to_enu, enu_to_ned
-from geo_py.frames import pry_to_dcm, direction_cosines
 # ================================================================================
 # ================================================================================
 # File:    test.py
@@ -251,30 +250,6 @@ def test_ned_to_enu():
     assert isclose(EE, -7134.757, rel_tol=1.0e-3)
     assert isclose(NN, -4556.321, rel_tol=1.0e-3)
     assert isclose(UU, 2852.390, rel_tol=1.0e-3)
-# ================================================================================
-# ================================================================================
-# Test Direction cosine functions
-
-
-def test_pry_to_dcm():
-    pitch = 0.1  # radians
-    roll = 0.0  # radians
-    yaw = 0.7854  # radians
-    dcm = pry_to_dcm(pitch, roll, yaw)
-    one = [0.7035729, 0.70357548, -0.09983342, -0.70710808, 0.70710548, 0.0,
-           0.07059276, 0.0705930155, 0.99500417]
-    new_dcm = list(dcm.flat)
-    for count, value in enumerate(new_dcm):
-        assert isclose(one[count], value, rel_tol=1.0e-3)
-# --------------------------------------------------------------------------------
-
-
-def test_direction_cosines():
-    a_vec = np.array([1., 2., 3.])
-    cos_x, cos_y, cos_z = direction_cosines(a_vec)
-    assert isclose(cos_x, 0.2672612, rel_tol=1.0e-3)
-    assert isclose(cos_y, 0.5345224, rel_tol=1.0e-3)
-    assert isclose(cos_z, 0.8017837, rel_tol=1.0e-3)
 # ================================================================================
 # ================================================================================
 # eof
