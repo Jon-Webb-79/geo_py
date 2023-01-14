@@ -51,15 +51,21 @@ well as quaternians.</p>
 <p>The following functions will conduct passive rotations based on Direction Cosines.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="geo_py.rotations.intrinsic_dir_cos_mat">
-<span class="sig-prename descclassname"><span class="pre">geo_py.rotations.</span></span><span class="sig-name descname"><span class="pre">intrinsic_dir_cos_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'XYZ'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geo_py/rotations.html#intrinsic_dir_cos_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.rotations.intrinsic_dir_cos_mat" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">geo_py.rotations.</span></span><span class="sig-name descname"><span class="pre">intrinsic_dir_cos_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'XYZ'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geo_py/rotations.html#intrinsic_dir_cos_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.rotations.intrinsic_dir_cos_mat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>alpha</strong> – The rotation angle for the x rotation matrix</p></li>
-<li><p><strong>beta</strong> – The rotation angle for the y rotation matrix</p></li>
-<li><p><strong>gamma</strong> – The rotation angle for the z rotation matrix</p></li>
+<li><p><strong>alpha</strong> – The rotation angle for the x rotation matrix in units of
+degrees or radians</p></li>
+<li><p><strong>beta</strong> – The rotation angle for the y rotation matrix in units of
+degrees or radians</p></li>
+<li><p><strong>gamma</strong> – The rotation angle for the z rotation matrix in units of
+degrees or raidans</p></li>
 <li><p><strong>order</strong> – The order of rotation, such as ‘XYZ’, ‘XZY’,
-‘YXZ’, ‘YZX’, ‘ZXY’, or ‘ZYX’</p></li>
+‘YXZ’, ‘YZX’, ‘ZXY’, or ‘ZYX’. Defaulted to
+‘XYZ’</p></li>
+<li><p><strong>deg</strong> – True if angles are in degrees, False, otherwise.  Defaulted
+to False.</p></li>
 </ul>
 </dd>
 </dl>
@@ -109,16 +115,18 @@ of operations.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geo_py.rotations.extrinsic_dir_cos_mat">
-<span class="sig-prename descclassname"><span class="pre">geo_py.rotations.</span></span><span class="sig-name descname"><span class="pre">extrinsic_dir_cos_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/geo_py/rotations.html#extrinsic_dir_cos_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.rotations.extrinsic_dir_cos_mat" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">geo_py.rotations.</span></span><span class="sig-name descname"><span class="pre">extrinsic_dir_cos_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pitch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yaw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/geo_py/rotations.html#extrinsic_dir_cos_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.rotations.extrinsic_dir_cos_mat" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pitch</strong> – The angle of attack of the craft relative to the x-axis in
-units of radians.</p></li>
+units of radians or degrees.</p></li>
 <li><p><strong>roll</strong> – The angle of the craft relative to the y-axis in units of
-radians</p></li>
+radians or degrees.</p></li>
 <li><p><strong>yaw</strong> – The angle of the craft relative to the z-axis, also
-the same as heading, in units of radians.</p></li>
+the same as heading, in units of radians or degrees.</p></li>
+<li><p><strong>deg</strong> – True if angles are in units od degrees, False is in radians.
+Defaulted to radians or degrees.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return dcm<span class="colon">:</span></dt>

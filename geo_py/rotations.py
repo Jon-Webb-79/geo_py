@@ -1,5 +1,5 @@
 # Import necessary packages here
-from math import sin, cos, sqrt
+from math import sin, cos, sqrt, radians
 import numpy as np
 from typing import Tuple
 # ================================================================================
@@ -17,14 +17,17 @@ __version__ = "1.0"
 # DIRECTION COSINE FUNCTIONS
 
 
-def extrinsic_dir_cos_mat(pitch: float, roll: float, yaw: float) -> np.ndarray:
+def extrinsic_dir_cos_mat(pitch: float, roll: float, yaw: float,
+                          deg: bool = False) -> np.ndarray:
     """
     :param pitch: The angle of attack of the craft relative to the x-axis in
-                  units of radians.
+                  units of radians or degrees.
     :param roll: The angle of the craft relative to the y-axis in units of
-                 radians
+                 radians or degrees.
     :param yaw: The angle of the craft relative to the z-axis, also
-                the same as heading, in units of radians.
+                the same as heading, in units of radians or degrees.
+    :param deg: True if angles are in units od degrees, False is in radians.
+                Defaulted to radians or degrees.
     :return dcm: The direction cosine matrix specific for rotations
                  around the Y, X, and Z axis, or the pitch, roll,
                  and yaw axis.
@@ -62,6 +65,10 @@ def extrinsic_dir_cos_mat(pitch: float, roll: float, yaw: float) -> np.ndarray:
              [-0.70710808 0.70710548 0.]
              [0.07059276 0.07059302 0.9950417]]
     """
+    if deg:
+        pitch = radians(pitch)
+        roll = radians(roll)
+        yaw = radians(yaw)
     x_axis = [cos(pitch)*cos(yaw), cos(pitch)*sin(yaw), -sin(pitch)]
     y_axis = [sin(roll)*sin(pitch)*cos(yaw)-cos(roll)*sin(yaw),
          sin(roll)*sin(pitch)*sin(yaw)+cos(roll)*cos(yaw),
@@ -74,13 +81,20 @@ def extrinsic_dir_cos_mat(pitch: float, roll: float, yaw: float) -> np.ndarray:
 
 
 def intrinsic_dir_cos_mat(alpha: float, beta: float,
-                            gamma: float, order: str = "XYZ"):
+                          gamma: float, order: str = "XYZ",
+                          deg: bool = False):
     """
-    :param alpha: The rotation angle for the x rotation matrix
-    :param beta: The rotation angle for the y rotation matrix
-    :param gamma: The rotation angle for the z rotation matrix
+    :param alpha: The rotation angle for the x rotation matrix in units of
+                  degrees or radians
+    :param beta: The rotation angle for the y rotation matrix in units of
+                 degrees or radians
+    :param gamma: The rotation angle for the z rotation matrix in units of
+                  degrees or raidans
     :param order: The order of rotation, such as 'XYZ', 'XZY',
-                  'YXZ', 'YZX', 'ZXY', or 'ZYX'
+                  'YXZ', 'YZX', 'ZXY', or 'ZYX'. Defaulted to
+                  'XYZ'
+    :param deg: True if angles are in degrees, False, otherwise.  Defaulted
+                to False.
 
     This function will produce an intrinsic direction cosine
     matrix in the order specified.  An intrinsic rotation matrix
@@ -129,6 +143,10 @@ def intrinsic_dir_cos_mat(alpha: float, beta: float,
              [0.70710808, 0.7035729, -0.07059276],
              [0.0, 0.09983342, 0.99500417]]
     """
+    if deg:
+        alpha = radians(alpha)
+        beta = radians(beta)
+        gamma = radians(gamma)
     # Create rotation matrices for each axis
     Rx = np.array([[1, 0, 0],
                    [0, np.cos(alpha), -np.sin(alpha)],
