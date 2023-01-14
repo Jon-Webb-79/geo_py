@@ -52,11 +52,11 @@ def extrinsic_dir_cos_mat(pitch: float, roll: float, yaw: float) -> np.ndarray:
 
     .. code-block::
 
-        from geopy.frames import pry_to_dcm
+        from geopy.rotations import extrinsic_dir_cos_mat
         pitch = 0.1
         roll = 0.0
         yaw = 0.7854
-        dcm = pry_to_dcm(pitch, roll, yaw)
+        dcm = extrinsic_dir_cos_mat(pitch, roll, yaw)
         print(dcm)
         >>> [[ 0.7035729 0.70357548 -0.09983342]
              [-0.70710808 0.70710548 0.]
@@ -114,6 +114,20 @@ def intrinsic_dir_cos_mat(alpha: float, beta: float,
                0 & 0 & 1 \\\\
            \\end{bmatrix}
        \\end{align}
+
+    Code Example
+
+    .. code-block::
+
+        from geopy.rotations import intrinsic_cos_mat
+        pitch = 0.1
+        roll = 0.0
+        yaw = 0.7854
+        dcm = intrinsic_dir_cos_mas(pitch, roll, yaw, "ZYX")
+        print(dcm)
+        >>> [[0.70710548, -0.70357548, 0.07059302],
+             [0.70710808, 0.7035729, -0.07059276],
+             [0.0, 0.09983342, 0.99500417]]
     """
     # Create rotation matrices for each axis
     Rx = np.array([[1, 0, 0],
@@ -165,7 +179,7 @@ def direction_cosines(vector: np.ndarray) -> Tuple[float, float, float]:
 
     .. code-block::
 
-        from geo_py.frames import direction_cosines
+        from geo_py.rotations import direction_cosines
         vec = np.array([1., 2., 3.])
         cos_x, cos_y, cos_z = direction_cosines(vec)
         print(cos_x, cos_y, cos_z)
@@ -179,6 +193,22 @@ def direction_cosines(vector: np.ndarray) -> Tuple[float, float, float]:
 
 
 def dcm_to_quaternion(dcm):
+    """
+    :param dcm: A Direction cosine matrix of size 3x3
+    :return q: A quaternion of size 1x4
+
+    This function transforms a direction cosine matrix to a quaternion.
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.rotations import dcm_to_quaternion
+        rot_mat = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
+        q = dcm_to_quaternion(rot_mat)
+        print(q)
+        >>> [0.01912624, -0.04617471, -0.38220603, 0.92272457],
+    """
     tr = np.trace(dcm)
     if tr > 0:
         s = np.sqrt(tr + 1.0) * 2
@@ -211,11 +241,54 @@ def dcm_to_quaternion(dcm):
 
 
 def quaternion_to_dcm(q):
+    """
+    :param q: A quaternion of size 1x4
+    :return dcm: A direction cosine matrix of size 3x3
+
+    This function convert a quaternian to a direction cosine matrix
+    with the following method where :math:`q_x` is a component to
+    the quaternion and :math:`C` is the direction cosine matrix.
+
+    .. math::
+
+       C =
+       \\begin{bmatrix}
+          q_4^2+q_1^2-q2^2-q_3^2 & 2\\left(q_1q_2+q_3q_4\\right) & 2\\left(q_1q_3-q_2q_4\\right) \\\\
+          2\\left(q_1q_2-q_3q_4\\right) & q_4^2-q_1^2+q_2^2-q_3^2 & 2\\left(q_2q_3+q_1q_4\\right) \\\\
+          2\\left(q_1q_3+q_2q_4\\right) & 2\\left(q_2q_3-q_1q_4\\right) & q_4^2-q_1^2-q_2^2+q_3^2 \\\\
+       \\end{bmatrix}
+
+    .. code-block::
+
+        from geo_py.rotations import quaternion_to_dcm
+        q = np.array([-0.1677489, -0.7369231, -0.3682588, 0.5414703]])
+        dcm = quaternion_to_dcm(q)
+        print(dcm)
+        >>> [[0.1423907, 0.72441893, -0.67449393],
+             [0.36109474, -0.67249153, -0.64603848],
+             [-0.9215396, -0.15156633, -0.35734044]]
+    """
     q0, q1, q2, q3 = q[0], q[1], q[2], q[3]
-    dcm = np.array([[q0**2 + q1**2 - q2**2 - q3**2, 2*(q1*q2 - q0*q3), 2*(q1*q3 + q0*q2)],
-                    [2*(q1*q2 + q0*q3), q0**2 - q1**2 + q2**2 - q3**2, 2*(q2*q3 - q0*q1)],
-                    [2*(q1*q3 - q0*q2), 2*(q2*q3 + q0*q1), q0**2 - q1**2 - q2**2 + q3**2]])
-    return dcm
+
+    # First row of the rotation matrix
+    r00 = 2 * (q0 * q0 + q1 * q1) - 1
+    r01 = 2 * (q1 * q2 - q0 * q3)
+    r02 = 2 * (q1 * q3 + q0 * q2)
+
+    # Second row of the rotation matrix
+    r10 = 2 * (q1 * q2 + q0 * q3)
+    r11 = 2 * (q0 * q0 + q2 * q2) - 1
+    r12 = 2 * (q2 * q3 - q0 * q1)
+
+    # Third row of the rotation matrix
+    r20 = 2 * (q1 * q3 - q0 * q2)
+    r21 = 2 * (q2 * q3 + q0 * q1)
+    r22 = 2 * (q0 * q0 + q3 * q3) - 1
+    # 3x3 rotation matrix
+    rot_matrix = np.array([[r00, r01, r02],
+                           [r10, r11, r12],
+                           [r20, r21, r22]])
+    return rot_matrix
 # ================================================================================
 # ================================================================================
 # eof

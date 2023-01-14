@@ -16,3 +16,7 @@ The following functions will conduct passive rotations based on Direction Cosine
 
 .. autofunction:: geo_py.rotations.direction_cosines
 
+.. autofunction:: geo_py.rotations.dcm_to_quaternion
+
+.. autofunction:: geo_py.rotations.quaternion_to_dcm
+

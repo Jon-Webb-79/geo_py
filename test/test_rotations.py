@@ -1,5 +1,5 @@
 # Import necessary packages here
-from math import isclose
+from math import isclose, radians
 import os
 import sys
 from pathlib import PurePath
@@ -7,7 +7,8 @@ import numpy as np
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
 from geo_py.rotations import intrinsic_dir_cos_mat, extrinsic_dir_cos_mat
-from geo_py.rotations import direction_cosines
+from geo_py.rotations import direction_cosines, dcm_to_quaternion
+from geo_py.rotations import quaternion_to_dcm
 # ================================================================================
 # ================================================================================
 # File:    test_rotations.py
@@ -53,7 +54,7 @@ def test_pry_to_dcm():
 # --------------------------------------------------------------------------------
 
 
-def test_direction_cosine_matric():
+def test_direction_cosine_matrix():
     x = 0.1
     y = 0.0
     z = 0.7854
@@ -72,6 +73,30 @@ def test_direction_cosines():
     assert isclose(cos_x, 0.2672612, rel_tol=1.0e-3)
     assert isclose(cos_y, 0.5345224, rel_tol=1.0e-3)
     assert isclose(cos_z, 0.8017837, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_dcm_to_quaternion():
+    pitch = 0.1  # radians
+    roll = 0.0  # radians
+    yaw = 0.7854  # radians
+    dcm = extrinsic_dir_cos_mat(pitch, roll, yaw)
+    q = dcm_to_quaternion(dcm)
+    assert isclose(q[0], 0.01912624, rel_tol=1.0e-3)
+    assert isclose(q[1], -0.04617471, rel_tol=1.0e-3)
+    assert isclose(q[2], -0.38220603, rel_tol=1.0e-3)
+    assert isclose(q[3], 0.92272457, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_quaternion_to_dcm():
+    q = np.array([-0.1677489, -0.7369231, -0.3682588, 0.5414703])
+    dcm = quaternion_to_dcm(q)
+    new_dcm = list(dcm.flat)
+    result = [0.142309, 0.72441893, -0.67449393, 0.36109474, -0.67249153,
+              -0.64603848, -0.92159396, -0.15156633, -0.35734044]
+    for count, value in enumerate(new_dcm):
+        assert isclose(result[count], value, rel_tol=1.0e-3)
 # ================================================================================
 # ================================================================================
 # eof
