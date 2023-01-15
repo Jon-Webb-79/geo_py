@@ -10,6 +10,7 @@ from geo_py.datum import ITRF
 from geo_py.frames import llh_to_ecef, ecef_to_llh, ecef_to_enu, enu_to_ecef
 from geo_py.frames import llh_to_enu, enu_to_llh, ecef_to_ned, ned_to_ecef
 from geo_py.frames import llh_to_ned, ned_to_llh, ned_to_enu, enu_to_ned
+from geo_py.frames import ned_vector, body, body_to_ecef
 # ================================================================================
 # ================================================================================
 # File:    test.py
@@ -250,6 +251,29 @@ def test_ned_to_enu():
     assert isclose(EE, -7134.757, rel_tol=1.0e-3)
     assert isclose(NN, -4556.321, rel_tol=1.0e-3)
     assert isclose(UU, 2852.390, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_ned_vector():
+    lat = 45.976
+    lon = 7.658
+    alt = 4531.0
+    N, E, D = ned_vector(lat, lon, alt)
+# --------------------------------------------------------------------------------
+
+
+def test_body():
+    pitch = radians(8.)
+    roll = 0.
+    yaw = radians(13.0)
+    lat = 57.14
+    lon = 112.3
+    alt = 6000.0
+    cos_x = 0.13
+    cos_y = -0.28
+    cos_z = 0.0717
+    vec1 = body_to_ecef(lat, lon, alt, pitch, roll, yaw, cos_x, cos_y, cos_z)
+    vec = body(lat, lon, alt, pitch, roll, yaw, cos_x, cos_y, cos_z)
 # ================================================================================
 # ================================================================================
 # eof

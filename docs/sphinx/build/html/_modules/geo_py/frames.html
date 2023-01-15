@@ -41,7 +41,7 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">PurePath</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">pi</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">atan</span><span class="p">,</span> <span class="n">atan2</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">degrees</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
@@ -840,6 +840,103 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">ned_to_ecef</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ecef_to_enu</span><span class="p">(</span><span class="n">origin_lat</span><span class="p">,</span> <span class="n">origin_lon</span><span class="p">,</span> <span class="n">origin_alt</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">dat</span><span class="p">)</span></div>
+<span class="c1"># ================================================================================</span>
+<span class="c1"># ================================================================================</span>
+
+
+<span class="k">def</span> <span class="nf">ned_vector</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param lat: The latitude in units of decimal degrees</span>
+<span class="sd">    :param lon: The longitude in units of decimal degrees</span>
+<span class="sd">    :param alt: The altitude in units of meters</span>
+<span class="sd">    :return NED: A tuple containing the North, East, and Down vectors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">lon</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">a</span> <span class="o">/</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">N</span> <span class="o">+</span> <span class="n">alt</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="n">north</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">z</span><span class="p">])</span>
+    <span class="n">east</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">down</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">z</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="o">-</span><span class="n">z</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span>
+                     <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">z</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">north</span><span class="p">,</span> <span class="n">east</span><span class="p">,</span> <span class="n">down</span>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<span class="c1"># def body_to_ecef(lat: float, lon: float, alt: float, pitch: float,</span>
+<span class="c1">#                  roll: float, yaw: float, cos_x: float, cos_y: float,</span>
+<span class="c1">#                  cos_z: float, dat: Datum = WGS84()):</span>
+<span class="c1">#     lat = radians(lat)</span>
+<span class="c1">#     lon = radians(lon)</span>
+<span class="c1">#     Rx = np.array([[1, 0, 0],</span>
+<span class="c1">#                [0, cos(pitch), -sin(pitch)],</span>
+<span class="c1">#                [0, sin(pitch), cos(pitch)]])</span>
+
+<span class="c1">#     Ry = np.array([[cos(roll), 0, sin(roll)],</span>
+<span class="c1">#                [0, 1, 0],</span>
+<span class="c1">#                [-sin(roll), 0, cos(roll)]])</span>
+
+<span class="c1">#     Rz = np.array([[cos(yaw), -sin(yaw), 0],</span>
+<span class="c1">#                [sin(yaw), cos(yaw), 0],</span>
+<span class="c1">#                [0, 0, 1]])</span>
+
+<span class="c1">#     R_body_ned = np.matmul(np.matmul(Rz, Ry), Rx)</span>
+<span class="c1">#     print(R_body_ned)</span>
+<span class="c1">#     print(&quot;&quot;)</span>
+<span class="c1">#     R_body_to_ned = intrinsic_dir_cos_mat(pitch, roll, yaw, order=&quot;ZXY&quot;)</span>
+<span class="c1">#     print(R_body_to_ned)</span>
+<span class="c1">#     R_pitch = np.array([[cos(pitch), 0, sin(pitch)], [0, 1, 0], [-sin(pitch), 0, cos(pitch)]])</span>
+<span class="c1">#     R_roll = np.array([[1, 0, 0], [0, cos(roll), -sin(roll)], [0, sin(roll), cos(roll)]])</span>
+<span class="c1">#     R_yaw = np.array([[cos(yaw), -sin(yaw), 0], [sin(yaw), cos(yaw), 0], [0, 0, 1]])</span>
+<span class="c1">#     R_body_to_ecef = np.matmul(np.matmul(R_yaw, R_pitch), R_roll)</span>
+<span class="c1">#     R_ecef_to_ned = np.array([[-sin(lon), cos(lon), 0],</span>
+<span class="c1">#                               [-sin(lat)*cos(lon),</span>
+<span class="c1">#                                -sin(lat)*sin(lon), cos(lat)],</span>
+<span class="c1">#                               [cos(lat)*cos(lon),</span>
+<span class="c1">#                                cos(lat)*sin(lon), sin(lat)]])</span>
+<span class="c1">#     R_ned_to_ecef = R_ecef_to_ned.T</span>
+<span class="c1">#     vector_ecef = np.matmul(np.matmul(R_ned_to_ecef, R_body_to_ecef),</span>
+<span class="c1">#                             np.array([cos_x, cos_y, cos_z]))</span>
+<span class="c1">#     vector_ecef[0] = vector_ecef[0]*(alt+dat.R_avg)</span>
+<span class="c1">#     vector_ecef[1] = vector_ecef[1]*(alt+dat.R_avg)</span>
+<span class="c1">#     vector_ecef[2] = vector_ecef[2]*(alt+dat.R_avg)</span>
+<span class="c1">#     return vector_ecef</span>
+<span class="c1"># # --------------------------------------------------------------------------------</span>
+
+
+<span class="c1"># def body(lat: float, lon: float, alt: float, pitch: float,</span>
+<span class="c1">#          roll: float, yaw: float, cos_x: float, cos_y: float,</span>
+<span class="c1">#          cos_z: float, dat: Datum = WGS84()):</span>
+
+<span class="c1">#     lat = radians(lat)</span>
+<span class="c1">#     lon = radians(lon)</span>
+
+<span class="c1">#     R_body_ned = np.array([[cos(yaw)*cos(pitch),</span>
+<span class="c1">#                             cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll),</span>
+<span class="c1">#                             cos(yaw)*sin(pitch)*cos(roll)+sin(yaw)*sin(roll)],</span>
+<span class="c1">#                            [sin(yaw)*cos(pitch),</span>
+<span class="c1">#                             sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll),</span>
+<span class="c1">#                             sin(yaw)*sin(pitch)*cos(roll)-cos(yaw)*sin(roll)],</span>
+<span class="c1">#                             [-sin(pitch), cos(pitch)*sin(roll), cos(pitch)*cos(roll)]])</span>
+<span class="c1">#     print(&quot;&quot;)</span>
+<span class="c1">#     print(R_body_ned)</span>
+
+<span class="c1">#     # Rotation matrix from NED to ECEF</span>
+<span class="c1">#     R_ecef_ned = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],</span>
+<span class="c1">#                             [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],</span>
+<span class="c1">#                             [cos(lat), 0, -sin(lat)]])</span>
+
+<span class="c1">#     R_ecef_body = np.matmul(R_ecef_ned, R_body_ned)</span>
+
+<span class="c1">#     # Position vector in ECEF</span>
+<span class="c1">#     pos_ecef = llh_to_ecef(degrees(lat), degrees(lon), alt)</span>
+
+<span class="c1">#     # Vector in ECEF</span>
+<span class="c1">#     vec_ecef = np.matmul(R_ecef_body, np.array([cos_x, cos_y, cos_z])) + pos_ecef</span>
+<span class="c1">#     return vec_ecef</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># eof</span>
