@@ -288,7 +288,7 @@
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
 
-<span class="k">def</span> <span class="nf">extrinsic_euler_angles</span><span class="p">(</span><span class="n">dcm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+<div class="viewcode-block" id="extrinsic_euler_angles"><a class="viewcode-back" href="../../Rotations.html#geo_py.rotations.extrinsic_euler_angles">[docs]</a><span class="k">def</span> <span class="nf">extrinsic_euler_angles</span><span class="p">(</span><span class="n">dcm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                            <span class="n">deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param dcm: A direction cosine matrix of order 3x3</span>
@@ -304,19 +304,19 @@
 
 <span class="sd">    .. code-block::</span>
 
-<span class="sd">        from geo_py.rotations import dcm_euler_angles, extrinsic_dir_cos_mat</span>
+<span class="sd">        from geo_py.rotations import extrinsic_euler_angles, extrinsic_dir_cos_mat</span>
 
 <span class="sd">        pitch = 0.1</span>
 <span class="sd">        roll = 0.0</span>
 <span class="sd">        yaw = 0.7854</span>
 <span class="sd">        dcm = extrinsic_dir_cos_mat(pitch, roll, yaw)</span>
-<span class="sd">        angles = extrinsic_dcm_euler_angles(dcm)</span>
+<span class="sd">        angles = extrinsic_euler_angles(dcm)</span>
 <span class="sd">        print(angles)</span>
 <span class="sd">        &gt;&gt;&gt; 0.1, 0.0, 0.7854</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">R</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_matrix</span><span class="p">(</span><span class="n">dcm</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
     <span class="n">angles</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">as_euler</span><span class="p">(</span><span class="s2">&quot;ZYX&quot;</span><span class="p">,</span> <span class="n">degrees</span><span class="o">=</span><span class="n">deg</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">angles</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">angles</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># QUATERNIANS</span>
@@ -371,6 +371,33 @@
                            <span class="p">[</span><span class="n">r10</span><span class="p">,</span> <span class="n">r11</span><span class="p">,</span> <span class="n">r12</span><span class="p">],</span>
                            <span class="p">[</span><span class="n">r20</span><span class="p">,</span> <span class="n">r21</span><span class="p">,</span> <span class="n">r22</span><span class="p">]])</span>
     <span class="k">return</span> <span class="n">rot_matrix</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="intrinsic_quaternion"><a class="viewcode-back" href="../../Rotations.html#geo_py.rotations.intrinsic_quaternion">[docs]</a><span class="k">def</span> <span class="nf">intrinsic_quaternion</span><span class="p">(</span><span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                         <span class="n">order</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ZYX&quot;</span><span class="p">,</span> <span class="n">deg</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param alpha: The rotaion angle for the x rotation matrix</span>
+<span class="sd">    :param beta: The rotation angle for the y rotation matrix</span>
+<span class="sd">    :param gamma: The rotation angle for the z roation matrix</span>
+<span class="sd">    :param order: The order of operations.  Defaulted to &#39;ZYX&#39;.</span>
+<span class="sd">    :param def: True if angles are in degrees.  Defaulted to False</span>
+<span class="sd">    :return quat: A quaternion as a 1x4 matrix</span>
+
+<span class="sd">    This function creates a quaternion from three Euler angles</span>
+
+<span class="sd">    .. code::</span>
+
+<span class="sd">        from geo_py.rotations import intrinsic_quaternion</span>
+<span class="sd">        pitch = 22</span>
+<span class="sd">        roll = 18</span>
+<span class="sd">        yaw = 2</span>
+<span class="sd">        quat = intrinsic_quaternion(pitch, roll, yaw, &quot;ZYX&quot;, deg=True)</span>
+<span class="sd">        print(quat)</span>
+<span class="sd">        &gt;&gt;&gt; -0.01292372, 0.15682601, 0.18575112, 0.969915</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Rotation</span><span class="o">.</span><span class="n">from_euler</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="p">[</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">],</span> <span class="n">degrees</span><span class="o">=</span><span class="n">deg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">R</span><span class="o">.</span><span class="n">as_quat</span><span class="p">()</span></div>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># eof</span>

@@ -307,15 +307,44 @@ for radians.  Defaulted to false</p></li>
 cosine matrix via the following method where <span class="math notranslate nohighlight">\(\theta\)</span> represents
 the angles in x, y and z directions. This method only works with
 rotation matrices that were produced via extrinsic rotations.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.rotations</span> <span class="kn">import</span> <span class="n">dcm_euler_angles</span><span class="p">,</span> <span class="n">extrinsic_dir_cos_mat</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.rotations</span> <span class="kn">import</span> <span class="n">extrinsic_euler_angles</span><span class="p">,</span> <span class="n">extrinsic_dir_cos_mat</span>
 
 <span class="n">pitch</span> <span class="o">=</span> <span class="mf">0.1</span>
 <span class="n">roll</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">yaw</span> <span class="o">=</span> <span class="mf">0.7854</span>
 <span class="n">dcm</span> <span class="o">=</span> <span class="n">extrinsic_dir_cos_mat</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">,</span> <span class="n">yaw</span><span class="p">)</span>
-<span class="n">angles</span> <span class="o">=</span> <span class="n">extrinsic_dcm_euler_angles</span><span class="p">(</span><span class="n">dcm</span><span class="p">)</span>
+<span class="n">angles</span> <span class="o">=</span> <span class="n">extrinsic_euler_angles</span><span class="p">(</span><span class="n">dcm</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">angles</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.7854</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.rotations.intrinsic_quaternion">
+<span class="sig-prename descclassname"><span class="pre">geo_py.rotations.</span></span><span class="sig-name descname"><span class="pre">intrinsic_quaternion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ZYX'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/geo_py/rotations.html#intrinsic_quaternion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.rotations.intrinsic_quaternion" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> – The rotaion angle for the x rotation matrix</p></li>
+<li><p><strong>beta</strong> – The rotation angle for the y rotation matrix</p></li>
+<li><p><strong>gamma</strong> – The rotation angle for the z roation matrix</p></li>
+<li><p><strong>order</strong> – The order of operations.  Defaulted to ‘ZYX’.</p></li>
+<li><p><strong>def</strong> – True if angles are in degrees.  Defaulted to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return quat<span class="colon">:</span></dt>
+<dd class="field-even"><p>A quaternion as a 1x4 matrix</p>
+</dd>
+</dl>
+<p>This function creates a quaternion from three Euler angles</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.rotations</span> <span class="kn">import</span> <span class="n">intrinsic_quaternion</span>
+<span class="n">pitch</span> <span class="o">=</span> <span class="mi">22</span>
+<span class="n">roll</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="n">yaw</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">quat</span> <span class="o">=</span> <span class="n">intrinsic_quaternion</span><span class="p">(</span><span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">,</span> <span class="n">yaw</span><span class="p">,</span> <span class="s2">&quot;ZYX&quot;</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">-</span><span class="mf">0.01292372</span><span class="p">,</span> <span class="mf">0.15682601</span><span class="p">,</span> <span class="mf">0.18575112</span><span class="p">,</span> <span class="mf">0.969915</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -342,6 +371,7 @@ rotation matrices that were produced via extrinsic rotations.</p>
 <li><a class="reference internal" href="#geo_py.rotations.quaternion_to_dcm"><code class="docutils literal notranslate"><span class="pre">quaternion_to_dcm()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.rotations.dcm_euler_angles"><code class="docutils literal notranslate"><span class="pre">dcm_euler_angles()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.rotations.extrinsic_euler_angles"><code class="docutils literal notranslate"><span class="pre">extrinsic_euler_angles()</span></code></a></li>
+<li><a class="reference internal" href="#geo_py.rotations.intrinsic_quaternion"><code class="docutils literal notranslate"><span class="pre">intrinsic_quaternion()</span></code></a></li>
 </ul>
 </li>
 </ul>

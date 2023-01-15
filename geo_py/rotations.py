@@ -332,6 +332,33 @@ def quaternion_to_dcm(q: np.ndarray) -> np.ndarray:
                            [r10, r11, r12],
                            [r20, r21, r22]])
     return rot_matrix
+# --------------------------------------------------------------------------------
+
+
+def intrinsic_quaternion(alpha: float, beta: float, gamma: float,
+                         order: str = "ZYX", deg: bool = False,) -> np.ndarray:
+    """
+    :param alpha: The rotaion angle for the x rotation matrix
+    :param beta: The rotation angle for the y rotation matrix
+    :param gamma: The rotation angle for the z roation matrix
+    :param order: The order of operations.  Defaulted to 'ZYX'.
+    :param def: True if angles are in degrees.  Defaulted to False
+    :return quat: A quaternion as a 1x4 matrix
+
+    This function creates a quaternion from three Euler angles
+
+    .. code::
+
+        from geo_py.rotations import intrinsic_quaternion
+        pitch = 22
+        roll = 18
+        yaw = 2
+        quat = intrinsic_quaternion(pitch, roll, yaw, "ZYX", deg=True)
+        print(quat)
+        >>> -0.01292372, 0.15682601, 0.18575112, 0.969915
+    """
+    R = Rotation.from_euler(order, [alpha, beta, gamma], degrees=deg)
+    return R.as_quat()
 # ================================================================================
 # ================================================================================
 # eof
