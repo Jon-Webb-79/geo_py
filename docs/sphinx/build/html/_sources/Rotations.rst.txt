@@ -26,3 +26,5 @@ The following functions will conduct passive rotations based on Direction Cosine
 
 .. autofunction:: geo_py.rotations.intrinsic_quaternion
 
+.. autofunction:: geo_py.rotations.extrinsic_quaternion
+

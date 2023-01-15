@@ -10,6 +10,7 @@ from geo_py.rotations import intrinsic_dir_cos_mat, extrinsic_dir_cos_mat
 from geo_py.rotations import direction_cosines, dcm_to_quaternion
 from geo_py.rotations import quaternion_to_dcm, dcm_euler_angles
 from geo_py.rotations import extrinsic_euler_angles, intrinsic_quaternion
+from geo_py.rotations import extrinsic_quaternion
 # ================================================================================
 # ================================================================================
 # File:    test_rotations.py
@@ -127,7 +128,7 @@ def test_quaternion_to_dcm():
 # --------------------------------------------------------------------------------
 
 
-def test_quaternion():
+def test_intrinsic_quaternion():
     pitch = 22
     roll = 18
     yaw = 2
@@ -135,6 +136,18 @@ def test_quaternion():
     assert isclose(-0.01292372, quat[0], rel_tol=1.0e-3)
     assert isclose(0.15682601, quat[1], rel_tol=1.0e-3)
     assert isclose(0.18575112, quat[2], rel_tol=1.0e-3)
+    assert isclose(0.969915, quat[3], rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_extrinsic_quaternion():
+    pitch = 22
+    roll = 18
+    yaw = 2
+    quat = extrinsic_quaternion(pitch, roll, yaw, deg=True)
+    assert isclose(-0.15024786, quat[0], rel_tol=1.0e-3)
+    assert isclose(-0.19111111, quat[1], rel_tol=1.0e-3)
+    assert isclose(0.01292372, quat[2], rel_tol=1.0e-3)
     assert isclose(0.969915, quat[3], rel_tol=1.0e-3)
 # ================================================================================
 # ================================================================================

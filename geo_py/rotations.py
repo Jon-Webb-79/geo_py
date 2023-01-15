@@ -359,6 +359,31 @@ def intrinsic_quaternion(alpha: float, beta: float, gamma: float,
     """
     R = Rotation.from_euler(order, [alpha, beta, gamma], degrees=deg)
     return R.as_quat()
+# --------------------------------------------------------------------------------
+
+def extrinsic_quaternion(pitch: float, roll: float, yaw: float,
+                         deg: bool = False) -> np.ndarray:
+    """
+    :param pitch: The rotation about the pitch axis
+    :param roll: The rotation about the roll axis
+    :param yaw: The rotation about the yaw axis
+    :param: True if units in degrees, False for radians
+    :return quat: A quaternion
+
+    This function creates a quaternion from three Euler angles
+
+    .. code::
+
+        from geo_py.rotations import extrinsic_quaternion
+        pitch = 22
+        roll = 18
+        yaw = 2
+        quat = extrinsic_quaternion(pitch, roll, yaw, deg=True)
+        print(quat)
+        >>> -0.01292372, 0.15682601, 0.18575112, 0.969915
+    """
+    dcm = extrinsic_dir_cos_mat(pitch, roll, yaw, deg=deg)
+    return dcm_to_quaternion(dcm)
 # ================================================================================
 # ================================================================================
 # eof
