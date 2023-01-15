@@ -8,7 +8,8 @@ p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
 from geo_py.rotations import intrinsic_dir_cos_mat, extrinsic_dir_cos_mat
 from geo_py.rotations import direction_cosines, dcm_to_quaternion
-from geo_py.rotations import quaternion_to_dcm
+from geo_py.rotations import quaternion_to_dcm, dcm_euler_angles
+from geo_py.rotations import extrinsic_euler_angles
 # ================================================================================
 # ================================================================================
 # File:    test_rotations.py
@@ -58,9 +59,9 @@ def test_direction_cosine_matrix():
     x = 0.1
     y = 0.0
     z = 0.7854
-    dcm = intrinsic_dir_cos_mat(0.1, 0.0, 0.7854, "ZYX")
-    one = [0.70710548, -0.70357548, 0.07059302, 0.70710808, 0.7035729,
-           -0.07059276, 0.0, 0.09983342, 0.99500417]
+    dcm = intrinsic_dir_cos_mat(x, y, z, "ZYX")
+    one = [0.99500417, -0.07059302, 0.07059302 , 0.09983342, 0.7035729,
+           -0.70357548, 0.0, 0.70710808, 0.70710548]
     new_dcm = list(dcm.flat)
     for count, value in enumerate(new_dcm):
         assert isclose(one[count], value, rel_tol=1.0e-3)
@@ -87,6 +88,32 @@ def test_dcm_to_quaternion():
     assert isclose(q[2], -0.38220603, rel_tol=1.0e-3)
     assert isclose(q[3], 0.92272457, rel_tol=1.0e-3)
 # --------------------------------------------------------------------------------
+
+
+def test_dcm_euler_angles():
+    pitch = 0.1  # radians
+    roll = 0.0  # radians
+    yaw = 0.7854  # radians
+    dcm = intrinsic_dir_cos_mat(roll, pitch, yaw, order="ZYX")
+    angles = dcm_euler_angles(dcm, order='ZYX')
+    assert isclose(angles[0], roll, rel_tol=1.0e-3)
+    assert isclose(angles[1], pitch, rel_tol=1.0e-3)
+    assert isclose(angles[2], yaw, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_extrinsic_dcm_euler_angles():
+    pitch = 0.1  # radians
+    roll = 0.0  # radians
+    yaw = 0.7854  # radians
+    dcm = extrinsic_dir_cos_mat(pitch, roll, yaw)
+    angles = extrinsic_euler_angles(dcm)
+    assert isclose(angles[0], pitch, rel_tol=1.0e-3)
+    assert isclose(angles[1], roll, rel_tol=1.0e-3)
+    assert isclose(angles[2], yaw, rel_tol=1.0e-3)
+# ================================================================================
+# ================================================================================
+# QUATERNIANS TEST
 
 
 def test_quaternion_to_dcm():

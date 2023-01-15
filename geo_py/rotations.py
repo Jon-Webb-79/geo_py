@@ -1,6 +1,7 @@
 # Import necessary packages here
-from math import sin, cos, sqrt, radians
+from math import sin, cos, sqrt, radians, degrees
 import numpy as np
+from scipy.spatial.transform import Rotation
 from typing import Tuple
 # ================================================================================
 # ================================================================================
@@ -32,7 +33,8 @@ def extrinsic_dir_cos_mat(pitch: float, roll: float, yaw: float,
                  around the Y, X, and Z axis, or the pitch, roll,
                  and yaw axis.
 
-    This function will build an extrinsic direction cosine matrix.
+    This function will build an extrinsic direction cosine matrix for
+    a rotation order of ZYX.
     This function conducts an extrsinsic Euler rotation about all axis
     This function returns the
     matrix of the following format where :math:`\\theta`, :math:`\\phi`,
@@ -81,7 +83,7 @@ def extrinsic_dir_cos_mat(pitch: float, roll: float, yaw: float,
 
 
 def intrinsic_dir_cos_mat(alpha: float, beta: float,
-                          gamma: float, order: str = "XYZ",
+                          gamma: float, order: str = "ZYX",
                           deg: bool = False):
     """
     :param alpha: The rotation angle for the x rotation matrix in units of
@@ -90,9 +92,7 @@ def intrinsic_dir_cos_mat(alpha: float, beta: float,
                  degrees or radians
     :param gamma: The rotation angle for the z rotation matrix in units of
                   degrees or raidans
-    :param order: The order of rotation, such as 'XYZ', 'XZY',
-                  'YXZ', 'YZX', 'ZXY', or 'ZYX'. Defaulted to
-                  'XYZ'
+    :param order: The order of rotation.  Defaulted to 'ZYX'
     :param deg: True if angles are in degrees, False, otherwise.  Defaulted
                 to False.
 
@@ -139,41 +139,16 @@ def intrinsic_dir_cos_mat(alpha: float, beta: float,
         yaw = 0.7854
         dcm = intrinsic_dir_cos_mas(pitch, roll, yaw, "ZYX")
         print(dcm)
-        >>> [[0.70710548, -0.70357548, 0.07059302],
-             [0.70710808, 0.7035729, -0.07059276],
-             [0.0, 0.09983342, 0.99500417]]
+        >>> [[0.99500417, -0.07059302, 0.07059302],
+             [0.09983342, 0.7035729, -0.70357548],
+             [0.0, 0.70710808, 0.70710548]]
     """
     if deg:
         alpha = radians(alpha)
         beta = radians(beta)
         gamma = radians(gamma)
-    # Create rotation matrices for each axis
-    Rx = np.array([[1, 0, 0],
-                   [0, np.cos(alpha), -np.sin(alpha)],
-                   [0, np.sin(alpha), np.cos(alpha)]])
-    Ry = np.array([[np.cos(beta), 0, np.sin(beta)],
-                   [0, 1, 0],
-                   [-np.sin(beta), 0, np.cos(beta)]])
-    Rz = np.array([[np.cos(gamma), -np.sin(gamma), 0],
-                   [np.sin(gamma), np.cos(gamma), 0],
-                   [0, 0, 1]])
-
-    # Multiply rotation matrices according to the order of rotations
-    if order == "XYZ":
-        R = np.matmul(np.matmul(Rx, Ry), Rz)
-    elif order == "XZY":
-        R = np.matmul(np.matmul(Rx, Rz), Ry)
-    elif order == "YXZ":
-        R = np.matmul(np.matmul(Ry, Rx), Rz)
-    elif order == "YZX":
-        R = np.matmul(np.matmul(Ry, Rz), Rx)
-    elif order == "ZXY":
-        R = np.matmul(np.matmul(Rz, Rx), Ry)
-    elif order == "ZYX":
-        R = np.matmul(np.matmul(Rz, Ry), Rx)
-    else:
-        raise ValueError("Invalid rotation order")
-    return R
+    R = Rotation.from_euler(order, [alpha, beta, gamma], degrees=deg)
+    return R.as_matrix()
 # --------------------------------------------------------------------------------
 
 
@@ -210,7 +185,7 @@ def direction_cosines(vector: np.ndarray) -> Tuple[float, float, float]:
 # --------------------------------------------------------------------------------
 
 
-def dcm_to_quaternion(dcm):
+def dcm_to_quaternion(dcm: np.ndarray) -> np.ndarray:
     """
     :param dcm: A Direction cosine matrix of size 3x3
     :return q: A quaternion of size 1x4
@@ -227,38 +202,88 @@ def dcm_to_quaternion(dcm):
         print(q)
         >>> [0.01912624, -0.04617471, -0.38220603, 0.92272457],
     """
-    tr = np.trace(dcm)
-    if tr > 0:
-        s = np.sqrt(tr + 1.0) * 2
-        q = np.array([(dcm[2, 1] - dcm[1, 2]) / s,
-                      (dcm[0, 2] - dcm[2, 0]) / s,
-                      (dcm[1, 0] - dcm[0, 1]) / s,
-                      0.25 * s])
-    elif dcm[0, 0] > dcm[1, 1] and dcm[0, 0] > dcm[2, 2]:
-        s = np.sqrt(1.0 + dcm[0, 0] - dcm[1, 1] - dcm[2, 2]) * 2
-        q = np.array([0.25 * s,
-                      (dcm[0, 1] + dcm[1, 0]) / s,
-                      (dcm[2, 0] + dcm[0, 2]) / s,
-                      (dcm[2, 1] - dcm[1, 2]) / s])
-    elif dcm[1, 1] > dcm[2, 2]:
-        s = np.sqrt(1.0 + dcm[1, 1] - dcm[0, 0] - dcm[2, 2]) * 2
-        q = np.array([(dcm[0, 1] + dcm[1, 0]) / s,
-                      0.25 * s,
-                      (dcm[1, 2] + dcm[2, 1]) / s,
-                      (dcm[0, 2] - dcm[2, 0]) / s])
-    else:
-        s = np.sqrt(1.0 + dcm[2, 2] - dcm[0, 0] - dcm[1, 1]) * 2
-        q = np.array([(dcm[0, 2] + dcm[2, 0]) / s,
-                      (dcm[1, 2] + dcm[2, 1]) / s,
-                      0.25 * s,
-                      (dcm[1, 0] - dcm[0, 1]) / s])
-    return q
+    R = Rotation.from_matrix(dcm)
+    return R.as_quat()
+# --------------------------------------------------------------------------------
+
+
+def dcm_euler_angles(dcm: np.ndarray,
+                     order: str = "ZYX",
+                     deg: bool = False) -> Tuple[float, float, float]:
+    """
+    :param dcm: A direction cosine matrix of order 3x3
+    :param order: The order of rotations. Defaulted to 'ZYX'
+    :param deg: True if angles are to be calculated in degrees, False
+                for radians.  Defaulted to false
+    :return alpha, beta, gamma: A tuple of the Euler angles
+
+    This function calculates the Euler angles associated with a direction
+    cosine matrix via the following method where :math:`\\theta` represents
+    the angles in x, y and z directions. This method only works with
+    rotation matrices that were produced via intrinsic rotations.
+
+    .. math::
+
+        \\theta_{x,y,z}=
+        \\begin{bmatrix}
+            arctan2\\left(r_{23}, r_{33}\\right) \\\\
+            -arcsin\\left(r_{13}\\right) \\\\
+            arctan2\\left(r_{12}, r_{11}\\right)
+        \\end{bmatrix}
+
+    .. code-block::
+
+        from geo_py.rotations import dcm_euler_angles, intrinsic_dir_cos_mat
+
+        pitch = 0.1
+        roll = 0.0
+        yaw = 0.7854
+        dcm = intrinsic_dir_cos_mat(pitch, roll, yaw)
+        angles = dcm_euler_angles(dcm)
+        print(angles)
+        >>> 0.0, 0.1, 0.7854
+    """
+    R = Rotation.from_matrix(dcm)
+    angles = R.as_euler(order, degrees=deg)
+    return angles[0], angles[1], angles[2]
+# --------------------------------------------------------------------------------
+
+
+def extrinsic_euler_angles(dcm: np.ndarray,
+                           deg: bool = False) -> Tuple[float, float, float]:
+    """
+    :param dcm: A direction cosine matrix of order 3x3
+    :param order: The order of rotations. Defaulted to 'ZYX'
+    :param deg: True if angles are to be calculated in degrees, False
+                for radians.  Defaulted to false
+    :return alpha, beta, gamma: A tuple of the Euler angles
+
+    This function calculates the Euler angles associated with a direction
+    cosine matrix via the following method where :math:`\\theta` represents
+    the angles in x, y and z directions. This method only works with
+    rotation matrices that were produced via extrinsic rotations.
+
+    .. code-block::
+
+        from geo_py.rotations import extrinsic_euler_angles, extrinsic_dir_cos_mat
+
+        pitch = 0.1
+        roll = 0.0
+        yaw = 0.7854
+        dcm = extrinsic_dir_cos_mat(pitch, roll, yaw)
+        angles = extrinsic_euler_angles(dcm)
+        print(angles)
+        >>> 0.1, 0.0, 0.7854
+    """
+    R = Rotation.from_matrix(dcm.T)
+    angles = R.as_euler("ZYX", degrees=deg)
+    return angles[1], angles[2], angles[0]
 # ================================================================================
 # ================================================================================
 # QUATERNIANS
 
 
-def quaternion_to_dcm(q):
+def quaternion_to_dcm(q: np.ndarray) -> np.ndarray:
     """
     :param q: A quaternion of size 1x4
     :return dcm: A direction cosine matrix of size 3x3

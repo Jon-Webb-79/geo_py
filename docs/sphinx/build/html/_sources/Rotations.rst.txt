@@ -20,3 +20,7 @@ The following functions will conduct passive rotations based on Direction Cosine
 
 .. autofunction:: geo_py.rotations.quaternion_to_dcm
 
+.. autofunction:: geo_py.rotations.dcm_euler_angles
+
+.. autofunction:: geo_py.rotations.extrinsic_euler_angles 
+
