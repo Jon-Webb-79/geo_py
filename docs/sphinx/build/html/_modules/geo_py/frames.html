@@ -257,7 +257,7 @@
 
 
 <span class="sd">    The algorithm then iterates over the following variables until the difference</span>
-<span class="sd">    between :math:`\\phi_1 and :math:`\\phi` is :math:`10^{-14}` or less.</span>
+<span class="sd">    between :math:`\\phi_1` and :math:`\\phi` is :math:`10^{-14}` or less.</span>
 
 <span class="sd">    .. math::</span>
 
@@ -843,7 +843,7 @@
 <span class="c1"># ================================================================================</span>
 
 
-<span class="k">def</span> <span class="nf">ned_vector</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<div class="viewcode-block" id="ned_vector"><a class="viewcode-back" href="../../Frames.html#geo_py.frames.ned_vector">[docs]</a><span class="k">def</span> <span class="nf">ned_vector</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param lat: The latitude in units of decimal degrees</span>
@@ -851,6 +851,51 @@
 <span class="sd">    :param alt: The altitude in units of meters</span>
 <span class="sd">    :param dat: A datum data class.  Defaulted to WGS84</span>
 <span class="sd">    :return NED: A tuple containing the North, East, and Down vectors</span>
+
+<span class="sd">    This function converts a latitude, longitude and altitude to</span>
+<span class="sd">    a North, East, and Down vectors via the following method</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\begin{align}</span>
+<span class="sd">            N = \\frac{a}{\\sqrt[]{1-e^2sin^2\\left(\\phi\\right)}} \\\\</span>
+<span class="sd">            x = \\left(N+h\\right)cos\\left(\\phi\\right)\\:cos\\left(\\theta\\right) \\\\</span>
+<span class="sd">            y = \\left(N+h\\right)cos\\left(\\phi\\right)\\:sin\\left(\\theta\\right) \\\\</span>
+<span class="sd">            z = sin\\left(\\phi\\right)\\left[sin\\left(\\phi\\right)\\left(1-e^2\\right)N+h \\right]</span>
+<span class="sd">        \\end{align} \\\\</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            N \\\\</span>
+<span class="sd">            E \\\\</span>
+<span class="sd">            D</span>
+<span class="sd">        \\end{bmatrix}</span>
+<span class="sd">        =</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            -x &amp; -y &amp; -z \\\\</span>
+<span class="sd">            -y &amp; x &amp; 0 \\\\</span>
+<span class="sd">            -z\\:cos\\left(\\phi\\right) &amp; -z\\:cos\\left(\\phi\\right)\\:sin\\left(\\theta\\right) &amp;</span>
+<span class="sd">            \\left(1-e^2\\right)z\\:cos\\left(\\phi\\right)\\:cos\\left(\\theta\\right)</span>
+<span class="sd">        \\end{bmatrix}</span>
+
+<span class="sd">    Code Example</span>
+
+<span class="sd">   .. code-block::</span>
+
+<span class="sd">       from geo_py.frames import ned_vector</span>
+
+<span class="sd">       lat = 45.976</span>
+<span class="sd">       lon = 7.658</span>
+<span class="sd">       alt = 4531.0</span>
+
+<span class="sd">       N, E, D = ned_vector(lat, lon, alt)</span>
+<span class="sd">       print(N)</span>
+<span class="sd">       print(E)</span>
+<span class="sd">       print(D)</span>
+<span class="sd">       &gt;&gt;&gt; -4403757.60452593 -592124.57913994 -4566652.06017423</span>
+<span class="sd">       &gt;&gt;&gt; -592124.57913994 4403757.6045293 0.0</span>
+<span class="sd">       &gt;&gt;&gt; -3282645.49857941 -472918.22155005 3124277.54183501</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">lat</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
     <span class="n">lon</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
@@ -862,7 +907,7 @@
     <span class="n">east</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
     <span class="n">down</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">z</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="o">-</span><span class="n">z</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span>
                      <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dat</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">z</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)])</span>
-    <span class="k">return</span> <span class="n">north</span><span class="p">,</span> <span class="n">east</span><span class="p">,</span> <span class="n">down</span>
+    <span class="k">return</span> <span class="n">north</span><span class="p">,</span> <span class="n">east</span><span class="p">,</span> <span class="n">down</span></div>
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
 
@@ -872,6 +917,29 @@
 <span class="sd">    :param lon: The longitude in units of decimal degrees</span>
 <span class="sd">    :param alt: The altitude in units of meters</span>
 <span class="sd">    :return ENU: A tuple containing the East, North, and Up vectors</span>
+
+<span class="sd">    WARNING: Function still in development, do noy use</span>
+
+<span class="sd">    The ENU vector is calculated via the following method where</span>
+<span class="sd">    :math:`\\phi` and :math:`\\theta` represent latitude and longitude</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">           E \\\\</span>
+<span class="sd">           N \\\\</span>
+<span class="sd">           U</span>
+<span class="sd">        \\end{bmatrix}</span>
+<span class="sd">        =</span>
+<span class="sd">        \\begin{bmatrix}</span>
+<span class="sd">            -sin\\left(\\theta\\right) &amp; cos\\left(\\theta\\right) &amp; 0 \\\\</span>
+<span class="sd">            -sin\\left(\\phi\\right)\\:cos\\left(\\theta\\right) &amp;</span>
+<span class="sd">            -sin\\left(\\phi\\right)\\:sin\\left(\\theta\\right) &amp;</span>
+<span class="sd">            cos\\left(\\phi\\right) \\\\</span>
+<span class="sd">            cos\\left(\\phi\\right)\\:cos\\left(\\theta\\right)&amp;</span>
+<span class="sd">            cos\\left(\\phi\\right)\\:sin\\left(\\theta\\right) &amp;</span>
+<span class="sd">            sin\\left(\\phi\\right)</span>
+<span class="sd">        \\end{bmatrix}</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">lat</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
     <span class="n">lon</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
@@ -882,34 +950,34 @@
 <span class="c1"># --------------------------------------------------------------------------------</span>
 
 
-<span class="k">def</span> <span class="nf">body_to_local</span><span class="p">(</span><span class="n">lat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">lon</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pitch</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                  <span class="n">roll</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">yaw</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">cos_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">cos_y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-                  <span class="n">cos_z</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ned</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                  <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span> <span class="o">=</span> <span class="n">WGS84</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="c1"># def body_to_local(lat: float, lon: float, alt: float, pitch: float,</span>
+<span class="c1">#                   roll: float, yaw: float, cos_x: float, cos_y: float,</span>
+<span class="c1">#                   cos_z: float, ned: bool = True,</span>
+<span class="c1">#                   dat: Datum = WGS84()) -&gt; np.ndarray:</span>
 
-    <span class="n">lat</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
-    <span class="n">lon</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
-    <span class="n">R_body_local</span> <span class="o">=</span> <span class="n">aircraft_rotation</span><span class="p">(</span><span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">)</span>
+<span class="c1">#     lat = radians(lat)</span>
+<span class="c1">#     lon = radians(lon)</span>
+<span class="c1">#     R_body_local = aircraft_rotation(yaw, pitch, roll)</span>
 
-    <span class="k">if</span> <span class="n">ned</span><span class="p">:</span>
-        <span class="c1"># Rotation matrix from NED to ECEF</span>
-        <span class="n">R_ecef_local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">)],</span>
-                               <span class="p">[</span><span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="o">-</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">)],</span>
-                               <span class="p">[</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)]])</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Rotation matrix from ENU to ECEF</span>
-        <span class="n">R_ecef_local</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
-                               <span class="p">[</span><span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)],</span>
-                               <span class="p">[</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)]])</span>
+<span class="c1">#     if ned:</span>
+<span class="c1">#         # Rotation matrix from NED to ECEF</span>
+<span class="c1">#         R_ecef_local = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],</span>
+<span class="c1">#                                [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],</span>
+<span class="c1">#                                [cos(lat), 0, -sin(lat)]])</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         # Rotation matrix from ENU to ECEF</span>
+<span class="c1">#         R_ecef_local = np.array([[-sin(lon), cos(lon), 0],</span>
+<span class="c1">#                                [-sin(lat)*cos(lon), -sin(lat)*sin(lon), cos(lat)],</span>
+<span class="c1">#                                [cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat)]])</span>
 
-    <span class="n">R_ecef_body</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">R_ecef_local</span><span class="p">,</span> <span class="n">R_body_local</span><span class="p">)</span>
+<span class="c1">#     R_ecef_body = np.matmul(R_ecef_local, R_body_local)</span>
 
-    <span class="c1"># Position vector in ECEF</span>
-    <span class="n">pos_ecef</span> <span class="o">=</span> <span class="n">llh_to_ecef</span><span class="p">(</span><span class="n">degrees</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="n">degrees</span><span class="p">(</span><span class="n">lon</span><span class="p">),</span> <span class="n">alt</span><span class="p">)</span>
+<span class="c1">#     # Position vector in ECEF</span>
+<span class="c1">#     pos_ecef = llh_to_ecef(degrees(lat), degrees(lon), alt)</span>
 
-    <span class="c1"># Vector in ECEF</span>
-    <span class="n">vec_ecef</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">R_ecef_body</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cos_x</span><span class="p">,</span> <span class="n">cos_y</span><span class="p">,</span> <span class="n">cos_z</span><span class="p">]))</span> <span class="o">+</span> <span class="n">pos_ecef</span>
-    <span class="k">return</span> <span class="n">vec_ecef</span>
+<span class="c1">#     # Vector in ECEF</span>
+<span class="c1">#     vec_ecef = np.matmul(R_ecef_body, np.array([cos_x, cos_y, cos_z])) + pos_ecef</span>
+<span class="c1">#     return vec_ecef</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># eof</span>

@@ -10,7 +10,7 @@ from geo_py.datum import ITRF
 from geo_py.frames import llh_to_ecef, ecef_to_llh, ecef_to_enu, enu_to_ecef
 from geo_py.frames import llh_to_enu, enu_to_llh, ecef_to_ned, ned_to_ecef
 from geo_py.frames import llh_to_ned, ned_to_llh, ned_to_enu, enu_to_ned
-from geo_py.frames import ned_vector
+from geo_py.frames import ned_vector, enu_vector
 # ================================================================================
 # ================================================================================
 # File:    test.py
@@ -258,7 +258,17 @@ def test_ned_vector():
     lat = 45.976
     lon = 7.658
     alt = 4531.0
-    N, E, D = ned_vector(lat, lon, alt)
+    ned_vector(lat, lon, alt)
+# --------------------------------------------------------------------------------
+
+
+def test_enu_vector():
+    lat = 17.4114
+    lon = 78.27
+    E, N, U = enu_vector(lat, lon)
+    print(E)
+    print(N)
+    print(U)
 # --------------------------------------------------------------------------------
 
 

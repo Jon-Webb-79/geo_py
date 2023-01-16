@@ -218,7 +218,7 @@ def ecef_to_llh(x: float, y: float,
 
 
     The algorithm then iterates over the following variables until the difference
-    between :math:`\\phi_1 and :math:`\\phi` is :math:`10^{-14}` or less.
+    between :math:`\\phi_1` and :math:`\\phi` is :math:`10^{-14}` or less.
 
     .. math::
 
@@ -812,6 +812,51 @@ def ned_vector(lat: float, lon: float, alt: float,
     :param alt: The altitude in units of meters
     :param dat: A datum data class.  Defaulted to WGS84
     :return NED: A tuple containing the North, East, and Down vectors
+
+    This function converts a latitude, longitude and altitude to
+    a North, East, and Down vectors via the following method
+
+    .. math::
+
+        \\begin{align}
+            N = \\frac{a}{\\sqrt[]{1-e^2sin^2\\left(\\phi\\right)}} \\\\
+            x = \\left(N+h\\right)cos\\left(\\phi\\right)\\:cos\\left(\\theta\\right) \\\\
+            y = \\left(N+h\\right)cos\\left(\\phi\\right)\\:sin\\left(\\theta\\right) \\\\
+            z = sin\\left(\\phi\\right)\\left[sin\\left(\\phi\\right)\\left(1-e^2\\right)N+h \\right]
+        \\end{align} \\\\
+
+    .. math::
+
+        \\begin{bmatrix}
+            N \\\\
+            E \\\\
+            D
+        \\end{bmatrix}
+        =
+        \\begin{bmatrix}
+            -x & -y & -z \\\\
+            -y & x & 0 \\\\
+            -z\\:cos\\left(\\phi\\right) & -z\\:cos\\left(\\phi\\right)\\:sin\\left(\\theta\\right) &
+            \\left(1-e^2\\right)z\\:cos\\left(\\phi\\right)\\:cos\\left(\\theta\\right)
+        \\end{bmatrix}
+
+    Code Example
+
+   .. code-block::
+
+       from geo_py.frames import ned_vector
+
+       lat = 45.976
+       lon = 7.658
+       alt = 4531.0
+
+       N, E, D = ned_vector(lat, lon, alt)
+       print(N)
+       print(E)
+       print(D)
+       >>> -4403757.60452593 -592124.57913994 -4566652.06017423
+       >>> -592124.57913994 4403757.6045293 0.0
+       >>> -3282645.49857941 -472918.22155005 3124277.54183501
     """
     lat = radians(lat)
     lon = radians(lon)
@@ -833,6 +878,29 @@ def enu_vector(lat: float, lon: float) -> Tuple[np.ndarray, np.ndarray, np.ndarr
     :param lon: The longitude in units of decimal degrees
     :param alt: The altitude in units of meters
     :return ENU: A tuple containing the East, North, and Up vectors
+
+    WARNING: Function still in development, do noy use
+
+    The ENU vector is calculated via the following method where
+    :math:`\\phi` and :math:`\\theta` represent latitude and longitude
+
+    .. math::
+
+        \\begin{bmatrix}
+           E \\\\
+           N \\\\
+           U
+        \\end{bmatrix}
+        =
+        \\begin{bmatrix}
+            -sin\\left(\\theta\\right) & cos\\left(\\theta\\right) & 0 \\\\
+            -sin\\left(\\phi\\right)\\:cos\\left(\\theta\\right) &
+            -sin\\left(\\phi\\right)\\:sin\\left(\\theta\\right) &
+            cos\\left(\\phi\\right) \\\\
+            cos\\left(\\phi\\right)\\:cos\\left(\\theta\\right)&
+            cos\\left(\\phi\\right)\\:sin\\left(\\theta\\right) &
+            sin\\left(\\phi\\right)
+        \\end{bmatrix}
     """
     lat = radians(lat)
     lon = radians(lon)
@@ -843,34 +911,34 @@ def enu_vector(lat: float, lon: float) -> Tuple[np.ndarray, np.ndarray, np.ndarr
 # --------------------------------------------------------------------------------
 
 
-def body_to_local(lat: float, lon: float, alt: float, pitch: float,
-                  roll: float, yaw: float, cos_x: float, cos_y: float,
-                  cos_z: float, ned: bool = True,
-                  dat: Datum = WGS84()) -> np.ndarray:
+# def body_to_local(lat: float, lon: float, alt: float, pitch: float,
+#                   roll: float, yaw: float, cos_x: float, cos_y: float,
+#                   cos_z: float, ned: bool = True,
+#                   dat: Datum = WGS84()) -> np.ndarray:
 
-    lat = radians(lat)
-    lon = radians(lon)
-    R_body_local = aircraft_rotation(yaw, pitch, roll)
+#     lat = radians(lat)
+#     lon = radians(lon)
+#     R_body_local = aircraft_rotation(yaw, pitch, roll)
 
-    if ned:
-        # Rotation matrix from NED to ECEF
-        R_ecef_local = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],
-                               [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],
-                               [cos(lat), 0, -sin(lat)]])
-    else:
-        # Rotation matrix from ENU to ECEF
-        R_ecef_local = np.array([[-sin(lon), cos(lon), 0],
-                               [-sin(lat)*cos(lon), -sin(lat)*sin(lon), cos(lat)],
-                               [cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat)]])
+#     if ned:
+#         # Rotation matrix from NED to ECEF
+#         R_ecef_local = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],
+#                                [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],
+#                                [cos(lat), 0, -sin(lat)]])
+#     else:
+#         # Rotation matrix from ENU to ECEF
+#         R_ecef_local = np.array([[-sin(lon), cos(lon), 0],
+#                                [-sin(lat)*cos(lon), -sin(lat)*sin(lon), cos(lat)],
+#                                [cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat)]])
 
-    R_ecef_body = np.matmul(R_ecef_local, R_body_local)
+#     R_ecef_body = np.matmul(R_ecef_local, R_body_local)
 
-    # Position vector in ECEF
-    pos_ecef = llh_to_ecef(degrees(lat), degrees(lon), alt)
+#     # Position vector in ECEF
+#     pos_ecef = llh_to_ecef(degrees(lat), degrees(lon), alt)
 
-    # Vector in ECEF
-    vec_ecef = np.matmul(R_ecef_body, np.array([cos_x, cos_y, cos_z])) + pos_ecef
-    return vec_ecef
+#     # Vector in ECEF
+#     vec_ecef = np.matmul(R_ecef_body, np.array([cos_x, cos_y, cos_z])) + pos_ecef
+#     return vec_ecef
 # ================================================================================
 # ================================================================================
 # eof

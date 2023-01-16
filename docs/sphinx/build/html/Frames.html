@@ -238,7 +238,7 @@ assumptions;</p>
     \phi = atan2\left(Z,P\left(1-e^2\right)\right)
 \end{eqnarray}\end{split}\]</div>
 <p>The algorithm then iterates over the following variables until the difference
-between <span class="math notranslate nohighlight">\(\phi_1 and :math:\)</span>phi` is <span class="math notranslate nohighlight">\(10^{-14}\)</span> or less.</p>
+between <span class="math notranslate nohighlight">\(\phi_1\)</span> and <span class="math notranslate nohighlight">\(\phi\)</span> is <span class="math notranslate nohighlight">\(10^{-14}\)</span> or less.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{eqnarray}
     N = \frac{a}{\sqrt[]{1-e^2sin^2\left(\phi\right)}} \\
@@ -738,6 +738,68 @@ used to transform to ENU coordinates</p>
 </div>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.frames.ned_vector">
+<span class="sig-prename descclassname"><span class="pre">geo_py.frames.</span></span><span class="sig-name descname"><span class="pre">ned_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WGS84(a=6378137.0,</span> <span class="pre">b=6356752.314245,</span> <span class="pre">f=0.0033528106647474805,</span> <span class="pre">e=0.08181919084262157,</span> <span class="pre">e2=0.00669437999014132,</span> <span class="pre">GM=398600500000000.0,</span> <span class="pre">R_avg=6371008.8,</span> <span class="pre">e24=0.006694317779487594,</span> <span class="pre">g_avg=9.7803253359)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/geo_py/frames.html#ned_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.frames.ned_vector" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">param lat<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The latitude in units of decimal degrees</p>
+</dd>
+<dt class="field-even">param lon<span class="colon">:</span></dt>
+<dd class="field-even"><p>The longitude in units of decimal degrees</p>
+</dd>
+<dt class="field-odd">param alt<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The altitude in units of meters</p>
+</dd>
+<dt class="field-even">param dat<span class="colon">:</span></dt>
+<dd class="field-even"><p>A datum data class.  Defaulted to WGS84</p>
+</dd>
+<dt class="field-odd">return NED<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing the North, East, and Down vectors</p>
+</dd>
+</dl>
+<p>This function converts a latitude, longitude and altitude to
+a North, East, and Down vectors via the following method</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+    N = \frac{a}{\sqrt[]{1-e^2sin^2\left(\phi\right)}} \\
+    x = \left(N+h\right)cos\left(\phi\right)\:cos\left(\theta\right) \\
+    y = \left(N+h\right)cos\left(\phi\right)\:sin\left(\theta\right) \\
+    z = sin\left(\phi\right)\left[sin\left(\phi\right)\left(1-e^2\right)N+h \right]
+\end{align} \\\end{split}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+    N \\
+    E \\
+    D
+\end{bmatrix}
+=
+\begin{bmatrix}
+    -x &amp; -y &amp; -z \\
+    -y &amp; x &amp; 0 \\
+    -z\:cos\left(\phi\right) &amp; -z\:cos\left(\phi\right)\:sin\left(\theta\right) &amp;
+    \left(1-e^2\right)z\:cos\left(\phi\right)\:cos\left(\theta\right)
+\end{bmatrix}\end{split}\]</div>
+<p>Code Example</p>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.frames</span> <span class="kn">import</span> <span class="n">ned_vector</span>
+
+<span class="n">lat</span> <span class="o">=</span> <span class="mf">45.976</span>
+<span class="n">lon</span> <span class="o">=</span> <span class="mf">7.658</span>
+<span class="n">alt</span> <span class="o">=</span> <span class="mf">4531.0</span>
+
+<span class="n">N</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">D</span> <span class="o">=</span> <span class="n">ned_vector</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">D</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">-</span><span class="mf">4403757.60452593</span> <span class="o">-</span><span class="mf">592124.57913994</span> <span class="o">-</span><span class="mf">4566652.06017423</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">-</span><span class="mf">592124.57913994</span> <span class="mf">4403757.6045293</span> <span class="mf">0.0</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">-</span><span class="mf">3282645.49857941</span> <span class="o">-</span><span class="mf">472918.22155005</span> <span class="mf">3124277.54183501</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 </section>
 
@@ -765,6 +827,7 @@ used to transform to ENU coordinates</p>
 <li><a class="reference internal" href="#geo_py.frames.ned_to_ecef"><code class="docutils literal notranslate"><span class="pre">ned_to_ecef()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.frames.ned_to_llh"><code class="docutils literal notranslate"><span class="pre">ned_to_llh()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.frames.ned_to_enu"><code class="docutils literal notranslate"><span class="pre">ned_to_enu()</span></code></a></li>
+<li><a class="reference internal" href="#geo_py.frames.ned_vector"><code class="docutils literal notranslate"><span class="pre">ned_vector()</span></code></a></li>
 </ul>
 </li>
 </ul>

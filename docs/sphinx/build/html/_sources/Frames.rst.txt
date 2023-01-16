@@ -37,3 +37,6 @@ ENU (East, North, Up), and NED (North, East, Down) coordinate frames.
 .. autofunction:: geo_py.frames.ned_to_llh
 
 .. autofunction:: geo_py.frames.ned_to_enu
+
+.. autofunction:: geo_py.frames.ned_vector
+
