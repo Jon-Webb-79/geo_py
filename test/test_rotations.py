@@ -6,7 +6,7 @@ from pathlib import PurePath
 from scipy.spatial.transform import Rotation
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
-from geo_py.rotations import rotation_matrix, dcm_euler_angles
+from geo_py.rotations import rotation_matrix, dcm_euler_angles, aircraft_rotation
 # ================================================================================
 # ================================================================================
 # File:    test_rotations.py
@@ -52,6 +52,12 @@ def test_rot_mat_xyz():
     scipy_dcm = list(scipy_dcm.flat)
     for one, two in zip(dcm, scipy_dcm):
         assert isclose(one, two, rel_tol=1.0e-3)
+
+    pitch = 22.1
+    roll = 8.75
+    yaw = 12.8
+    dcm = rotation_matrix(yaw, pitch, roll, order="XYZ", deg=True)
+    print(dcm)
 # --------------------------------------------------------------------------------
 
 
@@ -215,6 +221,21 @@ def test_dcm_to_euler_zxy():
     assert isclose(yaw, nyaw, rel_tol=1.0e-3)
     assert isclose(pitch, npitch, rel_tol=1.0e-3)
     assert isclose(roll, nroll, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_ac_rotation():
+    pitch = 22.1  # degrees
+    roll = 8.75  # degrees
+    yaw = 12.8  # degrees
+    sequence = "ZYX"  # Z: yaw, Y: pitch, X: roll
+    dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
+                          deg=True)
+    new_dcm = aircraft_rotation(yaw, pitch, roll, deg=True)
+    dcm = list(dcm.flat)
+    new_dcm = list(new_dcm.flat)
+    for one, two in zip(dcm, new_dcm):
+        assert isclose(one, two, rel_tol=1.0e-3)
 # ================================================================================
 # ================================================================================
 # QUATERNIANS TEST

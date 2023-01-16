@@ -15,4 +15,6 @@ The following functions will conduct passive rotations based on Direction Cosine
 
 .. autofunction:: geo_py.rotations.dcm_euler_angles
 
+.. autofunction:: geo_py.rotations.aircraft_rotation
+
 

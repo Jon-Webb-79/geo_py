@@ -229,30 +229,26 @@ coordinate system with its origin at the center of the Earth.</p>
 (<span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>) from the Datum dataclass and use them with the
 ECEF inputs <span class="math notranslate nohighlight">\(X\)</span>, <span class="math notranslate nohighlight">\(Y\)</span>, <span class="math notranslate nohighlight">\(Z\)</span> to calculate
 latitude, longitude, and height <span class="math notranslate nohighlight">\(\phi\)</span>, <span class="math notranslate nohighlight">\(\lambda\)</span>,
-<span class="math notranslate nohighlight">\(h\)</span> in accordance with the following equations.</p>
+<span class="math notranslate nohighlight">\(h\)</span>.  This method is iterative and starts by making the following
+assumptions;</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{eqnarray}
-e^2 = \frac{a^2-b^2}{a^2} \\
-e^{\prime 2} = \frac{a^2-b^2}{b^2} \\
-p = \sqrt[]{X^2+Y^2} \\
-F = 54b^2\:Z^2 \\
-G = p^2 + \left(1 - e^2\right)Z^2 - e^2 \left(a^2-b^2\right) \\
-c = \frac{e^4Fp^2}{G^3} \\
-s = \sqrt[3]{1 + c + \sqrt[]{c^2 + 2c}} \\
-k = s + 1 + \frac{1}{s} \\
-P = \frac{F}{3k^2G^2} \\
-Q = \sqrt[]{1+2e^4P} \\
-r_o = \frac{-Pe^2p}{1+Q} \\
-r_o2 = \frac{1}{2}a\left(1+\frac{1}{Q}\right) \\
-r_o3 = -\frac{P\left(1-e^2\right)Z^2}{Q\left(1+Q\right)} - \frac{1}{2}Pp^2 \\
-r_o = r_o + \sqrt[]{r_o2 + r_o3} \\
-U = \sqrt[]{\left(p-e^2r_o\right)^2+Z^2} \\
-V = \sqrt[]{\left(p-e^2r_o\right)^2+\left(1-e^2\right)Z^2} \\
-z_o = \frac{b^2Z}{aV} \\
-h = U\left(1-\frac{b^2}{aV}\right) \\
-\phi = arctan\left[\frac{Z+e^{\prime2}z_o}{p}\right] \\
-\lambda = arctan2\left[Y, X\right]
+    \lambda = atan2\left(Y,X\right) \\
+    p = \sqrt[]{X^2+Y^2} \\
+    \phi = atan2\left(Z,P\left(1-e^2\right)\right)
 \end{eqnarray}\end{split}\]</div>
+<p>The algorithm then iterates over the following variables until the difference
+between <span class="math notranslate nohighlight">\(\phi_1 and :math:\)</span>phi` is <span class="math notranslate nohighlight">\(10^{-14}\)</span> or less.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{eqnarray}
+    N = \frac{a}{\sqrt[]{1-e^2sin^2\left(\phi\right)}} \\
+    \phi_1 = atan2\left(Z+Ne^2sin^2\left(\phi\right),p\right) \\
+\end{eqnarray}\end{split}\]</div>
+<p>Once the solution has converged, which is usually within 4 to 5 iterations
+the altitude can eb deterimined via;</p>
+<div class="math notranslate nohighlight">
+\[h=\frac{p}{cos\left(\phi\right)}-N\]</div>
+<p>Finally the latitude and longitude are converted from radians to degrees.</p>
 <p>Code example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.datum</span> <span class="kn">import</span> <span class="n">ITRF</span>
 <span class="kn">from</span> <span class="nn">geo_py.frames</span> <span class="kn">import</span> <span class="n">ecef_to_llh</span>
@@ -263,11 +259,11 @@ h = U\left(1-\frac{b^2}{aV}\right) \\
 <span class="n">z</span> <span class="o">=</span> <span class="mf">4632996.83</span>
 <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span> <span class="o">=</span> <span class="n">ecef_to_llh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="mf">46.826</span><span class="p">,</span> <span class="mf">107.321</span><span class="p">,</span> <span class="mf">6097.1</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">46.826</span><span class="p">,</span> <span class="mf">107.321</span><span class="p">,</span> <span class="mf">6095.999</span>
 
 <span class="c1"># Use a different datum</span>
 <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span> <span class="o">=</span> <span class="n">ecef_to_llh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">ITRF</span><span class="p">())</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="mf">46.826</span><span class="p">,</span> <span class="mf">107.321</span><span class="p">,</span> <span class="mf">6097.448</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">46.826</span><span class="p">,</span> <span class="mf">107.321</span><span class="p">,</span> <span class="mf">6095.999</span>
 </pre></div>
 </div>
 </dd></dl>

@@ -119,9 +119,9 @@ matrix.</p>
 <span class="c1"># rotate about the ZYX axis, wich is default to get intrinsic matrix</span>
 <span class="n">dcm</span> <span class="o">=</span> <span class="n">rotation_matrix</span><span class="p">(</span><span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">dcm</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="p">[[</span> <span class="mf">0.25707693</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.62399419</span><span class="p">,</span> <span class="mf">0.73793137</span><span class="p">],</span>
-     <span class="p">[</span><span class="mf">0.96289059</span><span class="p">,</span> <span class="mf">0.23032494</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.14068453</span><span class="p">],</span>
-     <span class="p">[</span><span class="o">-</span><span class="mf">0.08217767</span><span class="p">,</span> <span class="mf">0.74671392</span><span class="p">,</span> <span class="mf">0.66004936</span><span class="p">]]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[[</span> <span class="mf">0.25707693</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.84569594</span><span class="p">,</span> <span class="mf">0.46766422</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.62399419</span><span class="p">,</span> <span class="mf">0.51478756</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.58789882</span><span class="p">],</span>
+     <span class="p">[</span><span class="o">-</span><span class="mf">0.73793137</span><span class="p">,</span> <span class="mf">0.14068453</span><span class="p">,</span> <span class="mf">0.66004936</span><span class="p">]]</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.rotations</span> <span class="kn">import</span> <span class="n">rotation_matrix</span>
@@ -132,9 +132,9 @@ matrix.</p>
 <span class="n">yaw</span> <span class="o">=</span> <span class="mf">12.8</span>  <span class="c1"># degrees</span>
 <span class="n">dcm</span> <span class="o">=</span> <span class="n">rotation_matrix</span><span class="p">(</span><span class="n">ya</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;XYZ&quot;</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extrinsic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">dcm</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="p">[[</span> <span class="mf">0.90335038</span><span class="p">,</span> <span class="mf">0.27478025</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.32890227</span><span class="p">],</span>
-     <span class="p">[</span><span class="o">-</span><span class="mf">0.20527103</span><span class="p">,</span> <span class="mf">0.95112031</span><span class="p">,</span> <span class="mf">0.23072485</span><span class="p">],</span>
-     <span class="p">[</span><span class="mf">0.37622426</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.14094667</span><span class="p">,</span> <span class="mf">0.9157424</span><span class="p">]]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[[</span> <span class="mf">0.90335038</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.20527103</span><span class="p">,</span> <span class="mf">0.37622426</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.27478025</span><span class="p">,</span> <span class="mf">0.95112031</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.14094667</span><span class="p">],</span>
+     <span class="p">[</span><span class="o">-</span><span class="mf">0.32890227</span><span class="p">,</span> <span class="mf">0.23072485</span><span class="p">,</span> <span class="mf">0.91574524</span><span class="p">]]</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -188,6 +188,57 @@ can be found here <a class="reference external" href="https://en.wikipedia.org/w
 </div>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.rotations.aircraft_rotation">
+<span class="sig-prename descclassname"><span class="pre">geo_py.rotations.</span></span><span class="sig-name descname"><span class="pre">aircraft_rotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/geo_py/rotations.html#aircraft_rotation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.rotations.aircraft_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>yaw</strong> – The rotation about the yaw axis in units of degrees or radians</p></li>
+<li><p><strong>pitch</strong> – The rotation about the pitch axis in units of degrees
+or radians</p></li>
+<li><p><strong>roll</strong> – The rotation about the roll axis in units of degrees
+or radians.</p></li>
+<li><p><strong>deg</strong> – True if units are in degrees, False for radians.
+Defaulted to false</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return dcm<span class="colon">:</span></dt>
+<dd class="field-even"><p>A direction cosine matrix rotated in the order ZYX</p>
+</dd>
+</dl>
+<p>This function returns the direction cosine matrix specifically rotated
+for an aircraft rotation about yaw, pitch and roll.  The rotation_matrix
+function can be used to accomplish the same utility as this function,
+however, no matrix multiplication is required with this function, which
+may reduce computational time if the function is called repetitively.
+This function implements the following rotation matrix, where
+<span class="math notranslate nohighlight">\(\theta\)</span>, <span class="math notranslate nohighlight">\(\phi\)</span>, and <span class="math notranslate nohighlight">\(\psi\)</span> represent
+pitch, roll, and yaw angles respectively</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}C = \\
+\begin{bmatrix}
+    cos\psi\:cos\theta &amp; cos\psi\:sin\theta\:sin\phi-sin\psi\:cos\phi &amp;
+    cos\psi\:sin\theta\:cos\phi+sin\psi\:sin\phi \\
+    sin\psi\:sin\theta &amp; sin\psi\:sin\theta\:sin\phi+cos\psi\:cos\phi &amp;
+    sin\psi\:sin\theta\:cos\phi-cos\psi\:sin\phi \\
+    -sin\theta &amp; cos\theta\:sin\phi &amp; cos\theta\:cos\phi
+\end{bmatrix}\end{split}\]</div>
+<p>Code Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.rotations</span> <span class="kn">import</span> <span class="n">aircraft_rotations</span>
+
+<span class="n">pitch</span> <span class="o">=</span> <span class="mi">15</span>  <span class="c1"># degrees</span>
+<span class="n">roll</span> <span class="o">=</span> <span class="mi">8</span>  <span class="c1"># degrees</span>
+<span class="n">yaw</span> <span class="o">=</span> <span class="mf">3.2</span>  <span class="c1"># degrees</span>
+<span class="n">dcm</span> <span class="o">=</span> <span class="n">aircraft_rotation</span><span class="p">(</span><span class="n">yaw</span><span class="p">,</span> <span class="n">pitch</span><span class="p">,</span> <span class="n">roll</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dcm</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[[</span><span class="mf">0.9035038</span> <span class="o">-</span><span class="mf">0.16315976</span> <span class="mf">0.39630769</span><span class="p">]</span>
+     <span class="p">[</span><span class="mf">0.20527103</span> <span class="mf">0.97647987</span> <span class="o">-</span><span class="mf">0.06596119</span><span class="p">]</span>
+     <span class="p">[</span><span class="o">-</span><span class="mf">0.37622426</span> <span class="mf">0.14094667</span> <span class="mf">0.91574524</span><span class="p">]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 </section>
 
@@ -205,6 +256,7 @@ can be found here <a class="reference external" href="https://en.wikipedia.org/w
 <li><a class="reference internal" href="#euler-angles">Euler Angles</a><ul>
 <li><a class="reference internal" href="#geo_py.rotations.rotation_matrix"><code class="docutils literal notranslate"><span class="pre">rotation_matrix()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.rotations.dcm_euler_angles"><code class="docutils literal notranslate"><span class="pre">dcm_euler_angles()</span></code></a></li>
+<li><a class="reference internal" href="#geo_py.rotations.aircraft_rotation"><code class="docutils literal notranslate"><span class="pre">aircraft_rotation()</span></code></a></li>
 </ul>
 </li>
 </ul>

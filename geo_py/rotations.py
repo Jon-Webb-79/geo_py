@@ -94,9 +94,9 @@ def rotation_matrix(yaw: float, pitch: float, roll: float,
         # rotate about the ZYX axis, wich is default to get intrinsic matrix
         dcm = rotation_matrix(yaw, pitch, roll)
         print(dcm)
-        >>> [[ 0.25707693, -0.62399419, 0.73793137],
-             [0.96289059, 0.23032494, -0.14068453],
-             [-0.08217767, 0.74671392, 0.66004936]]
+        >>> [[ 0.25707693, -0.84569594, 0.46766422],
+             [0.62399419, 0.51478756, -0.58789882],
+             [-0.73793137, 0.14068453, 0.66004936]]
 
     .. code-block::
 
@@ -108,9 +108,9 @@ def rotation_matrix(yaw: float, pitch: float, roll: float,
         yaw = 12.8  # degrees
         dcm = rotation_matrix(ya, pitch, roll, order="XYZ", deg=True, extrinsic=True)
         print(dcm)
-        >>> [[ 0.90335038, 0.27478025, -0.32890227],
-             [-0.20527103, 0.95112031, 0.23072485],
-             [0.37622426, -0.14094667, 0.9157424]]
+        >>> [[ 0.90335038, -0.20527103, 0.37622426],
+             [0.27478025, 0.95112031, -0.14094667],
+             [-0.32890227, 0.23072485, 0.91574524]]
     """
     order = order.upper()
     if deg:
@@ -118,7 +118,6 @@ def rotation_matrix(yaw: float, pitch: float, roll: float,
         pitch = radians(pitch)
         roll = radians(roll)
 
-    # Create rotation matrices for each axis
     rot_x = np.array([[1, 0, 0],
                       [0, np.cos(roll), -np.sin(roll)],
                       [0, np.sin(roll), np.cos(roll)]])
@@ -232,6 +231,70 @@ def dcm_euler_angles(dcm: np.ndarray, order: str = "ZYX", deg: bool = False,
         pitch = degrees(pitch)
         roll = degrees(roll)
     return yaw, pitch, roll
+# --------------------------------------------------------------------------------
+
+
+def aircraft_rotation(yaw: float, pitch: float, roll: float,
+                      deg: bool = False) -> np.ndarray:
+    """
+    :param yaw: The rotation about the yaw axis in units of degrees or radians
+    :param pitch: The rotation about the pitch axis in units of degrees
+                  or radians
+    :param roll: The rotation about the roll axis in units of degrees
+                 or radians.
+    :param deg: True if units are in degrees, False for radians.
+                Defaulted to false
+    :return dcm: A direction cosine matrix rotated in the order ZYX
+
+    This function returns the direction cosine matrix specifically rotated
+    for an aircraft rotation about yaw, pitch and roll.  The rotation_matrix
+    function can be used to accomplish the same utility as this function,
+    however, no matrix multiplication is required with this function, which
+    may reduce computational time if the function is called repetitively.
+    This function implements the following rotation matrix, where
+    :math:`\\theta`, :math:`\\phi`, and :math:`\\psi` represent
+    pitch, roll, and yaw angles respectively
+
+    .. math::
+
+       C = \\\\
+       \\begin{bmatrix}
+           cos\\psi\\:cos\\theta & cos\\psi\\:sin\\theta\\:sin\\phi-sin\\psi\\:cos\\phi &
+           cos\\psi\\:sin\\theta\\:cos\\phi+sin\\psi\\:sin\\phi \\\\
+           sin\\psi\\:sin\\theta & sin\\psi\\:sin\\theta\\:sin\\phi+cos\\psi\\:cos\\phi &
+           sin\\psi\\:sin\\theta\\:cos\\phi-cos\\psi\\:sin\\phi \\\\
+           -sin\\theta & cos\\theta\\:sin\\phi & cos\\theta\\:cos\\phi
+       \\end{bmatrix}
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.rotations import aircraft_rotations
+
+        pitch = 15  # degrees
+        roll = 8  # degrees
+        yaw = 3.2  # degrees
+        dcm = aircraft_rotation(yaw, pitch, roll, deg=True)
+        print(dcm)
+        >>> [[0.9035038 -0.16315976 0.39630769]
+             [0.20527103 0.97647987 -0.06596119]
+             [-0.37622426 0.14094667 0.91574524]]
+    """
+    if deg:
+        yaw = radians(yaw)
+        pitch = radians(pitch)
+        roll = radians(roll)
+
+    body_local = np.array([[cos(yaw)*cos(pitch),
+                            cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll),
+                            cos(yaw)*sin(pitch)*cos(roll)+sin(yaw)*sin(roll)],
+                           [sin(yaw)*cos(pitch),
+                            sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll),
+                            sin(yaw)*sin(pitch)*cos(roll)-cos(yaw)*sin(roll)],
+                           [-sin(pitch), cos(pitch)*sin(roll),
+                            cos(pitch)*cos(roll)]])
+    return body_local
 # ================================================================================
 # ================================================================================
 # eof

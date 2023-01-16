@@ -10,7 +10,7 @@ from geo_py.datum import ITRF
 from geo_py.frames import llh_to_ecef, ecef_to_llh, ecef_to_enu, enu_to_ecef
 from geo_py.frames import llh_to_enu, enu_to_llh, ecef_to_ned, ned_to_ecef
 from geo_py.frames import llh_to_ned, ned_to_llh, ned_to_enu, enu_to_ned
-from geo_py.frames import ned_vector, body, body_to_ecef
+from geo_py.frames import ned_vector
 # ================================================================================
 # ================================================================================
 # File:    test.py
@@ -262,18 +262,18 @@ def test_ned_vector():
 # --------------------------------------------------------------------------------
 
 
-def test_body():
-    pitch = radians(8.)
-    roll = 0.
-    yaw = radians(13.0)
-    lat = 57.14
-    lon = 112.3
-    alt = 6000.0
-    cos_x = 0.13
-    cos_y = -0.28
-    cos_z = 0.0717
-    vec = body(lat, lon, alt, pitch, roll, yaw, cos_x, cos_y, cos_z)
-    print(vec)
+# def test_body():
+#     pitch = radians(8.)
+#     roll = 0.
+#     yaw = radians(13.0)
+#     lat = 57.14
+#     lon = 112.3
+#     alt = 6000.0
+#     cos_x = 0.13
+#     cos_y = -0.28
+#     cos_z = 0.0717
+#     vec = body(lat, lon, alt, pitch, roll, yaw, cos_x, cos_y, cos_z)
+#     print(vec)
 # ================================================================================
 # ================================================================================
 # eof

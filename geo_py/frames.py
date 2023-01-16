@@ -7,7 +7,7 @@ import numpy as np
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
 from geo_py.datum import Datum, WGS84
-from geo_py.rotations import rotation_matrix
+from geo_py.rotations import rotation_matrix, aircraft_rotation
 # ================================================================================
 # ================================================================================
 # File:    transform.py
@@ -205,32 +205,36 @@ def ecef_to_llh(x: float, y: float,
     (:math:`a`, :math:`b`) from the Datum dataclass and use them with the
     ECEF inputs :math:`X`, :math:`Y`, :math:`Z` to calculate
     latitude, longitude, and height :math:`\\phi`, :math:`\\lambda`,
-    :math:`h` in accordance with the following equations.
+    :math:`h`.  This method is iterative and starts by making the following
+    assumptions;
 
     .. math::
 
         \\begin{eqnarray}
-        e^2 = \\frac{a^2-b^2}{a^2} \\\\
-        e^{\\prime 2} = \\frac{a^2-b^2}{b^2} \\\\
-        p = \\sqrt[]{X^2+Y^2} \\\\
-        F = 54b^2\\:Z^2 \\\\
-        G = p^2 + \\left(1 - e^2\\right)Z^2 - e^2 \\left(a^2-b^2\\right) \\\\
-        c = \\frac{e^4Fp^2}{G^3} \\\\
-        s = \\sqrt[3]{1 + c + \\sqrt[]{c^2 + 2c}} \\\\
-        k = s + 1 + \\frac{1}{s} \\\\
-        P = \\frac{F}{3k^2G^2} \\\\
-        Q = \\sqrt[]{1+2e^4P} \\\\
-        r_o = \\frac{-Pe^2p}{1+Q} \\\\
-        r_o2 = \\frac{1}{2}a\\left(1+\\frac{1}{Q}\\right) \\\\
-        r_o3 = -\\frac{P\\left(1-e^2\\right)Z^2}{Q\\left(1+Q\\right)} - \\frac{1}{2}Pp^2 \\\\
-        r_o = r_o + \\sqrt[]{r_o2 + r_o3} \\\\
-        U = \\sqrt[]{\\left(p-e^2r_o\\right)^2+Z^2} \\\\
-        V = \\sqrt[]{\\left(p-e^2r_o\\right)^2+\\left(1-e^2\\right)Z^2} \\\\
-        z_o = \\frac{b^2Z}{aV} \\\\
-        h = U\\left(1-\\frac{b^2}{aV}\\right) \\\\
-        \\phi = arctan\\left[\\frac{Z+e^{\\prime2}z_o}{p}\\right] \\\\
-        \\lambda = arctan2\\left[Y, X\\right]
+            \\lambda = atan2\\left(Y,X\\right) \\\\
+            p = \\sqrt[]{X^2+Y^2} \\\\
+            \\phi = atan2\\left(Z,P\\left(1-e^2\\right)\\right)
         \\end{eqnarray}
+
+
+    The algorithm then iterates over the following variables until the difference
+    between :math:`\\phi_1 and :math:`\\phi` is :math:`10^{-14}` or less.
+
+    .. math::
+
+        \\begin{eqnarray}
+            N = \\frac{a}{\\sqrt[]{1-e^2sin^2\\left(\\phi\\right)}} \\\\
+            \\phi_1 = atan2\\left(Z+Ne^2sin^2\\left(\\phi\\right),p\\right) \\\\
+        \\end{eqnarray}
+
+    Once the solution has converged, which is usually within 4 to 5 iterations
+    the altitude can eb deterimined via;
+
+    .. math::
+
+        h=\\frac{p}{cos\\left(\\phi\\right)}-N
+
+    Finally the latitude and longitude are converted from radians to degrees.
 
     Code example
 
@@ -245,32 +249,26 @@ def ecef_to_llh(x: float, y: float,
         z = 4632996.83
         lat, lon, alt = ecef_to_llh(x, y, z)
         print(lat, lon, alt)
-        >>> 46.826, 107.321, 6097.1
+        >>> 46.826, 107.321, 6095.999
 
         # Use a different datum
         lat, lon, alt = ecef_to_llh(x, y, z, dat=ITRF())
-        >>> 46.826, 107.321, 6097.448
+        >>> 46.826, 107.321, 6095.999
     """
-    # calculations:
-    r = sqrt(x**2 + y**2)
-    ep_sq  = (dat.a**2-dat.b**2)/dat.b**2
-    ee = (dat.a**2-dat.b**2)
-    f = (54*dat.b**2)*(z**2)
-    g = r**2 + (1 - dat.e2)*(z**2) - dat.e2*ee*2
-    c = (dat.e2**2)*f*r**2/(g**3)
-    s = (1 + c + sqrt(c**2 + 2*c))**(1/3.)
-    p = f/(3.*(g**2)*(s + (1./s) + 1)**2)
-    q = sqrt(1 + 2*p*dat.e2**2)
-    r_0 = -(p*dat.e2*r)/(1+q) + \
-            sqrt(0.5*(dat.a**2)*(1+(1./q)) - \
-            p*(z**2)*(1-dat.e2)/(q*(1+q)) - 0.5*p*(r**2))
-    u = sqrt((r - dat.e2*r_0)**2 + z**2)
-    v = sqrt((r - dat.e2*r_0)**2 + (1 - dat.e2)*z**2)
-    z_0 = (dat.b**2)*z/(dat.a*v)
-    h = u*(1 - dat.b**2/(dat.a*v))
-    phi = atan((z + ep_sq*z_0)/r)
-    lambd = atan2(y, x)
-    return phi*180/pi, lambd*180/pi, h
+    lon = atan2(y, x)
+    p_var = np.sqrt(x**2 + y**2)
+    lat = atan2(z, p_var * (1 - dat.e**2))
+    N = 0.0  # Initialize variable
+    for _ in range(10):
+        N = dat.a / np.sqrt(1 - dat.e**2 * sin(lat)**2)
+        lat1 = atan2(z + N * dat.e**2 * sin(lat), p_var)
+        if abs(lat1 - lat) < 1e-14:
+            break
+        lat = lat1
+    alt = p_var / cos(lat) - N
+    lat = np.rad2deg(lat)
+    lon = np.rad2deg(lon)
+    return lat, lon, alt
 # --------------------------------------------------------------------------------
 
 def ecef_to_enu(origin_lat: float, origin_lon: float, origin_alt: float,
@@ -812,6 +810,7 @@ def ned_vector(lat: float, lon: float, alt: float,
     :param lat: The latitude in units of decimal degrees
     :param lon: The longitude in units of decimal degrees
     :param alt: The altitude in units of meters
+    :param dat: A datum data class.  Defaulted to WGS84
     :return NED: A tuple containing the North, East, and Down vectors
     """
     lat = radians(lat)
@@ -828,25 +827,43 @@ def ned_vector(lat: float, lon: float, alt: float,
 # --------------------------------------------------------------------------------
 
 
-def body(lat: float, lon: float, alt: float, pitch: float,
-         roll: float, yaw: float, cos_x: float, cos_y: float,
-         cos_z: float, dat: Datum = WGS84()) -> np.ndarray:
+def enu_vector(lat: float, lon: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    :param lat: The latitude in units of decimal degrees
+    :param lon: The longitude in units of decimal degrees
+    :param alt: The altitude in units of meters
+    :return ENU: A tuple containing the East, North, and Up vectors
+    """
+    lat = radians(lat)
+    lon = radians(lon)
+    east = np.array([-sin(lon), cos(lon), 0])
+    north = np.array([-sin(lat)*cos(lon), -sin(lat)*sin(lon), cos(lat)])
+    up = np.array([cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat)])
+    return east, north, up
+# --------------------------------------------------------------------------------
+
+
+def body_to_local(lat: float, lon: float, alt: float, pitch: float,
+                  roll: float, yaw: float, cos_x: float, cos_y: float,
+                  cos_z: float, ned: bool = True,
+                  dat: Datum = WGS84()) -> np.ndarray:
 
     lat = radians(lat)
     lon = radians(lon)
-    R_body_ned = rotation_matrix(yaw, pitch, roll)
+    R_body_local = aircraft_rotation(yaw, pitch, roll)
 
-    # Rotation matrix from NED to ECEF
-    R_ecef_local = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],
-                            [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],
-                            [cos(lat), 0, -sin(lat)]])
+    if ned:
+        # Rotation matrix from NED to ECEF
+        R_ecef_local = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],
+                               [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],
+                               [cos(lat), 0, -sin(lat)]])
+    else:
+        # Rotation matrix from ENU to ECEF
+        R_ecef_local = np.array([[-sin(lon), cos(lon), 0],
+                               [-sin(lat)*cos(lon), -sin(lat)*sin(lon), cos(lat)],
+                               [cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat)]])
 
-    # R_ecef_enu = np.array([[-sin(lon), cos(lon), 0],
-    #                        [-sin(lat)*cos(lon), -sin(lat)*sin(lon), cos(lat)],
-    #                        [cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat)]])
-
-    R_ecef_body = np.matmul(R_ecef_local, R_body_ned)
-    #R_ecef_body = np.matmul(R_ecef_local, R_body_enu)
+    R_ecef_body = np.matmul(R_ecef_local, R_body_local)
 
     # Position vector in ECEF
     pos_ecef = llh_to_ecef(degrees(lat), degrees(lon), alt)
