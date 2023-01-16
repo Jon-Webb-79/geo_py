@@ -39,18 +39,94 @@ __version__ = "1.0"
 # Insert Code here
 
 
-def test_rotation_matrix():
-    """
-    This function will test the rotation_matrix function against the scipy
-    transform.rotation library
-    """
+def test_rot_mat_xyz():
     pitch = 22.1  # degrees
     roll = 8.75  # degrees
     yaw = 12.8  # degrees
     sequence = "XYZ"  # Z: yaw, Y: pitch, X: roll
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
-                          deg=True, extrinsic=True)
+                          deg=True)
+    rot = Rotation.from_euler(sequence, [pitch, roll, yaw], degrees=True)
+    scipy_dcm = rot.as_matrix()
+    dcm = list(dcm.flat)
+    scipy_dcm = list(scipy_dcm.flat)
+    for one, two in zip(dcm, scipy_dcm):
+        assert isclose(one, two, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_rot_mat_xzy():
+    pitch = 22.1  # degrees
+    roll = 8.75  # degrees
+    yaw = 12.8  # degrees
+    sequence = "XZY"  # Z: yaw, Y: pitch, X: roll
+    dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
+                          deg=True)
+    rot = Rotation.from_euler(sequence, [pitch, yaw, roll], degrees=True)
+    scipy_dcm = rot.as_matrix()
+    dcm = list(dcm.flat)
+    scipy_dcm = list(scipy_dcm.flat)
+    for one, two in zip(dcm, scipy_dcm):
+        assert isclose(one, two, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_rot_mat_yxz():
+    pitch = 22.1  # degrees
+    roll = 8.75  # degrees
+    yaw = 12.8  # degrees
+    sequence = "YXZ"  # Z: yaw, Y: pitch, X: roll
+    dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
+                          deg=True)
     rot = Rotation.from_euler(sequence, [roll, pitch, yaw], degrees=True)
+    scipy_dcm = rot.as_matrix()
+    dcm = list(dcm.flat)
+    scipy_dcm = list(scipy_dcm.flat)
+    for one, two in zip(dcm, scipy_dcm):
+        assert isclose(one, two, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_rot_mat_zyx():
+    pitch = 22.1  # degrees
+    roll = 8.75  # degrees
+    yaw = 12.8  # degrees
+    sequence = "ZYX"  # Z: yaw, Y: pitch, X: roll
+    dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
+                          deg=True)
+    rot = Rotation.from_euler(sequence, [yaw, roll, pitch], degrees=True)
+    scipy_dcm = rot.as_matrix()
+    dcm = list(dcm.flat)
+    scipy_dcm = list(scipy_dcm.flat)
+    for one, two in zip(dcm, scipy_dcm):
+        assert isclose(one, two, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_rot_mat_zxy():
+    pitch = 22.1  # degrees
+    roll = 8.75  # degrees
+    yaw = 12.8  # degrees
+    sequence = "ZXY"  # Z: yaw, Y: pitch, X: roll
+    dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
+                          deg=True)
+    rot = Rotation.from_euler(sequence, [yaw, pitch, roll], degrees=True)
+    scipy_dcm = rot.as_matrix()
+    dcm = list(dcm.flat)
+    scipy_dcm = list(scipy_dcm.flat)
+    for one, two in zip(dcm, scipy_dcm):
+        assert isclose(one, two, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_rot_mat_extrinsic():
+    pitch = 22.1  # degrees
+    roll = 8.75  # degrees
+    yaw = 12.8  # degrees
+    sequence = "ZXY"  # Z: yaw, Y: pitch, X: roll
+    dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
+                          deg=True, extrinsic=True)
+    rot = Rotation.from_euler(sequence, [yaw, pitch, roll], degrees=True)
     scipy_dcm = rot.as_matrix().T
     dcm = list(dcm.flat)
     scipy_dcm = list(scipy_dcm.flat)
@@ -65,15 +141,15 @@ def test_dcm_to_euler_xyz():
     yaw = 12.8  # degrees
     sequence = "XYZ"  # Z: yaw, Y: pitch, X: roll
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
-                          deg=True)
+                           deg=True)
     nyaw, npitch, nroll = dcm_euler_angles(dcm, order=sequence, deg=True)
     assert isclose(yaw, nyaw, rel_tol=1.0e-3)
     assert isclose(pitch, npitch, rel_tol=1.0e-3)
     assert isclose(roll, nroll, rel_tol=1.0e-3)
-# --------------------------------------------------------------------------------
+# # --------------------------------------------------------------------------------
 
 
-def test_dcm_to_euler_xzr():
+def test_dcm_to_euler_xzy():
     pitch = 22.1  # degrees
     roll = 8.75  # degrees
     yaw = 12.8  # degrees
@@ -136,7 +212,6 @@ def test_dcm_to_euler_zxy():
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
                           deg=True)
     nyaw, npitch, nroll = dcm_euler_angles(dcm, order=sequence, deg=True)
-    print(nyaw, npitch, nroll)
     assert isclose(yaw, nyaw, rel_tol=1.0e-3)
     assert isclose(pitch, npitch, rel_tol=1.0e-3)
     assert isclose(roll, nroll, rel_tol=1.0e-3)

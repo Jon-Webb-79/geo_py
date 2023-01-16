@@ -7,6 +7,7 @@ import numpy as np
 p = PurePath(__file__).parent
 sys.path.insert(1, os.path.abspath(p))
 from geo_py.datum import Datum, WGS84
+from geo_py.rotations import rotation_matrix
 # ================================================================================
 # ================================================================================
 # File:    transform.py
@@ -827,77 +828,59 @@ def ned_vector(lat: float, lon: float, alt: float,
 # --------------------------------------------------------------------------------
 
 
-# def body_to_ecef(lat: float, lon: float, alt: float, pitch: float,
-#                  roll: float, yaw: float, cos_x: float, cos_y: float,
-#                  cos_z: float, dat: Datum = WGS84()):
-#     lat = radians(lat)
-#     lon = radians(lon)
-#     Rx = np.array([[1, 0, 0],
-#                [0, cos(pitch), -sin(pitch)],
-#                [0, sin(pitch), cos(pitch)]])
-
-#     Ry = np.array([[cos(roll), 0, sin(roll)],
-#                [0, 1, 0],
-#                [-sin(roll), 0, cos(roll)]])
-
-#     Rz = np.array([[cos(yaw), -sin(yaw), 0],
-#                [sin(yaw), cos(yaw), 0],
-#                [0, 0, 1]])
-
-#     R_body_ned = np.matmul(np.matmul(Rz, Ry), Rx)
-#     print(R_body_ned)
-#     print("")
-#     R_body_to_ned = intrinsic_dir_cos_mat(pitch, roll, yaw, order="ZXY")
-#     print(R_body_to_ned)
-#     R_pitch = np.array([[cos(pitch), 0, sin(pitch)], [0, 1, 0], [-sin(pitch), 0, cos(pitch)]])
-#     R_roll = np.array([[1, 0, 0], [0, cos(roll), -sin(roll)], [0, sin(roll), cos(roll)]])
-#     R_yaw = np.array([[cos(yaw), -sin(yaw), 0], [sin(yaw), cos(yaw), 0], [0, 0, 1]])
-#     R_body_to_ecef = np.matmul(np.matmul(R_yaw, R_pitch), R_roll)
-#     R_ecef_to_ned = np.array([[-sin(lon), cos(lon), 0],
-#                               [-sin(lat)*cos(lon),
-#                                -sin(lat)*sin(lon), cos(lat)],
-#                               [cos(lat)*cos(lon),
-#                                cos(lat)*sin(lon), sin(lat)]])
-#     R_ned_to_ecef = R_ecef_to_ned.T
-#     vector_ecef = np.matmul(np.matmul(R_ned_to_ecef, R_body_to_ecef),
-#                             np.array([cos_x, cos_y, cos_z]))
-#     vector_ecef[0] = vector_ecef[0]*(alt+dat.R_avg)
-#     vector_ecef[1] = vector_ecef[1]*(alt+dat.R_avg)
-#     vector_ecef[2] = vector_ecef[2]*(alt+dat.R_avg)
-#     return vector_ecef
-# # --------------------------------------------------------------------------------
+def body_to_ecef(lat: float, lon: float, alt: float, pitch: float,
+                 roll: float, yaw: float, cos_x: float, cos_y: float,
+                 cos_z: float, dat: Datum = WGS84()):
+    lat = radians(lat)
+    lon = radians(lon)
+    print("")
+    R_body_to_ned = rotation_matrix(yaw, roll, pitch, order="ZYX", extrinsic=False)
+    print(R_body_to_ned)
+# --------------------------------------------------------------------------------
 
 
-# def body(lat: float, lon: float, alt: float, pitch: float,
-#          roll: float, yaw: float, cos_x: float, cos_y: float,
-#          cos_z: float, dat: Datum = WGS84()):
+def body(lat: float, lon: float, alt: float, pitch: float,
+         roll: float, yaw: float, cos_x: float, cos_y: float,
+         cos_z: float, dat: Datum = WGS84()):
 
-#     lat = radians(lat)
-#     lon = radians(lon)
+    lat = radians(lat)
+    lon = radians(lon)
+    x_rot = np.array([[1, 0, 0], [0, cos(pitch), -sin(pitch)], [0, sin(pitch), cos(pitch)]])
+    y_rot = np.array([[cos(roll), 0, sin(roll)], [0, 1, 0], [-sin(roll), 0, cos(roll)]])
+    z_rot = np.array([[cos(yaw), -sin(yaw), 0], [sin(yaw), cos(yaw), 0], [0, 0, 1]])
 
-#     R_body_ned = np.array([[cos(yaw)*cos(pitch),
-#                             cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll),
-#                             cos(yaw)*sin(pitch)*cos(roll)+sin(yaw)*sin(roll)],
-#                            [sin(yaw)*cos(pitch),
-#                             sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll),
-#                             sin(yaw)*sin(pitch)*cos(roll)-cos(yaw)*sin(roll)],
-#                             [-sin(pitch), cos(pitch)*sin(roll), cos(pitch)*cos(roll)]])
-#     print("")
-#     print(R_body_ned)
+    # Multiply the x, y, and z components according to the order of rotations
+    R_body_ned = np.matmul(np.matmul(z_rot, y_rot), x_rot)
+    #R_body_ned = np.array([[cos(yaw)*cos(pitch),
+    #                        cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll),
+    #                        cos(yaw)*sin(pitch)*cos(roll)+sin(yaw)*sin(roll)],
+    #                       [sin(yaw)*cos(pitch),
+    #                        sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll),
+    #                        sin(yaw)*sin(pitch)*cos(roll)-cos(yaw)*sin(roll)],
+    #                        [-sin(pitch), cos(pitch)*sin(roll), cos(pitch)*cos(roll)]])
+    #R_body_ned = np.array([[cos(yaw)*cos(pitch),
+    #                        cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll),
+    #                        cos(yaw)*sin(pitch)*cos(roll)+sin(yaw)*sin(roll)],
+    #                        [sin(yaw)*cos(pitch),
+    #                         sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll),
+    #                         sin(yaw)*sin(pitch)*cos(roll)-cos(yaw)*sin(roll)],
+    #                        [-sin(pitch), cos(pitch)*sin(roll), cos(pitch)*cos(roll)]])
+    print("")
+    print(R_body_ned)
 
-#     # Rotation matrix from NED to ECEF
-#     R_ecef_ned = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],
-#                             [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],
-#                             [cos(lat), 0, -sin(lat)]])
+    # Rotation matrix from NED to ECEF
+    R_ecef_ned = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],
+                            [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],
+                            [cos(lat), 0, -sin(lat)]])
 
-#     R_ecef_body = np.matmul(R_ecef_ned, R_body_ned)
+    R_ecef_body = np.matmul(R_ecef_ned, R_body_ned)
 
-#     # Position vector in ECEF
-#     pos_ecef = llh_to_ecef(degrees(lat), degrees(lon), alt)
+    # Position vector in ECEF
+    pos_ecef = llh_to_ecef(degrees(lat), degrees(lon), alt)
 
-#     # Vector in ECEF
-#     vec_ecef = np.matmul(R_ecef_body, np.array([cos_x, cos_y, cos_z])) + pos_ecef
-#     return vec_ecef
+    # Vector in ECEF
+    vec_ecef = np.matmul(R_ecef_body, np.array([cos_x, cos_y, cos_z])) + pos_ecef
+    return vec_ecef
 # ================================================================================
 # ================================================================================
 # eof

@@ -4,7 +4,8 @@ rotations
 
 The **rotations.py** file contains methods that allow a programmer
 to conduct coordinate frame rotations with dirction cosines as
-well as quaternians.
+well as quaternians.  Presently this library is only set up
+to handle Tait-Bryan angles.
 
 Euler Angles
 ============

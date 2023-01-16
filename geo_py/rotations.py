@@ -120,14 +120,14 @@ def rotation_matrix(x_rot: float, y_rot: float, z_rot: float,
 
     # Create rotation matrices for each axis
     rot_x = np.array([[1, 0, 0],
-                     [0, np.cos(z_rot), -np.sin(z_rot)],
-                     [0, np.sin(z_rot), np.cos(z_rot)]])
-    rot_y = np.array([[np.cos(y_rot), 0, np.sin(y_rot)],
-                     [0, 1, 0],
-                     [-np.sin(y_rot), 0, np.cos(y_rot)]])
+                      [0, np.cos(y_rot), -np.sin(y_rot)],
+                      [0, np.sin(y_rot), np.cos(y_rot)]])
+    rot_y = np.array([[np.cos(z_rot), 0, np.sin(z_rot)],
+                      [0, 1, 0],
+                      [-np.sin(z_rot), 0, np.cos(z_rot)]])
     rot_z = np.array([[np.cos(x_rot), -np.sin(x_rot), 0],
-                     [np.sin(x_rot), np.cos(x_rot), 0],
-                     [0, 0, 1]])
+                      [np.sin(x_rot), np.cos(x_rot), 0],
+                      [0, 0, 1]])
 
     # Multiply rotation matrices according to the order of rotations
     if order == "XYZ":
@@ -203,28 +203,28 @@ def dcm_euler_angles(dcm: np.ndarray, order: str = "ZYX", deg: bool = False,
         dcm = dcm.T
     if order == 'ZYX':
         yaw = np.arctan2(dcm[1, 0], dcm[0, 0])
-        pitch = np.arcsin(-dcm[2, 0])
-        roll = np.arctan2(dcm[2, 1], dcm[2, 2])
+        roll = np.arcsin(-dcm[2, 0])
+        pitch = np.arctan2(dcm[2, 1], dcm[2, 2])
     elif order == 'XYZ':
-        roll = np.arctan2(-dcm[1, 2], dcm[2, 2])
-        pitch = np.arcsin(dcm[0, 2])
+        pitch = np.arctan2(-dcm[1, 2], dcm[2, 2])
+        roll = np.arcsin(dcm[0, 2])
         yaw = np.arctan2(-dcm[0, 1], dcm[0, 0])
     elif order == 'XZY':
-        roll = np.arctan2(dcm[2, 1], dcm[1, 1])
-        pitch = np.arctan2(dcm[0, 2], dcm[0, 0])
+        pitch = np.arctan2(dcm[2, 1], dcm[1, 1])
+        roll = np.arctan2(dcm[0, 2], dcm[0, 0])
         yaw = np.arcsin(-dcm[0, 1])
     elif order == 'YXZ':
-        roll = np.arcsin(-dcm[1, 2])
-        pitch = np.arctan2(dcm[0, 2], dcm[2, 2])
+        pitch = np.arcsin(-dcm[1, 2])
+        roll = np.arctan2(dcm[0, 2], dcm[2, 2])
         yaw = np.arctan2(dcm[1, 0], dcm[1, 1])
     elif order == 'YZX':
-        roll = np.arctan2(-dcm[1, 2], dcm[1, 1])
-        pitch = np.arctan2(-dcm[2, 0], dcm[0, 0])
+        pitch = np.arctan2(-dcm[1, 2], dcm[1, 1])
+        roll = np.arctan2(-dcm[2, 0], dcm[0, 0])
         yaw = np.arcsin(dcm[1, 0])
     elif order == 'ZXY':
         yaw = np.arctan2(-dcm[0, 1], dcm[1, 1])
-        roll = np.arcsin(dcm[2, 1])
-        pitch = np.arctan2(-dcm[2, 0], dcm[2, 2])
+        pitch = np.arcsin(dcm[2, 1])
+        roll = np.arctan2(-dcm[2, 0], dcm[2, 2])
     else:
         raise ValueError("Invalid order of rotation.")
     if deg:
