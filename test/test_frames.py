@@ -272,8 +272,8 @@ def test_body():
     cos_x = 0.13
     cos_y = -0.28
     cos_z = 0.0717
-    vec1 = body_to_ecef(lat, lon, alt, pitch, roll, yaw, cos_x, cos_y, cos_z)
     vec = body(lat, lon, alt, pitch, roll, yaw, cos_x, cos_y, cos_z)
+    print(vec)
 # ================================================================================
 # ================================================================================
 # eof

@@ -17,15 +17,15 @@ __version__ = "1.0"
 # DIRECTION COSINE FUNCTIONS
 
 
-def rotation_matrix(x_rot: float, y_rot: float, z_rot: float,
+def rotation_matrix(yaw: float, pitch: float, roll: float,
                     order: str = "ZYX", deg: bool = False,
                     extrinsic: bool = False) -> np.ndarray:
     """
-    :param x_rot: The rotation about the x-axis in units of degrees or radians.
-                  This axis is also known as the yaw axis.
-    :param y_rot: The rotation about the y-axis in units of degrees or radians.
+    :param yaw: The rotation about the x-axis in units of degrees or radians.
+                This axis is also known as the yaw axis.
+    :param pitch: The rotation about the y-axis in units of degrees or radians.
                   This axis is also known as the pitch axis.
-    :param z_rot: The rotation about the z-axis in units of degrees or radians.
+    :param roll: The rotation about the z-axis in units of degrees or radians.
                   This axis is also known as the roll axis.
     :param order: The order of rotation as a string.  Defaulted to 'ZYX', which
                   is the traditional order for aircraft rotations.
@@ -114,19 +114,19 @@ def rotation_matrix(x_rot: float, y_rot: float, z_rot: float,
     """
     order = order.upper()
     if deg:
-        x_rot = radians(x_rot)
-        y_rot = radians(y_rot)
-        z_rot = radians(z_rot)
+        yaw = radians(yaw)
+        pitch = radians(pitch)
+        roll = radians(roll)
 
     # Create rotation matrices for each axis
     rot_x = np.array([[1, 0, 0],
-                      [0, np.cos(y_rot), -np.sin(y_rot)],
-                      [0, np.sin(y_rot), np.cos(y_rot)]])
-    rot_y = np.array([[np.cos(z_rot), 0, np.sin(z_rot)],
+                      [0, np.cos(roll), -np.sin(roll)],
+                      [0, np.sin(roll), np.cos(roll)]])
+    rot_y = np.array([[np.cos(pitch), 0, np.sin(pitch)],
                       [0, 1, 0],
-                      [-np.sin(z_rot), 0, np.cos(z_rot)]])
-    rot_z = np.array([[np.cos(x_rot), -np.sin(x_rot), 0],
-                      [np.sin(x_rot), np.cos(x_rot), 0],
+                      [-np.sin(pitch), 0, np.cos(pitch)]])
+    rot_z = np.array([[np.cos(yaw), -np.sin(yaw), 0],
+                      [np.sin(yaw), np.cos(yaw), 0],
                       [0, 0, 1]])
 
     # Multiply rotation matrices according to the order of rotations
@@ -203,28 +203,28 @@ def dcm_euler_angles(dcm: np.ndarray, order: str = "ZYX", deg: bool = False,
         dcm = dcm.T
     if order == 'ZYX':
         yaw = np.arctan2(dcm[1, 0], dcm[0, 0])
-        roll = np.arcsin(-dcm[2, 0])
-        pitch = np.arctan2(dcm[2, 1], dcm[2, 2])
+        pitch = np.arcsin(-dcm[2, 0])
+        roll = np.arctan2(dcm[2, 1], dcm[2, 2])
     elif order == 'XYZ':
-        pitch = np.arctan2(-dcm[1, 2], dcm[2, 2])
-        roll = np.arcsin(dcm[0, 2])
+        roll = np.arctan2(-dcm[1, 2], dcm[2, 2])
+        pitch = np.arcsin(dcm[0, 2])
         yaw = np.arctan2(-dcm[0, 1], dcm[0, 0])
     elif order == 'XZY':
-        pitch = np.arctan2(dcm[2, 1], dcm[1, 1])
-        roll = np.arctan2(dcm[0, 2], dcm[0, 0])
+        roll = np.arctan2(dcm[2, 1], dcm[1, 1])
+        pitch = np.arctan2(dcm[0, 2], dcm[0, 0])
         yaw = np.arcsin(-dcm[0, 1])
     elif order == 'YXZ':
-        pitch = np.arcsin(-dcm[1, 2])
-        roll = np.arctan2(dcm[0, 2], dcm[2, 2])
+        roll = np.arcsin(-dcm[1, 2])
+        pitch = np.arctan2(dcm[0, 2], dcm[2, 2])
         yaw = np.arctan2(dcm[1, 0], dcm[1, 1])
     elif order == 'YZX':
-        pitch = np.arctan2(-dcm[1, 2], dcm[1, 1])
-        roll = np.arctan2(-dcm[2, 0], dcm[0, 0])
+        roll = np.arctan2(-dcm[1, 2], dcm[1, 1])
+        pitch = np.arctan2(-dcm[2, 0], dcm[0, 0])
         yaw = np.arcsin(dcm[1, 0])
     elif order == 'ZXY':
         yaw = np.arctan2(-dcm[0, 1], dcm[1, 1])
-        pitch = np.arcsin(dcm[2, 1])
-        roll = np.arctan2(-dcm[2, 0], dcm[2, 2])
+        roll = np.arcsin(dcm[2, 1])
+        pitch = np.arctan2(-dcm[2, 0], dcm[2, 2])
     else:
         raise ValueError("Invalid order of rotation.")
     if deg:

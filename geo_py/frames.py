@@ -828,52 +828,25 @@ def ned_vector(lat: float, lon: float, alt: float,
 # --------------------------------------------------------------------------------
 
 
-def body_to_ecef(lat: float, lon: float, alt: float, pitch: float,
-                 roll: float, yaw: float, cos_x: float, cos_y: float,
-                 cos_z: float, dat: Datum = WGS84()):
-    lat = radians(lat)
-    lon = radians(lon)
-    print("")
-    R_body_to_ned = rotation_matrix(yaw, roll, pitch, order="ZYX", extrinsic=False)
-    print(R_body_to_ned)
-# --------------------------------------------------------------------------------
-
-
 def body(lat: float, lon: float, alt: float, pitch: float,
          roll: float, yaw: float, cos_x: float, cos_y: float,
-         cos_z: float, dat: Datum = WGS84()):
+         cos_z: float, dat: Datum = WGS84()) -> np.ndarray:
 
     lat = radians(lat)
     lon = radians(lon)
-    x_rot = np.array([[1, 0, 0], [0, cos(pitch), -sin(pitch)], [0, sin(pitch), cos(pitch)]])
-    y_rot = np.array([[cos(roll), 0, sin(roll)], [0, 1, 0], [-sin(roll), 0, cos(roll)]])
-    z_rot = np.array([[cos(yaw), -sin(yaw), 0], [sin(yaw), cos(yaw), 0], [0, 0, 1]])
-
-    # Multiply the x, y, and z components according to the order of rotations
-    R_body_ned = np.matmul(np.matmul(z_rot, y_rot), x_rot)
-    #R_body_ned = np.array([[cos(yaw)*cos(pitch),
-    #                        cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll),
-    #                        cos(yaw)*sin(pitch)*cos(roll)+sin(yaw)*sin(roll)],
-    #                       [sin(yaw)*cos(pitch),
-    #                        sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll),
-    #                        sin(yaw)*sin(pitch)*cos(roll)-cos(yaw)*sin(roll)],
-    #                        [-sin(pitch), cos(pitch)*sin(roll), cos(pitch)*cos(roll)]])
-    #R_body_ned = np.array([[cos(yaw)*cos(pitch),
-    #                        cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll),
-    #                        cos(yaw)*sin(pitch)*cos(roll)+sin(yaw)*sin(roll)],
-    #                        [sin(yaw)*cos(pitch),
-    #                         sin(yaw)*sin(pitch)*sin(roll)+cos(yaw)*cos(roll),
-    #                         sin(yaw)*sin(pitch)*cos(roll)-cos(yaw)*sin(roll)],
-    #                        [-sin(pitch), cos(pitch)*sin(roll), cos(pitch)*cos(roll)]])
-    print("")
-    print(R_body_ned)
+    R_body_ned = rotation_matrix(yaw, pitch, roll)
 
     # Rotation matrix from NED to ECEF
-    R_ecef_ned = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],
+    R_ecef_local = np.array([[-sin(lat)*cos(lon), -sin(lon), -cos(lat)*cos(lon)],
                             [-sin(lat)*sin(lon), cos(lon), -cos(lat)*sin(lon)],
                             [cos(lat), 0, -sin(lat)]])
 
-    R_ecef_body = np.matmul(R_ecef_ned, R_body_ned)
+    # R_ecef_enu = np.array([[-sin(lon), cos(lon), 0],
+    #                        [-sin(lat)*cos(lon), -sin(lat)*sin(lon), cos(lat)],
+    #                        [cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat)]])
+
+    R_ecef_body = np.matmul(R_ecef_local, R_body_ned)
+    #R_ecef_body = np.matmul(R_ecef_local, R_body_enu)
 
     # Position vector in ECEF
     pos_ecef = llh_to_ecef(degrees(lat), degrees(lon), alt)

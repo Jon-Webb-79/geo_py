@@ -46,7 +46,7 @@ def test_rot_mat_xyz():
     sequence = "XYZ"  # Z: yaw, Y: pitch, X: roll
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
                           deg=True)
-    rot = Rotation.from_euler(sequence, [pitch, roll, yaw], degrees=True)
+    rot = Rotation.from_euler(sequence, [roll, pitch, yaw], degrees=True)
     scipy_dcm = rot.as_matrix()
     dcm = list(dcm.flat)
     scipy_dcm = list(scipy_dcm.flat)
@@ -62,7 +62,7 @@ def test_rot_mat_xzy():
     sequence = "XZY"  # Z: yaw, Y: pitch, X: roll
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
                           deg=True)
-    rot = Rotation.from_euler(sequence, [pitch, yaw, roll], degrees=True)
+    rot = Rotation.from_euler(sequence, [roll, yaw, pitch], degrees=True)
     scipy_dcm = rot.as_matrix()
     dcm = list(dcm.flat)
     scipy_dcm = list(scipy_dcm.flat)
@@ -78,7 +78,7 @@ def test_rot_mat_yxz():
     sequence = "YXZ"  # Z: yaw, Y: pitch, X: roll
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
                           deg=True)
-    rot = Rotation.from_euler(sequence, [roll, pitch, yaw], degrees=True)
+    rot = Rotation.from_euler(sequence, [pitch, roll, yaw], degrees=True)
     scipy_dcm = rot.as_matrix()
     dcm = list(dcm.flat)
     scipy_dcm = list(scipy_dcm.flat)
@@ -94,7 +94,7 @@ def test_rot_mat_zyx():
     sequence = "ZYX"  # Z: yaw, Y: pitch, X: roll
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
                           deg=True)
-    rot = Rotation.from_euler(sequence, [yaw, roll, pitch], degrees=True)
+    rot = Rotation.from_euler(sequence, [yaw, pitch, roll], degrees=True)
     scipy_dcm = rot.as_matrix()
     dcm = list(dcm.flat)
     scipy_dcm = list(scipy_dcm.flat)
@@ -110,7 +110,7 @@ def test_rot_mat_zxy():
     sequence = "ZXY"  # Z: yaw, Y: pitch, X: roll
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
                           deg=True)
-    rot = Rotation.from_euler(sequence, [yaw, pitch, roll], degrees=True)
+    rot = Rotation.from_euler(sequence, [yaw, roll, pitch], degrees=True)
     scipy_dcm = rot.as_matrix()
     dcm = list(dcm.flat)
     scipy_dcm = list(scipy_dcm.flat)
@@ -126,7 +126,7 @@ def test_rot_mat_extrinsic():
     sequence = "ZXY"  # Z: yaw, Y: pitch, X: roll
     dcm = rotation_matrix(yaw, pitch, roll, order=sequence,
                           deg=True, extrinsic=True)
-    rot = Rotation.from_euler(sequence, [yaw, pitch, roll], degrees=True)
+    rot = Rotation.from_euler(sequence, [yaw, roll, pitch], degrees=True)
     scipy_dcm = rot.as_matrix().T
     dcm = list(dcm.flat)
     scipy_dcm = list(scipy_dcm.flat)
