@@ -908,7 +908,69 @@ def enu_vector(lat: float, lon: float) -> Tuple[np.ndarray, np.ndarray, np.ndarr
     north = np.array([-sin(lat)*cos(lon), -sin(lat)*sin(lon), cos(lat)])
     up = np.array([cos(lat)*cos(lon), cos(lat)*sin(lon), sin(lat)])
     return east, north, up
+# ================================================================================
+# ================================================================================
+# DISTANCE FORMULAS
+
+
+def haversine(lla1: Tuple[float, float, float],
+              lla2: Tuple[float, float, float],
+              dat: Datum = WGS84()) -> float:
+    """
+    :param lla1: A tuple containing the latitude, longitude, and altitude of
+                 a point.  Latitude, and longitude are in units of decimal
+                 degrees, altitude in units of meters.
+    :param lla2: A tuple containing the latitude, longitude, and altitude of
+                 a point.  Latitude, and longitude are in units of decimal
+                 degrees, altitude in units of meters.
+    :param dat: A Datum dataclass. Defaulted to WGS84
+    """
+    # unpack tuples
+    lat1, lon1, alt1 = radians(lla1[0]), radians(lla1[1]), lla1[2]
+    lat2, lon2, alt2 = radians(lla2[0]), radians(lla2[1]), lla2[2]
+
+    earth_radius = dat.R_avg  # in kilometers
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a_var = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c_var = 2 * atan2(sqrt(a_var), sqrt(1 - a_var))
+    distance = earth_radius * c_var
+    altitude = abs(alt2 - alt1)
+    distance = sqrt(distance**2 + altitude**2)
+    return distance
 # --------------------------------------------------------------------------------
+
+
+class Distance:
+    def __init__(self, lla1: Tuple[float, float, float],
+                 lla2: Tuple[float, float, float],
+                 dat: Datum = WGS84()):
+        self.lat1, self.lon1, self.alt1 = radians(lla1[0]), radians(lla1[1]), lla1[2]
+        self.lat2, self.lon2, self.alt2 = radians(lla2[0]), radians(lla2[1]), lla2[2]
+        earth_radius = dat.R_avg
+        dlat = self.lat2 - self.lat1
+        dlon = self.lon2 - self.lon1
+        a_var = sin(dlat / 2)**2 + cos(self.lat1) * cos(self.lat2) * sin(dlon / 2)**2
+        c_var = 2 * atan2(sqrt(a_var), sqrt(1 - a_var))
+        distance = earth_radius * c_var
+        altitude = abs(self.alt2 - self.alt1)
+        self.distance = sqrt(distance**2 + altitude**2)
+# --------------------------------------------------------------------------------
+
+    @property
+    def km(self):
+        return self.distance/1000.0
+# --------------------------------------------------------------------------------
+
+    @property
+    def m(self):
+        return self.distance
+# --------------------------------------------------------------------------------
+
+    @property
+    def miles(self):
+        return self.distance * 0.000621371
+
 
 
 # def body_to_local(lat: float, lon: float, alt: float, pitch: float,

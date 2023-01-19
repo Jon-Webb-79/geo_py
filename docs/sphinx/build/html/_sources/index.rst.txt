@@ -14,6 +14,7 @@ Welcome to Core Utilities's documentation!
    Datums
    Frames
    Rotations
+   Distance
 
 
 Indices and tables

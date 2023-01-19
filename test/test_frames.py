@@ -65,6 +65,7 @@ def lla2():
     alt = 1673.0
     return lat, lon, alt
 
+
 def cmp_float_arrays(arrone, arrtwo, tol=1.0e-3):
     for one, two in zip(arrone, arrtwo):
         assert isclose(one, two, rel_tol = tol)
@@ -270,7 +271,6 @@ def test_enu_vector():
     lon = 78.27
     E, N, U = enu_vector(lat, lon)
 # --------------------------------------------------------------------------------
-
 
 # def test_body():
 #     pitch = radians(8.)
