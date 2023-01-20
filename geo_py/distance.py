@@ -119,7 +119,7 @@ def great_circle(lla1: Tuple[float, float, float],
         from geo_py.distance import great_circle
         lla1 = (40.98197, 111.9026, 0.0)
         lla2 = (45.01443, 113.9278, 0.0)
-        d = haversine(lla1, lla2)
+        d = great_circle(lla1, lla2)
         print(d)
         >>> 477637.629
     """
@@ -163,15 +163,13 @@ def vincenty(lla1: Tuple[float, float, float],
 
         lla1 = (40.98197, 111.9026, 0.0)
         lla2 = (45.01443, 113.9278, 0.0)
-        d = haversine(lla1, lla2)
+        d = vincenty(lla1, lla2)
         print(d)
         >>> 477402.505
     """
     lat1, lon1, alt1 = lla1[0], lla1[1], lla1[2]
     lat2, lon2, alt2 = lla2[0], lla2[1], lla2[2]
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
-    u_1=atan((1-dat.f)*tan(radians(lat1)))
-    u_2=atan((1-dat.f)*tan(radians(lat2)))
     tolerance = 1e-12 # to stop iteration
 
     phi1, phi2 = lat1, lat2
@@ -212,6 +210,61 @@ def vincenty(lla1: Tuple[float, float, float],
 
     distance = sqrt(s**2.0 + (alt2 - alt1)**2.0)
     return distance
+# --------------------------------------------------------------------------------
+
+
+def linear_dist(lla1: Tuple[float, float, float],
+                lla2: Tuple[float, float, float],
+                dat: Datum=WGS84()):
+    """
+    :param lla1: A tuple containing latitude, longitude and altitude
+                 of a point on the surface of a body.  Latitude and longitude
+                 are in units of decimal degrees, altitude in units of meters
+    :param lla2: A tuple containing latitude, longitude and altitude
+                 of a point on the surface of a body.  Latitude and longitude
+                 are in units of decimal degrees, altitude in units of meters
+    :param cruise_alt: The cruising altitude, if this method is used for an
+                       aircraft.  Units in meters. Defaulted to 0
+    :param dat: A Datum dataclass, defaulted to WGS84
+    :return dist: The linear distance between two points in units of meters.
+
+    This function will determine the linear distance between two points of
+    latitudes, longitudes, and altitudes.  This method converts each
+    latitude, longitude, altitude pair into ECEF coordinates and determines
+    the distance as the magnitude of the distance between the X, Y, and Z
+    points.
+
+    Code Example
+
+    .. code-block::
+
+        from geo_py.distance import linear_dist
+
+        lla1 = (40.98197, 111.9026, 0.0)
+        lla2 = (45.01443, 113.9278, 0.0)
+        d = linear_dist(lla1, lla2)
+        print(d)
+        >>> 477965.401
+    """
+    lat1, lon1, alt1 = lla1[0], lla1[1], lla1[2]
+    lat2, lon2, alt2 = lla2[0], lla2[1], lla2[2]
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+    N1 = dat.a / (sqrt(1.0 - \
+        dat.e ** 2.0 * (sin(lat1)) ** 2.0))
+    xe1 = (N1 + alt1) * cos(lat1) * cos(lon1)
+    ye1 = (N1 + alt1) * cos(lat1) * sin(lon1)
+    ze1 = (((dat.b ** 2.0 / dat.a ** 2.0) * N1) + \
+            alt1) * sin(lat1)
+
+    N2 = dat.a / (sqrt(1.0 - \
+        dat.e ** 2.0 * (sin(lat2)) ** 2.0))
+    xe2 = (N1 + alt2) * cos(lat2) * cos(lon2)
+    ye2 = (N1 + alt2) * cos(lat2) * sin(lon2)
+    ze2 = (((dat.b ** 2.0 / dat.a ** 2.0) * N2) + \
+            alt2) * sin(lat2)
+    dist = sqrt((xe1-xe2)**2 + (ye1-ye2)**2 + (ze1-ze2)**2)
+    return dist
 # ================================================================================
 # ================================================================================
 
@@ -262,6 +315,8 @@ class Distance:
             self.distance = great_circle(lla1, lla2, cruise_alt, dat)
         elif method == "VINCENTY":
             self.distance = vincenty(lla1, lla2, dat)
+        elif method == "LINEAR":
+            self.distance = linear_dist(lla1, lla2, dat)
         else:
             raise ValueError("Invalid method for Distance class")
 # --------------------------------------------------------------------------------

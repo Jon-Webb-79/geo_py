@@ -139,7 +139,7 @@ The equation below describes the mathematics of the great circle method.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.distance</span> <span class="kn">import</span> <span class="n">great_circle</span>
 <span class="n">lla1</span> <span class="o">=</span> <span class="p">(</span><span class="mf">40.98197</span><span class="p">,</span> <span class="mf">111.9026</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 <span class="n">lla2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">45.01443</span><span class="p">,</span> <span class="mf">113.9278</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">haversine</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">great_circle</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="mf">477637.629</span>
 </pre></div>
@@ -177,9 +177,47 @@ formula is to complex to document here; however, it can be found at
 
 <span class="n">lla1</span> <span class="o">=</span> <span class="p">(</span><span class="mf">40.98197</span><span class="p">,</span> <span class="mf">111.9026</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 <span class="n">lla2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">45.01443</span><span class="p">,</span> <span class="mf">113.9278</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-<span class="n">d</span> <span class="o">=</span> <span class="n">haversine</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">vincenty</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="mf">477402.505</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geo_py.distance.linear_dist">
+<span class="sig-prename descclassname"><span class="pre">geo_py.distance.</span></span><span class="sig-name descname"><span class="pre">linear_dist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lla1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lla2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WGS84(a=6378137.0,</span> <span class="pre">b=6356752.314245,</span> <span class="pre">f=0.0033528106647474805,</span> <span class="pre">e=0.08181919084262157,</span> <span class="pre">e2=0.00669437999014132,</span> <span class="pre">GM=398600500000000.0,</span> <span class="pre">R_avg=6371008.8,</span> <span class="pre">e24=0.006694317779487594,</span> <span class="pre">g_avg=9.7803253359)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geo_py/distance.html#linear_dist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.distance.linear_dist" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lla1</strong> – A tuple containing latitude, longitude and altitude
+of a point on the surface of a body.  Latitude and longitude
+are in units of decimal degrees, altitude in units of meters</p></li>
+<li><p><strong>lla2</strong> – A tuple containing latitude, longitude and altitude
+of a point on the surface of a body.  Latitude and longitude
+are in units of decimal degrees, altitude in units of meters</p></li>
+<li><p><strong>cruise_alt</strong> – The cruising altitude, if this method is used for an
+aircraft.  Units in meters. Defaulted to 0</p></li>
+<li><p><strong>dat</strong> – A Datum dataclass, defaulted to WGS84</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return dist<span class="colon">:</span></dt>
+<dd class="field-even"><p>The linear distance between two points in units of meters.</p>
+</dd>
+</dl>
+<p>This function will determine the linear distance between two points of
+latitudes, longitudes, and altitudes.  This method converts each
+latitude, longitude, altitude pair into ECEF coordinates and determines
+the distance as the magnitude of the distance between the X, Y, and Z
+points.</p>
+<p>Code Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.distance</span> <span class="kn">import</span> <span class="n">linear_dist</span>
+
+<span class="n">lla1</span> <span class="o">=</span> <span class="p">(</span><span class="mf">40.98197</span><span class="p">,</span> <span class="mf">111.9026</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">lla2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">45.01443</span><span class="p">,</span> <span class="mf">113.9278</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">linear_dist</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">477965.401</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -202,6 +240,7 @@ formula is to complex to document here; however, it can be found at
 <li><a class="reference internal" href="#geo_py.distance.haversine"><code class="docutils literal notranslate"><span class="pre">haversine()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.distance.great_circle"><code class="docutils literal notranslate"><span class="pre">great_circle()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.distance.vincenty"><code class="docutils literal notranslate"><span class="pre">vincenty()</span></code></a></li>
+<li><a class="reference internal" href="#geo_py.distance.linear_dist"><code class="docutils literal notranslate"><span class="pre">linear_dist()</span></code></a></li>
 </ul>
 </li>
 </ul>

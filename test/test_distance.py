@@ -73,7 +73,7 @@ def dist_lla2():
 
 def test_haversine(dist_lla1, dist_lla2):
     """
-    This function tests the Haversine class for correctness against the Geopy
+    This function tests the Haversine method for correctness against the Geopy
     great_circle function for units of feet, meters, km, and miles
     """
     assert isclose(Distance(dist_lla1[0], dist_lla1[1]).km,
@@ -89,7 +89,7 @@ def test_haversine(dist_lla1, dist_lla2):
 
 def test_great_circle(dist_lla1, dist_lla2):
     """
-    This function tests the Haversine class for correctness against the Geopy
+    This function tests the great_circle method for correctness against the Geopy
     great_circle function for units of feet, meters, km, and miles
     """
     assert isclose(Distance(dist_lla1[0], dist_lla1[1], method="GREAT CIRCLE").km,
@@ -105,7 +105,7 @@ def test_great_circle(dist_lla1, dist_lla2):
 
 def test_vincenti(dist_lla1, dist_lla2):
     """
-    This function tests the Haversine class for correctness against the Geopy
+    This function tests the vincenty for correctness against the Geopy
     great_circle function for units of feet, meters, km, and miles
     """
     assert isclose(Distance(dist_lla1[0], dist_lla1[1], method="VINCENTY").km,
@@ -115,6 +115,22 @@ def test_vincenti(dist_lla1, dist_lla2):
     assert isclose(Distance(dist_lla1[0], dist_lla1[1], method="VINCENTY").miles,
                    great_circle(dist_lla2[0], dist_lla2[1]).miles, rel_tol=1.0e-3)
     assert isclose(Distance(dist_lla1[0], dist_lla1[1], method="VINCENTY").feet,
+                   great_circle(dist_lla2[0], dist_lla2[1]).feet, rel_tol=1.0e-3)
+# --------------------------------------------------------------------------------
+
+
+def test_linear(dist_lla1, dist_lla2):
+    """
+    This function tests the linear_dist method for correctness against
+    the Geopy great_circle function for units of feet, meters, km, and miles
+    """
+    assert isclose(Distance(dist_lla1[0], dist_lla1[1], method="LINEAR").km,
+                   great_circle(dist_lla2[0], dist_lla2[1]).km, rel_tol=1.0e-3)
+    assert isclose(Distance(dist_lla1[0], dist_lla1[1], method="LINEAR").m,
+                   great_circle(dist_lla2[0], dist_lla2[1]).m, rel_tol=1.0e-3)
+    assert isclose(Distance(dist_lla1[0], dist_lla1[1], method="LINEAR").miles,
+                   great_circle(dist_lla2[0], dist_lla2[1]).miles, rel_tol=1.0e-3)
+    assert isclose(Distance(dist_lla1[0], dist_lla1[1], method="LINEAR").feet,
                    great_circle(dist_lla2[0], dist_lla2[1]).feet, rel_tol=1.0e-3)
 # ================================================================================
 # ================================================================================

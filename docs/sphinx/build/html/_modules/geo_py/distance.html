@@ -158,7 +158,7 @@
 <span class="sd">        from geo_py.distance import great_circle</span>
 <span class="sd">        lla1 = (40.98197, 111.9026, 0.0)</span>
 <span class="sd">        lla2 = (45.01443, 113.9278, 0.0)</span>
-<span class="sd">        d = haversine(lla1, lla2)</span>
+<span class="sd">        d = great_circle(lla1, lla2)</span>
 <span class="sd">        print(d)</span>
 <span class="sd">        &gt;&gt;&gt; 477637.629</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -202,15 +202,13 @@
 
 <span class="sd">        lla1 = (40.98197, 111.9026, 0.0)</span>
 <span class="sd">        lla2 = (45.01443, 113.9278, 0.0)</span>
-<span class="sd">        d = haversine(lla1, lla2)</span>
+<span class="sd">        d = vincenty(lla1, lla2)</span>
 <span class="sd">        print(d)</span>
 <span class="sd">        &gt;&gt;&gt; 477402.505</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">alt1</span> <span class="o">=</span> <span class="n">lla1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lla1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lla1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span><span class="p">,</span> <span class="n">alt2</span> <span class="o">=</span> <span class="n">lla2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lla2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lla2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">radians</span><span class="p">,</span> <span class="p">[</span><span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span><span class="p">])</span>
-    <span class="n">u_1</span><span class="o">=</span><span class="n">atan</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">dat</span><span class="o">.</span><span class="n">f</span><span class="p">)</span><span class="o">*</span><span class="n">tan</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="n">lat1</span><span class="p">)))</span>
-    <span class="n">u_2</span><span class="o">=</span><span class="n">atan</span><span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">dat</span><span class="o">.</span><span class="n">f</span><span class="p">)</span><span class="o">*</span><span class="n">tan</span><span class="p">(</span><span class="n">radians</span><span class="p">(</span><span class="n">lat2</span><span class="p">)))</span>
     <span class="n">tolerance</span> <span class="o">=</span> <span class="mf">1e-12</span> <span class="c1"># to stop iteration</span>
 
     <span class="n">phi1</span><span class="p">,</span> <span class="n">phi2</span> <span class="o">=</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">lat2</span>
@@ -251,6 +249,61 @@
 
     <span class="n">distance</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">s</span><span class="o">**</span><span class="mf">2.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">alt2</span> <span class="o">-</span> <span class="n">alt1</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">distance</span></div>
+<span class="c1"># --------------------------------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="linear_dist"><a class="viewcode-back" href="../../Distance.html#geo_py.distance.linear_dist">[docs]</a><span class="k">def</span> <span class="nf">linear_dist</span><span class="p">(</span><span class="n">lla1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                <span class="n">lla2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span><span class="o">=</span><span class="n">WGS84</span><span class="p">()):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param lla1: A tuple containing latitude, longitude and altitude</span>
+<span class="sd">                 of a point on the surface of a body.  Latitude and longitude</span>
+<span class="sd">                 are in units of decimal degrees, altitude in units of meters</span>
+<span class="sd">    :param lla2: A tuple containing latitude, longitude and altitude</span>
+<span class="sd">                 of a point on the surface of a body.  Latitude and longitude</span>
+<span class="sd">                 are in units of decimal degrees, altitude in units of meters</span>
+<span class="sd">    :param cruise_alt: The cruising altitude, if this method is used for an</span>
+<span class="sd">                       aircraft.  Units in meters. Defaulted to 0</span>
+<span class="sd">    :param dat: A Datum dataclass, defaulted to WGS84</span>
+<span class="sd">    :return dist: The linear distance between two points in units of meters.</span>
+
+<span class="sd">    This function will determine the linear distance between two points of</span>
+<span class="sd">    latitudes, longitudes, and altitudes.  This method converts each</span>
+<span class="sd">    latitude, longitude, altitude pair into ECEF coordinates and determines</span>
+<span class="sd">    the distance as the magnitude of the distance between the X, Y, and Z</span>
+<span class="sd">    points.</span>
+
+<span class="sd">    Code Example</span>
+
+<span class="sd">    .. code-block::</span>
+
+<span class="sd">        from geo_py.distance import linear_dist</span>
+
+<span class="sd">        lla1 = (40.98197, 111.9026, 0.0)</span>
+<span class="sd">        lla2 = (45.01443, 113.9278, 0.0)</span>
+<span class="sd">        d = linear_dist(lla1, lla2)</span>
+<span class="sd">        print(d)</span>
+<span class="sd">        &gt;&gt;&gt; 477965.401</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">alt1</span> <span class="o">=</span> <span class="n">lla1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lla1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lla1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span><span class="p">,</span> <span class="n">alt2</span> <span class="o">=</span> <span class="n">lla2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lla2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">lla2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">radians</span><span class="p">,</span> <span class="p">[</span><span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span><span class="p">])</span>
+
+    <span class="n">N1</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">a</span> <span class="o">/</span> <span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> \
+        <span class="n">dat</span><span class="o">.</span><span class="n">e</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">lat1</span><span class="p">))</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">))</span>
+    <span class="n">xe1</span> <span class="o">=</span> <span class="p">(</span><span class="n">N1</span> <span class="o">+</span> <span class="n">alt1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon1</span><span class="p">)</span>
+    <span class="n">ye1</span> <span class="o">=</span> <span class="p">(</span><span class="n">N1</span> <span class="o">+</span> <span class="n">alt1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon1</span><span class="p">)</span>
+    <span class="n">ze1</span> <span class="o">=</span> <span class="p">(((</span><span class="n">dat</span><span class="o">.</span><span class="n">b</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">dat</span><span class="o">.</span><span class="n">a</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">N1</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="n">alt1</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span>
+
+    <span class="n">N2</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">a</span> <span class="o">/</span> <span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> \
+        <span class="n">dat</span><span class="o">.</span><span class="n">e</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">lat2</span><span class="p">))</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">))</span>
+    <span class="n">xe2</span> <span class="o">=</span> <span class="p">(</span><span class="n">N1</span> <span class="o">+</span> <span class="n">alt2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon2</span><span class="p">)</span>
+    <span class="n">ye2</span> <span class="o">=</span> <span class="p">(</span><span class="n">N1</span> <span class="o">+</span> <span class="n">alt2</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon2</span><span class="p">)</span>
+    <span class="n">ze2</span> <span class="o">=</span> <span class="p">(((</span><span class="n">dat</span><span class="o">.</span><span class="n">b</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="n">dat</span><span class="o">.</span><span class="n">a</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">N2</span><span class="p">)</span> <span class="o">+</span> \
+            <span class="n">alt2</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">((</span><span class="n">xe1</span><span class="o">-</span><span class="n">xe2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ye1</span><span class="o">-</span><span class="n">ye2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ze1</span><span class="o">-</span><span class="n">ze2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dist</span></div>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 
@@ -299,8 +352,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">haversine</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">,</span> <span class="n">cruise_alt</span><span class="p">,</span> <span class="n">dat</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;GREAT CIRCLE&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">great_circle</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">,</span> <span class="n">cruise_alt</span><span class="p">,</span> <span class="n">dat</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;VINCENTI&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;VINCENTY&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">vincenty</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">,</span> <span class="n">dat</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;LINEAR&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">=</span> <span class="n">linear_dist</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">,</span> <span class="n">dat</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid method for Distance class&quot;</span><span class="p">)</span>
 <span class="c1"># --------------------------------------------------------------------------------</span>
