@@ -277,7 +277,7 @@ class Distance:
     :param lla2: A tuple containing latitude, longitude and altitude
                  of a point on the surface of a body.  Latitude and longitude
                  are in units of decimal degrees, altitude in units of meters
-    :param method: 'haversine', 'great circle', or 'vincenti'. Not case
+    :param method: 'haversine', 'great circle', 'linear', or 'vincenti'. Not case
                    sensitive. Defaulted to haversine.
     :param cruise_alt: The cruising altitude, if this method is used for an
                        aircraft.  Units in meters. Defaulted to 0
@@ -295,15 +295,15 @@ class Distance:
 
         lla1 = (40.98197, 111.9026, 0.0)
         lla2 = (45.01443, 113.9278, 0.0)
-        dist = Haversine(lla1, lla2, method='haversine').km
+        dist = Distance(lla1, lla2, method='haversine').km
         print(dist)
         >>> 477.637
 
         # Use a different coordinate system and a flight altitude
-        dist = Distance(lla1, lla2, method='haversine',
+        dist = Distance(lla1, lla2, method='linear',
                         cruise_alt=3400.0, dat=ITRF()).miles
         print(dist)
-        >>> 296.948
+        >>> 296.787
     """
     def __init__(self, lla1: Tuple[float, float, float],
                  lla2: Tuple[float, float, float], method: str = "HAVERSINE",
@@ -368,32 +368,6 @@ class Distance:
         This method will return the distance in units of feet
         """
         return self.distance * 3.28084
-# --------------------------------------------------------------------------------
-
-    def _calculate(self, lla1: Tuple[float, float, float],
-                   lla2: Tuple[float, float, float],
-                   cruise_alt: float, dat: Datum):
-        """
-        :param lla1: A tuple containing latitude, longitude and altitude
-                     of a point on the surface of a body.  Latitude and longitude
-                     are in units of decimal degrees, altitude in units of meters
-        :param lla2: A tuple containing latitude, longitude and altitude
-                     of a point on the surface of a body.  Latitude and longitude
-                     are in units of decimal degrees, altitude in units of meters
-        :param cruise_alt: The cruising altitude, if this method is used for an
-                           aircraft.  Units in meters. Defaulted to 0
-        :param dat: A Datum dataclass, defaulted to WGS84
-        """
-        lat1, lon1, alt1 = radians(lla1[0]), radians(lla1[1]), lla1[2]
-        lat2, lon2, alt2 = radians(lla2[0]), radians(lla2[1]), lla2[2]
-        earth_radius = dat.R_avg + cruise_alt
-        dlat = lat2 - lat1
-        dlon = lon2 - lon1
-        a_var = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-        c_var = 2 * atan2(sqrt(a_var), sqrt(1 - a_var))
-        distance = earth_radius * c_var
-        altitude = abs(alt2 - alt1)
-        return sqrt(distance**2 + altitude**2)
 # ================================================================================
 # ================================================================================
 # eof

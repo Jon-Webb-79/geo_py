@@ -308,7 +308,7 @@
 <span class="c1"># ================================================================================</span>
 
 
-<span class="k">class</span> <span class="nc">Distance</span><span class="p">:</span>
+<div class="viewcode-block" id="Distance"><a class="viewcode-back" href="../../Distance.html#geo_py.distance.Distance">[docs]</a><span class="k">class</span> <span class="nc">Distance</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    :param lla1: A tuple containing latitude, longitude and altitude</span>
 <span class="sd">                 of a point on the surface of a body.  Latitude and longitude</span>
@@ -316,7 +316,7 @@
 <span class="sd">    :param lla2: A tuple containing latitude, longitude and altitude</span>
 <span class="sd">                 of a point on the surface of a body.  Latitude and longitude</span>
 <span class="sd">                 are in units of decimal degrees, altitude in units of meters</span>
-<span class="sd">    :param method: &#39;haversine&#39;, &#39;great circle&#39;, or &#39;vincenti&#39;. Not case</span>
+<span class="sd">    :param method: &#39;haversine&#39;, &#39;great circle&#39;, &#39;linear&#39;, or &#39;vincenti&#39;. Not case</span>
 <span class="sd">                   sensitive. Defaulted to haversine.</span>
 <span class="sd">    :param cruise_alt: The cruising altitude, if this method is used for an</span>
 <span class="sd">                       aircraft.  Units in meters. Defaulted to 0</span>
@@ -334,15 +334,15 @@
 
 <span class="sd">        lla1 = (40.98197, 111.9026, 0.0)</span>
 <span class="sd">        lla2 = (45.01443, 113.9278, 0.0)</span>
-<span class="sd">        dist = Haversine(lla1, lla2, method=&#39;haversine&#39;).km</span>
+<span class="sd">        dist = Distance(lla1, lla2, method=&#39;haversine&#39;).km</span>
 <span class="sd">        print(dist)</span>
 <span class="sd">        &gt;&gt;&gt; 477.637</span>
 
 <span class="sd">        # Use a different coordinate system and a flight altitude</span>
-<span class="sd">        dist = Distance(lla1, lla2, method=&#39;haversine&#39;,</span>
+<span class="sd">        dist = Distance(lla1, lla2, method=&#39;linear&#39;,</span>
 <span class="sd">                        cruise_alt=3400.0, dat=ITRF()).miles</span>
 <span class="sd">        print(dist)</span>
-<span class="sd">        &gt;&gt;&gt; 296.948</span>
+<span class="sd">        &gt;&gt;&gt; 296.787</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lla1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
                  <span class="n">lla2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;HAVERSINE&quot;</span><span class="p">,</span>
@@ -406,33 +406,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This method will return the distance in units of feet</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">*</span> <span class="mf">3.28084</span>
-<span class="c1"># --------------------------------------------------------------------------------</span>
-
-    <span class="k">def</span> <span class="nf">_calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lla1</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-                   <span class="n">lla2</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-                   <span class="n">cruise_alt</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dat</span><span class="p">:</span> <span class="n">Datum</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param lla1: A tuple containing latitude, longitude and altitude</span>
-<span class="sd">                     of a point on the surface of a body.  Latitude and longitude</span>
-<span class="sd">                     are in units of decimal degrees, altitude in units of meters</span>
-<span class="sd">        :param lla2: A tuple containing latitude, longitude and altitude</span>
-<span class="sd">                     of a point on the surface of a body.  Latitude and longitude</span>
-<span class="sd">                     are in units of decimal degrees, altitude in units of meters</span>
-<span class="sd">        :param cruise_alt: The cruising altitude, if this method is used for an</span>
-<span class="sd">                           aircraft.  Units in meters. Defaulted to 0</span>
-<span class="sd">        :param dat: A Datum dataclass, defaulted to WGS84</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">lat1</span><span class="p">,</span> <span class="n">lon1</span><span class="p">,</span> <span class="n">alt1</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lla1</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">radians</span><span class="p">(</span><span class="n">lla1</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">lla1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="n">lat2</span><span class="p">,</span> <span class="n">lon2</span><span class="p">,</span> <span class="n">alt2</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lla2</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">radians</span><span class="p">(</span><span class="n">lla2</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">lla2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="n">earth_radius</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">R_avg</span> <span class="o">+</span> <span class="n">cruise_alt</span>
-        <span class="n">dlat</span> <span class="o">=</span> <span class="n">lat2</span> <span class="o">-</span> <span class="n">lat1</span>
-        <span class="n">dlon</span> <span class="o">=</span> <span class="n">lon2</span> <span class="o">-</span> <span class="n">lon1</span>
-        <span class="n">a_var</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">dlat</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">dlon</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
-        <span class="n">c_var</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">atan2</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a_var</span><span class="p">),</span> <span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a_var</span><span class="p">))</span>
-        <span class="n">distance</span> <span class="o">=</span> <span class="n">earth_radius</span> <span class="o">*</span> <span class="n">c_var</span>
-        <span class="n">altitude</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">alt2</span> <span class="o">-</span> <span class="n">alt1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">distance</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">altitude</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">distance</span> <span class="o">*</span> <span class="mf">3.28084</span></div>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># ================================================================================</span>
 <span class="c1"># eof</span>

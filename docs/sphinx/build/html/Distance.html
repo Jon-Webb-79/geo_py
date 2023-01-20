@@ -222,6 +222,71 @@ points.</p>
 </div>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="geo_py.distance.Distance">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geo_py.distance.</span></span><span class="sig-name descname"><span class="pre">Distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lla1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lla2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'HAVERSINE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cruise_alt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="Datums.html#geo_py.datum.Datum" title="geo_py.datum.Datum"><span class="pre">Datum</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WGS84(a=6378137.0,</span> <span class="pre">b=6356752.314245,</span> <span class="pre">f=0.0033528106647474805,</span> <span class="pre">e=0.08181919084262157,</span> <span class="pre">e2=0.00669437999014132,</span> <span class="pre">GM=398600500000000.0,</span> <span class="pre">R_avg=6371008.8,</span> <span class="pre">e24=0.006694317779487594,</span> <span class="pre">g_avg=9.7803253359)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/geo_py/distance.html#Distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geo_py.distance.Distance" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lla1</strong> – A tuple containing latitude, longitude and altitude
+of a point on the surface of a body.  Latitude and longitude
+are in units of decimal degrees, altitude in units of meters</p></li>
+<li><p><strong>lla2</strong> – A tuple containing latitude, longitude and altitude
+of a point on the surface of a body.  Latitude and longitude
+are in units of decimal degrees, altitude in units of meters</p></li>
+<li><p><strong>method</strong> – ‘haversine’, ‘great circle’, ‘linear’, or ‘vincenti’. Not case
+sensitive. Defaulted to haversine.</p></li>
+<li><p><strong>cruise_alt</strong> – The cruising altitude, if this method is used for an
+aircraft.  Units in meters. Defaulted to 0</p></li>
+<li><p><strong>dat</strong> – A Datum dataclass, defaulted to WGS84</p></li>
+</ul>
+</dd>
+</dl>
+<p>This class will calculate the distance between two points using either the
+Haversine, Great Circle, or Vincenti methods.</p>
+<p>Code Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geo_py.distance</span> <span class="kn">import</span> <span class="n">Haversine</span>
+<span class="kn">from</span> <span class="nn">geo_py.datums</span> <span class="kn">import</span> <span class="n">ITRF</span>
+
+<span class="n">lla1</span> <span class="o">=</span> <span class="p">(</span><span class="mf">40.98197</span><span class="p">,</span> <span class="mf">111.9026</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">lla2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">45.01443</span><span class="p">,</span> <span class="mf">113.9278</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="n">Distance</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;haversine&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">km</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">477.637</span>
+
+<span class="c1"># Use a different coordinate system and a flight altitude</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="n">Distance</span><span class="p">(</span><span class="n">lla1</span><span class="p">,</span> <span class="n">lla2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                <span class="n">cruise_alt</span><span class="o">=</span><span class="mf">3400.0</span><span class="p">,</span> <span class="n">dat</span><span class="o">=</span><span class="n">ITRF</span><span class="p">())</span><span class="o">.</span><span class="n">miles</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="mf">296.787</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="geo_py.distance.Distance.feet">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">feet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#geo_py.distance.Distance.feet" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method will return the distance in units of feet</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geo_py.distance.Distance.km">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">km</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#geo_py.distance.Distance.km" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method will return the distance in units of kiometers</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geo_py.distance.Distance.m">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">m</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#geo_py.distance.Distance.m" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method will return the distance in units of meters</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geo_py.distance.Distance.miles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">miles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#geo_py.distance.Distance.miles" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method will return the distance in units of miles</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -241,6 +306,13 @@ points.</p>
 <li><a class="reference internal" href="#geo_py.distance.great_circle"><code class="docutils literal notranslate"><span class="pre">great_circle()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.distance.vincenty"><code class="docutils literal notranslate"><span class="pre">vincenty()</span></code></a></li>
 <li><a class="reference internal" href="#geo_py.distance.linear_dist"><code class="docutils literal notranslate"><span class="pre">linear_dist()</span></code></a></li>
+<li><a class="reference internal" href="#geo_py.distance.Distance"><code class="docutils literal notranslate"><span class="pre">Distance</span></code></a><ul>
+<li><a class="reference internal" href="#geo_py.distance.Distance.feet"><code class="docutils literal notranslate"><span class="pre">Distance.feet</span></code></a></li>
+<li><a class="reference internal" href="#geo_py.distance.Distance.km"><code class="docutils literal notranslate"><span class="pre">Distance.km</span></code></a></li>
+<li><a class="reference internal" href="#geo_py.distance.Distance.m"><code class="docutils literal notranslate"><span class="pre">Distance.m</span></code></a></li>
+<li><a class="reference internal" href="#geo_py.distance.Distance.miles"><code class="docutils literal notranslate"><span class="pre">Distance.miles</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

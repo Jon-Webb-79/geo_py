@@ -22,3 +22,7 @@ The following functions can be used to determine the distance between two points
 .. autofunction:: geo_py.distance.vincenty
 
 .. autofunction:: geo_py.distance.linear_dist
+
+.. autoclass:: geo_py.distance.Distance
+   :members:
+
